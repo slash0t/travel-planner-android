@@ -1,3 +1,3 @@
-# Travel Planner Frontend
+# Travel Planner Android
 
-Фронт-энд часть для [проекта](https://github.com/slash0t/travel-planner)
+Андроид приложение для [Travel Planner](https://github.com/slash0t/travel-planner)
