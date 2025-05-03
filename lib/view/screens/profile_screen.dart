@@ -252,16 +252,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         const SizedBox(height: 8),
         Container(
-          height: 44,
-          decoration: BoxDecoration(
-            border: Border.all(
-              color: Colors.black.withOpacity(0.14),
-            ),
-            borderRadius: BorderRadius.circular(6),
-          ),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: TextField(
+            padding: const EdgeInsets.symmetric(horizontal: 0),
+            /*child: TextField(
               controller: controller,
               obscureText: isPassword,
               decoration: const InputDecoration(
@@ -272,6 +265,33 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 fontSize: 16,
                 color: const Color(0xFF545454).withOpacity(0.9),
                 fontFamily: 'NotoSans',
+              ),
+            ),*/
+            child: TextField(
+              controller: controller,
+              obscureText: isPassword,
+              decoration: InputDecoration(
+                labelStyle: const TextStyle(
+                  color: Color(0xFF9A9A9A),
+                  fontFamily: 'NotoSans',
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: const BorderSide(
+                    color: Color(0xFFD9D9D9),
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: const BorderSide(
+                    color: Color(0xFFEA2517),
+                    width: 2.0,
+                  ),
+                ),
+                floatingLabelStyle: const TextStyle(
+                  color: Color(0xFFEA2517),
+                  fontFamily: 'NotoSans',
+                ),
               ),
             ),
           ),
