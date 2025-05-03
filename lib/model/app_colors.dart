@@ -13,4 +13,6 @@ class AppColors {
   
   /// Yellow color for highlighting #f1c021
   static const Color secondary = Color(0xFFF1C021);
-} 
+
+  static const Color link = Color(0xFF367AFF);
+}

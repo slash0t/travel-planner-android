@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:putevod/view/screens/login_screen.dart';
+import 'package:putevod/view/screens/main_menu_screen.dart';
+import 'package:putevod/model/app_colors.dart';
+import 'package:putevod/view_model/registration_view_model.dart';
 
 class RegistrationScreen extends StatelessWidget {
   const RegistrationScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final viewModel = Provider.of<RegistrationViewModel>(context);
+    
     return Scaffold(
-      backgroundColor: const Color(0xFFE7E4DC),
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
@@ -41,7 +47,24 @@ class RegistrationScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 30),
+                if (viewModel.errorMessage.isNotEmpty)
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    margin: const EdgeInsets.only(bottom: 10),
+                    decoration: BoxDecoration(
+                      color: Colors.red.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text(
+                      viewModel.errorMessage,
+                      style: const TextStyle(
+                        color: Colors.red,
+                        fontFamily: 'NotoSans',
+                      ),
+                    ),
+                  ),
                 TextField(
+                  onChanged: (value) => viewModel.setEmail(value),
                   decoration: InputDecoration(
                     labelText: 'Email',
                     labelStyle: const TextStyle(
@@ -57,18 +80,19 @@ class RegistrationScreen extends StatelessWidget {
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                       borderSide: const BorderSide(
-                        color: Color(0xFFEA2517),
+                        color: AppColors.accent,
                         width: 2.0,
                       ),
                     ),
                     floatingLabelStyle: const TextStyle(
-                      color: Color(0xFFEA2517),
+                      color: AppColors.accent,
                       fontFamily: 'NotoSans',
                     ),
                   ),
                 ),
                 const SizedBox(height: 20),
                 TextField(
+                  onChanged: (value) => viewModel.setPassword(value),
                   obscureText: true,
                   decoration: InputDecoration(
                     labelText: 'Пароль',
@@ -85,12 +109,12 @@ class RegistrationScreen extends StatelessWidget {
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                       borderSide: const BorderSide(
-                        color: Color(0xFFEA2517),
+                        color: AppColors.accent,
                         width: 2.0,
                       ),
                     ),
                     floatingLabelStyle: const TextStyle(
-                      color: Color(0xFFEA2517),
+                      color: AppColors.accent,
                       fontFamily: 'NotoSans',
                     ),
                     suffixIcon: const Icon(
@@ -101,6 +125,7 @@ class RegistrationScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
                 TextField(
+                  onChanged: (value) => viewModel.setConfirmPassword(value),
                   obscureText: true,
                   decoration: InputDecoration(
                     labelText: 'Подтвердите пароль',
@@ -117,12 +142,12 @@ class RegistrationScreen extends StatelessWidget {
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                       borderSide: const BorderSide(
-                        color: Color(0xFFEA2517),
+                        color: AppColors.accent,
                         width: 2.0,
                       ),
                     ),
                     floatingLabelStyle: const TextStyle(
-                      color: Color(0xFFEA2517),
+                      color: AppColors.accent,
                       fontFamily: 'NotoSans',
                     ),
                     suffixIcon: const Icon(
@@ -133,11 +158,19 @@ class RegistrationScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
                 ElevatedButton(
-                  onPressed: () {
-                    // Handle registration
-                  },
+                  onPressed: viewModel.isLoading
+                      ? null
+                      : () async {
+                          final success = await viewModel.register();
+                          if (success && context.mounted) {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(builder: (context) => const MainMenuScreen()),
+                            );
+                          }
+                        },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFF1C021),
+                    backgroundColor: AppColors.secondary,
                     minimumSize: const Size(343, 50),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
@@ -173,7 +206,7 @@ class RegistrationScreen extends StatelessWidget {
                           TextSpan(
                             text: 'Войти',
                             style: TextStyle(
-                              color: Color(0xFF367AFF),
+                              color: AppColors.link,
                               fontWeight: FontWeight.bold,
                             ),
                           ),

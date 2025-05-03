@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:putevod/view/screens/login_screen.dart';
+import 'package:putevod/model/app_colors.dart';
+import 'package:putevod/view_model/password_recovery_view_model.dart';
 
 class PasswordRecoveryScreen extends StatelessWidget {
   const PasswordRecoveryScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final viewModel = Provider.of<PasswordRecoveryViewModel>(context);
+    
     return Scaffold(
-      backgroundColor: const Color(0xFFE7E4DC),
+      backgroundColor: AppColors.background,
       extendBodyBehindAppBar: true,
       body: SafeArea(
         child: SingleChildScrollView(
@@ -42,11 +47,44 @@ class PasswordRecoveryScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 30),
+                if (viewModel.errorMessage.isNotEmpty)
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    margin: const EdgeInsets.only(bottom: 10),
+                    decoration: BoxDecoration(
+                      color: Colors.red.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text(
+                      viewModel.errorMessage,
+                      style: const TextStyle(
+                        color: Colors.red,
+                        fontFamily: 'NotoSans',
+                      ),
+                    ),
+                  ),
+                if (viewModel.successMessage.isNotEmpty)
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    margin: const EdgeInsets.only(bottom: 10),
+                    decoration: BoxDecoration(
+                      color: Colors.green.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text(
+                      viewModel.successMessage,
+                      style: const TextStyle(
+                        color: Colors.green,
+                        fontFamily: 'NotoSans',
+                      ),
+                    ),
+                  ),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
                       child: TextField(
+                        onChanged: (value) => viewModel.setEmail(value),
                         decoration: InputDecoration(
                           labelText: 'Email',
                           labelStyle: const TextStyle(
@@ -62,12 +100,12 @@ class PasswordRecoveryScreen extends StatelessWidget {
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
                             borderSide: const BorderSide(
-                              color: Color(0xFFEA2517),
+                              color: AppColors.accent,
                               width: 2.0,
                             ),
                           ),
                           floatingLabelStyle: const TextStyle(
-                            color: Color(0xFFEA2517),
+                            color: AppColors.accent,
                             fontFamily: 'NotoSans',
                           ),
                         ),
@@ -75,9 +113,11 @@ class PasswordRecoveryScreen extends StatelessWidget {
                     ),
                     const SizedBox(width: 10),
                     ElevatedButton(
-                      onPressed: () {
-                        // Handle send code
-                      },
+                      onPressed: viewModel.isLoading 
+                          ? null 
+                          : () async {
+                              await viewModel.sendResetCode();
+                            },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.transparent,
                         elevation: 0,
@@ -100,6 +140,7 @@ class PasswordRecoveryScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
                 TextField(
+                  onChanged: (value) => viewModel.setCode(value),
                   decoration: InputDecoration(
                     labelText: 'Код подтверждения',
                     labelStyle: const TextStyle(
@@ -115,18 +156,19 @@ class PasswordRecoveryScreen extends StatelessWidget {
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                       borderSide: const BorderSide(
-                        color: Color(0xFFEA2517),
+                        color: AppColors.accent,
                         width: 2.0,
                       ),
                     ),
                     floatingLabelStyle: const TextStyle(
-                      color: Color(0xFFEA2517),
+                      color: AppColors.accent,
                       fontFamily: 'NotoSans',
                     ),
                   ),
                 ),
                 const SizedBox(height: 20),
                 TextField(
+                  onChanged: (value) => viewModel.setNewPassword(value),
                   obscureText: true,
                   decoration: InputDecoration(
                     labelText: 'Новый пароль',
@@ -143,12 +185,12 @@ class PasswordRecoveryScreen extends StatelessWidget {
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                       borderSide: const BorderSide(
-                        color: Color(0xFFEA2517),
+                        color: AppColors.accent,
                         width: 2.0,
                       ),
                     ),
                     floatingLabelStyle: const TextStyle(
-                      color: Color(0xFFEA2517),
+                      color: AppColors.accent,
                       fontFamily: 'NotoSans',
                     ),
                     suffixIcon: const Icon(
@@ -159,6 +201,7 @@ class PasswordRecoveryScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
                 TextField(
+                  onChanged: (value) => viewModel.setConfirmPassword(value),
                   obscureText: true,
                   decoration: InputDecoration(
                     labelText: 'Подтвердите новый пароль',
@@ -175,12 +218,12 @@ class PasswordRecoveryScreen extends StatelessWidget {
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                       borderSide: const BorderSide(
-                        color: Color(0xFFEA2517),
+                        color: AppColors.accent,
                         width: 2.0,
                       ),
                     ),
                     floatingLabelStyle: const TextStyle(
-                      color: Color(0xFFEA2517),
+                      color: AppColors.accent,
                       fontFamily: 'NotoSans',
                     ),
                     suffixIcon: const Icon(
@@ -191,46 +234,56 @@ class PasswordRecoveryScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
                 ElevatedButton(
-                  onPressed: () {
-                    // Handle password recovery
-                    showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          backgroundColor: const Color(0xFFE7E4DC),
-                          title: const Text(
-                            'Письмо отправлено',
-                            style: TextStyle(
-                              fontFamily: 'NotoSans',
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          content: const Text(
-                            'На указанный email отправлено письмо с инструкциями по восстановлению пароля.',
-                            style: TextStyle(
-                              fontFamily: 'NotoSans',
-                            ),
-                          ),
-                          actions: [
-                            TextButton(
-                              onPressed: () {
-                                Navigator.pop(context);
+                  onPressed: viewModel.isLoading
+                      ? null
+                      : () async {
+                          final success = await viewModel.resetPassword();
+                          if (success && context.mounted) {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  backgroundColor: AppColors.background,
+                                  title: const Text(
+                                    'Пароль изменен',
+                                    style: TextStyle(
+                                      fontFamily: 'NotoSans',
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  content: const Text(
+                                    'Ваш пароль был успешно изменен.',
+                                    style: TextStyle(
+                                      fontFamily: 'NotoSans',
+                                    ),
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                        Navigator.pushReplacement(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => const LoginScreen(),
+                                          ),
+                                        );
+                                      },
+                                      child: const Text(
+                                        'ОК',
+                                        style: TextStyle(
+                                          color: AppColors.accent,
+                                          fontFamily: 'NotoSans',
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                );
                               },
-                              child: const Text(
-                                'ОК',
-                                style: TextStyle(
-                                  color: Color(0xFFEA2517),
-                                  fontFamily: 'NotoSans',
-                                ),
-                              ),
-                            ),
-                          ],
-                        );
-                      },
-                    );
-                  },
+                            );
+                          }
+                        },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFEA2525),
+                    backgroundColor: AppColors.accent,
                     minimumSize: const Size(343, 50),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
@@ -266,7 +319,7 @@ class PasswordRecoveryScreen extends StatelessWidget {
                           TextSpan(
                             text: 'Войти',
                             style: TextStyle(
-                              color: Color(0xFF367AFF),
+                              color: AppColors.link,
                               fontWeight: FontWeight.bold,
                             ),
                           ),

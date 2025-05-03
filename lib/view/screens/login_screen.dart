@@ -1,14 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:putevod/view/screens/main_menu_screen.dart';
 import 'package:putevod/view/screens/password_recovery_screen.dart';
 import 'package:putevod/view/screens/registration_screen.dart';
+import 'package:putevod/model/app_colors.dart';
+import 'package:putevod/view_model/login_view_model.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final viewModel = Provider.of<LoginViewModel>(context);
+    
     return Scaffold(
-      backgroundColor: const Color(0xFFE7E4DC),
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
@@ -42,6 +48,7 @@ class LoginScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 30),
                 TextField(
+                  onChanged: (value) => viewModel.setEmail(value),
                   decoration: InputDecoration(
                     labelText: 'Email',
                     labelStyle: const TextStyle(
@@ -57,18 +64,19 @@ class LoginScreen extends StatelessWidget {
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                       borderSide: const BorderSide(
-                        color: Color(0xFFEA2517),
+                        color: AppColors.accent,
                         width: 2.0,
                       ),
                     ),
                     floatingLabelStyle: const TextStyle(
-                      color: Color(0xFFEA2517),
+                      color: AppColors.accent,
                       fontFamily: 'NotoSans',
                     ),
                   ),
                 ),
                 const SizedBox(height: 20),
                 TextField(
+                  onChanged: (value) => viewModel.setPassword(value),
                   obscureText: true,
                   decoration: InputDecoration(
                     labelText: 'Пароль',
@@ -85,12 +93,12 @@ class LoginScreen extends StatelessWidget {
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                       borderSide: const BorderSide(
-                        color: Color(0xFFEA2517),
+                        color: AppColors.accent,
                         width: 2.0,
                       ),
                     ),
                     floatingLabelStyle: const TextStyle(
-                      color: Color(0xFFEA2517),
+                      color: AppColors.accent,
                       fontFamily: 'NotoSans',
                     ),
                     suffixIcon: const Icon(
@@ -121,11 +129,19 @@ class LoginScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
                 ElevatedButton(
-                  onPressed: () {
-                    // Handle login
-                  },
+                  onPressed: viewModel.isLoading
+                      ? null
+                      : () async {
+                          final success = await viewModel.login();
+                          if (success && context.mounted) {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(builder: (context) => const MainMenuScreen()),
+                            );
+                          }
+                        },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFEA2525),
+                    backgroundColor: AppColors.accent,
                     minimumSize: const Size(343, 50),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),

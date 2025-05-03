@@ -6,20 +6,20 @@ class Constants {
   Constants._();
   
   /// Base API URL from environment variables
-  static String get apiBaseUrl => dotenv.env['API_BASE_URL'] ?? 'http://localhost:3000';
+  static String get apiUrl => dotenv.env['API_URL'] ?? 'http://localhost:3000';
   
   /// Login endpoint
-  static const String loginEndpoint = '/login';
+  static String get loginEndpoint => '$apiUrl/login';
   
   /// Register endpoint
-  static const String registerEndpoint = '/register';
+  static String get registerEndpoint => '$apiUrl/register';
   
   /// Forgot password endpoint
-  static const String forgotPasswordEndpoint = '/forgot-password';
+  static String get forgotPasswordEndpoint => '$apiUrl/forgot-password';
   
   /// Verify reset code endpoint
-  static const String verifyResetCodeEndpoint = '/verify-reset-code';
+  static String get verifyResetCodeEndpoint => '$apiUrl/verify-reset-code';
   
   /// Reset password endpoint
-  static const String resetPasswordEndpoint = '/reset-password';
+  static String get resetPasswordEndpoint => '$apiUrl/reset-password';
 }
