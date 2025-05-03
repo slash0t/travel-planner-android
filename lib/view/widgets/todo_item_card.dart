@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:putevod/model/app_colors.dart';
 import 'package:putevod/view-model/todo_list_view_model.dart';
+import 'package:putevod/view/screens/todo_item_detail_screen.dart';
 
 /// A card widget that displays a todo item
 class TodoItemCard extends StatelessWidget {
@@ -16,43 +17,56 @@ class TodoItemCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 15),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            offset: const Offset(0, 1),
-            blurRadius: 2,
-            spreadRadius: 0,
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              todoItem.title,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-                fontFamily: 'Noto Sans',
-                color: AppColors.text,
-              ),
+    return ReorderableDragStartListener(
+      index: 0, // Will be overridden by parent ReorderableListView
+      child: GestureDetector(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => TodoItemDetailScreen(todoItemId: todoItem.id),
             ),
-            const SizedBox(height: 17),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          );
+        },
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 15),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                offset: const Offset(0, 1),
+                blurRadius: 2,
+                spreadRadius: 0,
+              ),
+            ],
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildCreatedDateInfo(),
-                _buildCompletionInfo(),
+                Text(
+                  todoItem.title,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    fontFamily: 'Noto Sans',
+                    color: AppColors.text,
+                  ),
+                ),
+                const SizedBox(height: 17),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    _buildCreatedDateInfo(),
+                    _buildCompletionInfo(),
+                  ],
+                ),
               ],
             ),
-          ],
+          ),
         ),
       ),
     );

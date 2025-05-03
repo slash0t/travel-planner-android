@@ -5,6 +5,7 @@ import 'package:putevod/model/app_colors.dart';
 import 'package:putevod/view-model/loading_view_model.dart';
 import 'package:putevod/view-model/navigation_view_model.dart';
 import 'package:putevod/view-model/profile_view_model.dart';
+import 'package:putevod/view-model/todo_item_detail_view_model.dart';
 import 'package:putevod/view-model/todo_list_view_model.dart';
 import 'package:putevod/view-model/trip_search_view_model.dart';
 import 'package:putevod/view-model/trips_view_model.dart';
@@ -35,6 +36,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AppHeaderViewModel()),
         ChangeNotifierProvider(create: (_) => TodoListViewModel()),
         ChangeNotifierProvider(create: (_) => TripSearchViewModel()),
+        ChangeNotifierProvider(create: (_) => TodoItemDetailViewModel()),
         ChangeNotifierProvider(create: (_) => LoginViewModel()),
         ChangeNotifierProvider(create: (_) => RegistrationViewModel()),
         ChangeNotifierProvider(create: (_) => PasswordRecoveryViewModel()),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
 
 /// Model for a Todo item
 class TodoItem {
@@ -34,6 +35,9 @@ class TodoListViewModel extends ChangeNotifier {
   
   /// Number of active lists
   int _activeListCount = 0;
+  
+  /// UUID generator for new todo lists
+  final _uuid = const Uuid();
 
   /// Gets the list of todo items
   List<TodoItem> get todoItems => _todoItems;
@@ -68,12 +72,71 @@ class TodoListViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Creates a new todo list
-  Future<void> createNewTodoList() async {
-    // This would open a dialog or navigate to a new screen to create a todo list
-    // For now, we'll just show a placeholder implementation
+  /// Creates a new todo list and returns its ID
+  Future<String> createNewTodoList() async {
+    final newId = _uuid.v4();
     
-    // In a real app, this would add a new item to the list
+    final newTodoItem = TodoItem(
+      id: newId,
+      title: 'Новый список',
+      createdAt: DateTime.now(),
+      completedTasks: 0,
+      totalTasks: 0,
+    );
+    
+    _todoItems.add(newTodoItem);
+    _activeListCount = _todoItems.length;
+    notifyListeners();
+    
+    return newId;
+  }
+  
+  /// Deletes a todo list by ID
+  Future<void> deleteTodoList(String id) async {
+    _todoItems.removeWhere((item) => item.id == id);
+    _activeListCount = _todoItems.length;
+    notifyListeners();
+  }
+  
+  /// Updates a todo list with new information
+  void updateTodoList(String id, {int? completedTasks, int? totalTasks, String? title}) {
+    final index = _todoItems.indexWhere((item) => item.id == id);
+    if (index != -1) {
+      final item = _todoItems[index];
+      final updatedItem = TodoItem(
+        id: item.id,
+        title: title ?? item.title,
+        createdAt: item.createdAt,
+        completedTasks: completedTasks ?? item.completedTasks,
+        totalTasks: totalTasks ?? item.totalTasks,
+      );
+      
+      _todoItems[index] = updatedItem;
+      notifyListeners();
+    }
+  }
+
+  /// Reorders the todo lists
+  void reorderTodoLists(int oldIndex, int newIndex) {
+    // Make sure both indices are within bounds
+    if (oldIndex < 0 || oldIndex >= _todoItems.length || 
+        newIndex < 0 || newIndex > _todoItems.length) {
+      return;
+    }
+    
+    // In Flutter's ReorderableListView, if you move an item down,
+    // the index you get for newIndex is incremented by 1
+    if (newIndex > oldIndex) {
+      newIndex -= 1;
+    }
+    
+    // Only proceed if the indices are different
+    if (oldIndex == newIndex) return;
+    
+    // Remove the item from the old position and insert it at the new position
+    final todoItem = _todoItems.removeAt(oldIndex);
+    _todoItems.insert(newIndex, todoItem);
+    
     notifyListeners();
   }
 } 

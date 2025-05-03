@@ -6,6 +6,7 @@ import 'package:putevod/view-model/todo_list_view_model.dart';
 import 'package:putevod/view/widgets/app_header.dart';
 import 'package:putevod/view/widgets/app_bottom_navigation.dart';
 import 'package:putevod/view/widgets/todo_item_card.dart';
+import 'package:putevod/view/screens/todo_item_detail_screen.dart';
 
 /// Screen that displays the user's todo lists
 class TodoListScreen extends StatefulWidget {
@@ -127,7 +128,16 @@ class _TodoListScreenState extends State<TodoListScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               ),
               onPressed: () {
-                viewModel.createNewTodoList();
+                viewModel.createNewTodoList().then((newId) {
+                  if (newId.isNotEmpty) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => TodoItemDetailScreen(todoItemId: newId),
+                      ),
+                    );
+                  }
+                });
               },
             ),
           ],
@@ -137,12 +147,27 @@ class _TodoListScreenState extends State<TodoListScreen> {
   }
   
   Widget _buildTodoList(TodoListViewModel viewModel) {
-    return ListView.builder(
+    return ReorderableListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: viewModel.todoItems.length,
+      onReorder: viewModel.reorderTodoLists,
+      proxyDecorator: (child, index, animation) {
+        return AnimatedBuilder(
+          animation: animation,
+          builder: (BuildContext context, Widget? child) {
+            return Material(
+              elevation: 0,
+              color: Colors.transparent,
+              child: child,
+            );
+          },
+          child: child,
+        );
+      },
       itemBuilder: (context, index) {
         return TodoItemCard(
+          key: ValueKey(viewModel.todoItems[index].id),
           todoItem: viewModel.todoItems[index],
         );
       },

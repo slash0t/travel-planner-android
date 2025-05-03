@@ -71,13 +71,19 @@ class AppBottomNavigation extends StatelessWidget {
             'TODO',
             Icons.check_box_outlined,
           ),
-          selectedTab == NavigationTab.home ? _buildNavItem(
+          /*selectedTab == NavigationTab.home ? _buildNavItem(
             context,
             NavigationTab.home,
             'Создать',
             Icons.add,
             onTap: onCreatePressed,
           ) : _buildNavItem(
+            context,
+            NavigationTab.home,
+            'Главная',
+            Icons.home,
+          ),*/
+          _buildNavItem(
             context,
             NavigationTab.home,
             'Главная',
@@ -114,7 +120,8 @@ class AppBottomNavigation extends StatelessWidget {
           children: [
             Icon(
               icon,
-              color: tab == NavigationTab.home ? Colors.black : color,
+              //color: tab == NavigationTab.home ? Colors.black : color,
+              color: color,
               size: 20,
             ),
             const SizedBox(height: 4),
