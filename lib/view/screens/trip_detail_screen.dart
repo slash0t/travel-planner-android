@@ -56,20 +56,29 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
             
             final tripDetail = viewModel.tripDetail!;
             
-            return Column(
+            return Stack(
               children: [
-                _buildHeader(tripDetail.trip.name, tripDetail.trip.startDate, tripDetail.trip.endDate),
-                if (tripDetail.days.isNotEmpty && viewModel.selectedDay != null) ...[
-                  TripDaySelector(
-                    days: tripDetail.days,
-                    selectedDay: viewModel.selectedDay!,
-                    onDaySelected: viewModel.selectDay,
-                  ),
-                  Expanded(
-                    child: _buildEventsList(viewModel),
-                  ),
-                  _buildMapButton(),
-                ],
+                Column(
+                  children: [
+                    _buildHeader(tripDetail.trip.name, tripDetail.trip.startDate, tripDetail.trip.endDate),
+                    if (tripDetail.days.isNotEmpty && viewModel.selectedDay != null) ...[
+                      TripDaySelector(
+                        days: tripDetail.days,
+                        selectedDay: viewModel.selectedDay!,
+                        onDaySelected: viewModel.selectDay,
+                      ),
+                      Expanded(
+                        child: _buildEventsList(viewModel),
+                      ),
+                      _buildMapButton(),
+                    ],
+                  ],
+                ),
+                Positioned(
+                  right: 16,
+                  bottom: 80,
+                  child: _buildCreateEventButton(),
+                ),
               ],
             );
           },
@@ -95,35 +104,37 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                 onTap: () => Navigator.pop(context),
                 child: const Icon(Icons.arrow_back, size: 20),
               ),
-              GestureDetector(
-                onTap: () {
-                  // Show a dialog to confirm deletion
-                  showDialog(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      title: const Text('Удалить поездку?'),
-                      content: const Text('Это действие нельзя отменить.'),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: const Text('Отмена'),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                            Navigator.pop(context); // Return to previous screen after deletion
-                          },
-                          child: const Text('Удалить'),
-                        ),
+              PopupMenuButton<String>(
+                icon: const Icon(Icons.more_vert, size: 20),
+                onSelected: (value) {
+                  if (value == 'edit') {
+                    // TODO: Navigate to edit trip screen
+                  } else if (value == 'delete') {
+                    _showDeleteConfirmationDialog();
+                  }
+                },
+                itemBuilder: (context) => [
+                  const PopupMenuItem(
+                    value: 'edit',
+                    child: Row(
+                      children: [
+                        Icon(Icons.edit_outlined, size: 20),
+                        SizedBox(width: 8),
+                        Text('Редактировать'),
                       ],
                     ),
-                  );
-                },
-                child: const Icon(
-                  Icons.delete_outline,
-                  size: 20,
-                  color: AppColors.accent,
-                ),
+                  ),
+                  const PopupMenuItem(
+                    value: 'delete',
+                    child: Row(
+                      children: [
+                        Icon(Icons.delete_outline, size: 20, color: AppColors.accent),
+                        SizedBox(width: 8),
+                        Text('Удалить', style: TextStyle(color: AppColors.accent)),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -145,6 +156,29 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
               fontSize: 16,
               color: Color(0xFF4B5562),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  void _showDeleteConfirmationDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Удалить поездку?'),
+        content: const Text('Это действие нельзя отменить.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Отмена'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.pop(context); // Return to previous screen after deletion
+            },
+            child: const Text('Удалить'),
           ),
         ],
       ),
@@ -235,6 +269,30 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
             fontWeight: FontWeight.w500,
           ),
         ),
+      ),
+    );
+  }
+  
+  Widget _buildCreateEventButton() {
+    return FloatingActionButton.extended(
+      onPressed: () {
+        // TODO: Navigate to create event screen
+      },
+      backgroundColor: AppColors.secondary,
+      label: const Row(
+        children: [
+          Icon(Icons.add, color: AppColors.text),
+          SizedBox(width: 8),
+          Text(
+            'Создать',
+            style: TextStyle(
+              fontFamily: 'NotoSans',
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              color: AppColors.text,
+            ),
+          ),
+        ],
       ),
     );
   }
