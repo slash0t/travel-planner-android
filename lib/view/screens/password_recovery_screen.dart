@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:putevod/view/screens/login_screen.dart';
 import 'package:putevod/model/app_colors.dart';
-import 'package:putevod/view_model/password_recovery_view_model.dart';
+import 'package:putevod/view-model/password_recovery_view_model.dart';
 
 class PasswordRecoveryScreen extends StatelessWidget {
   const PasswordRecoveryScreen({super.key});

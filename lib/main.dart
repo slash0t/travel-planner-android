@@ -12,9 +12,9 @@ import 'package:putevod/view-model/trips_view_model.dart';
 import 'package:putevod/view/screens/loading_screen.dart';
 import 'package:putevod/view/screens/login_screen.dart';
 import 'package:putevod/view/widgets/app_header_view_model.dart';
-import 'package:putevod/view_model/login_view_model.dart';
-import 'package:putevod/view_model/registration_view_model.dart';
-import 'package:putevod/view_model/password_recovery_view_model.dart';
+import 'package:putevod/view-model/login_view_model.dart';
+import 'package:putevod/view-model/registration_view_model.dart';
+import 'package:putevod/view-model/password_recovery_view_model.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();

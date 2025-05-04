@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:putevod/view/screens/login_screen.dart';
 import 'package:putevod/view/screens/main_menu_screen.dart';
 import 'package:putevod/model/app_colors.dart';
-import 'package:putevod/view_model/registration_view_model.dart';
+import 'package:putevod/view-model/registration_view_model.dart';
 
 class RegistrationScreen extends StatelessWidget {
   const RegistrationScreen({super.key});

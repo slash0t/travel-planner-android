@@ -4,7 +4,7 @@ import 'package:putevod/view/screens/main_menu_screen.dart';
 import 'package:putevod/view/screens/password_recovery_screen.dart';
 import 'package:putevod/view/screens/registration_screen.dart';
 import 'package:putevod/model/app_colors.dart';
-import 'package:putevod/view_model/login_view_model.dart';
+import 'package:putevod/view-model/login_view_model.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
