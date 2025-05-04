@@ -4,6 +4,7 @@ import 'package:putevod/model/app_colors.dart';
 import 'package:putevod/model/trip.dart';
 import 'package:putevod/view-model/navigation_view_model.dart';
 import 'package:putevod/view-model/trips_view_model.dart';
+import 'package:putevod/view/screens/trip_creation_screen.dart';
 import 'package:putevod/view/widgets/app_header.dart';
 import 'package:putevod/view/widgets/app_bottom_navigation.dart';
 import 'package:putevod/view/widgets/trip_card.dart';
@@ -21,31 +22,74 @@ class TripsScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
-        child: Column(
+        child: Stack(
           children: [
-            const AppHeader(
-              showBackButton: false,
-            ),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 20),
-                  _buildFilterTabs(tripsViewModel),
-                  Expanded(
-                    child: _buildTripsList(tripsViewModel, context),
+            Column(
+              children: [
+                const AppHeader(
+                  showBackButton: false,
+                ),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 20),
+                      _buildFilterTabs(tripsViewModel),
+                      Expanded(
+                        child: _buildTripsList(tripsViewModel, context),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+                AppBottomNavigation(
+                  selectedTab: NavigationTab.trips,
+                  onTabSelected: (tab) {
+                    navigationViewModel.setSelectedTab(tab);
+                  },
+                  onCreatePressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const TripCreationScreen()),
+                    );
+                  },
+                ),
+              ],
             ),
-            AppBottomNavigation(
-              selectedTab: NavigationTab.trips,
-              onTabSelected: (tab) {
-                navigationViewModel.setSelectedTab(tab);
-              },
-              onCreatePressed: () {
-                navigationViewModel.setSelectedTab(NavigationTab.home);
-              },
+            // Create trip button in bottom right
+            Positioned(
+              right: 16,
+              bottom: 90, // Position above bottom navigation
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const TripCreationScreen()),
+                  );
+                },
+                child: Container(
+                  width: 129,
+                  height: 58,
+                  decoration: BoxDecoration(
+                    color: AppColors.secondary,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.add, size: 14, color: Colors.black),
+                      const SizedBox(width: 8),
+                      const Text(
+                        'Создать',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500, 
+                          color: Colors.black,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ),
           ],
         ),
@@ -114,10 +158,11 @@ class TripsScreen extends StatelessWidget {
           trip: trip,
           viewModel: viewModel,
           onTap: () {
-            // Navigate to trip details screen
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Нажата поездка: ${trip.name}'),
+            // Navigate to trip details or edit screen
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => TripCreationScreen(tripToEdit: trip),
               ),
             );
           },

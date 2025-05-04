@@ -129,4 +129,21 @@ class TripsViewModel extends ChangeNotifier {
         return const Color(0xFF4B5563); // Gray
     }
   }
+
+  /// Add a new trip to the list
+  void addTrip(Trip trip) {
+    _trips.add(trip);
+    notifyListeners();
+    // TODO: Add trip to database
+  }
+
+  /// Update an existing trip in the list
+  void updateTrip(Trip updatedTrip) {
+    final index = _trips.indexWhere((trip) => trip.id == updatedTrip.id);
+    if (index != -1) {
+      _trips[index] = updatedTrip;
+      notifyListeners();
+      // TODO: Update trip in database
+    }
+  }
 } 

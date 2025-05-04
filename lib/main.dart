@@ -7,6 +7,7 @@ import 'package:putevod/view-model/navigation_view_model.dart';
 import 'package:putevod/view-model/profile_view_model.dart';
 import 'package:putevod/view-model/todo_item_detail_view_model.dart';
 import 'package:putevod/view-model/todo_list_view_model.dart';
+import 'package:putevod/view-model/trip_creation_view_model.dart';
 import 'package:putevod/view-model/trip_search_view_model.dart';
 import 'package:putevod/view-model/trips_view_model.dart';
 import 'package:putevod/view/screens/loading_screen.dart';
@@ -40,6 +41,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => LoginViewModel()),
         ChangeNotifierProvider(create: (_) => RegistrationViewModel()),
         ChangeNotifierProvider(create: (_) => PasswordRecoveryViewModel()),
+        ChangeNotifierProvider(create: (_) => TripCreationViewModel()),
       ],
       child: MaterialApp(
         title: 'Putevod',

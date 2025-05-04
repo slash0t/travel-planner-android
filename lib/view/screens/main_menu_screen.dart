@@ -6,6 +6,7 @@ import 'package:putevod/view-model/navigation_view_model.dart';
 import 'package:putevod/view-model/trips_view_model.dart';
 import 'package:putevod/view/widgets/app_bottom_navigation.dart';
 import 'package:putevod/view/widgets/app_header.dart';
+import 'package:putevod/view/screens/trip_creation_screen.dart';
 
 /// Main menu screen displayed after login or guest mode
 class MainMenuScreen extends StatefulWidget {
@@ -33,8 +34,9 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
 
   void _handleNewTripPressed() {
     // Handle create new trip button pressed
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Create new trip pressed')),
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const TripCreationScreen()),
     );
   }
 
