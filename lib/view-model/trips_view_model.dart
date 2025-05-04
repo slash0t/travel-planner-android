@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:putevod/model/trip.dart';
 import 'package:flutter/material.dart';
+import 'package:putevod/model/app_colors.dart';
 
 /// ViewModel for the trips screen
 class TripsViewModel extends ChangeNotifier {
@@ -31,7 +32,7 @@ class TripsViewModel extends ChangeNotifier {
       name: 'Поездка в Рим',
       startDate: DateTime(2023, 6, 10),
       endDate: DateTime(2023, 6, 20),
-      status: TripStatus.ongoing,
+      status: TripStatus.upcoming,
       imageUrl: 'assets/images/rome.jpg',
       destination: 'Рим, Италия',
     ),
@@ -40,7 +41,7 @@ class TripsViewModel extends ChangeNotifier {
       name: 'Тур по Японии',
       startDate: DateTime(2023, 7, 5),
       endDate: DateTime(2023, 7, 20),
-      status: TripStatus.ongoing,
+      status: TripStatus.upcoming,
       imageUrl: 'assets/images/japan.jpg',
       destination: 'Токио, Япония',
     ),
@@ -49,7 +50,7 @@ class TripsViewModel extends ChangeNotifier {
       name: 'Поездка в Грецию',
       startDate: DateTime(2022, 10, 5),
       endDate: DateTime(2022, 10, 15),
-      status: TripStatus.completed,
+      status: TripStatus.upcoming,
       imageUrl: 'assets/images/greece.jpg',
       destination: 'Афины, Греция',
     ),
@@ -58,7 +59,7 @@ class TripsViewModel extends ChangeNotifier {
       name: 'Отдых в Турции',
       startDate: DateTime(2022, 8, 10),
       endDate: DateTime(2022, 8, 20),
-      status: TripStatus.completed,
+      status: TripStatus.upcoming,
       imageUrl: 'assets/images/turkey.jpg',
       destination: 'Стамбул, Турция',
     ),
@@ -121,7 +122,7 @@ class TripsViewModel extends ChangeNotifier {
   Color getStatusColor(TripStatus status) {
     switch (status) {
       case TripStatus.upcoming:
-        return const Color(0xFFF1C021); // Yellow
+        return AppColors.secondary; // Yellow
       case TripStatus.ongoing:
         return const Color(0xFF84BA83); // Green
       case TripStatus.completed:

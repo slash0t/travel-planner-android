@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:putevod/model/app_colors.dart';
+import 'package:putevod/model/trip.dart';
 import 'package:putevod/view-model/navigation_view_model.dart';
+import 'package:putevod/view-model/trips_view_model.dart';
 import 'package:putevod/view/widgets/app_bottom_navigation.dart';
 import 'package:putevod/view/widgets/app_header.dart';
 
@@ -46,6 +48,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
   @override
   Widget build(BuildContext context) {
     final navigationViewModel = Provider.of<NavigationViewModel>(context);
+    final tripsViewModel = Provider.of<TripsViewModel>(context);
     
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -80,7 +83,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                     const SizedBox(height: 16),
                     
                     // Trip cards
-                    _buildTripCards(),
+                    _buildTripCards(tripsViewModel),
                   ],
                 ),
               ),
@@ -227,37 +230,47 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
     );
   }
 
-  Widget _buildTripCards() {
+  Widget _buildTripCards(TripsViewModel viewModel) {
+    // Filter to show only upcoming trips (default filter for main menu)
+    final upcomingTrips = viewModel.trips.where((trip) => trip.status == TripStatus.upcoming).toList();
+    
+    if (upcomingTrips.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: const [
+            Text(
+              'У вас пока нет путешествий',
+              style: TextStyle(
+                fontFamily: 'NotoSans',
+                fontSize: 16,
+                color: Colors.black54,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+    
     return Column(
-      children: [
-        _buildTripCard(
-          title: 'Карелия, Онежское озеро',
-          date: '20 июня - 27 июня 2023',
-          destination: 'Петрозаводск',
-          isUpcoming: true,
-        ),
-        const SizedBox(height: 16),
-        _buildTripCard(
-          title: 'Италия, Сицилия',
-          date: '10 августа - 20 августа 2023',
-          destination: 'Палермо',
-        ),
-        const SizedBox(height: 16),
-        _buildTripCard(
-          title: 'Поход с друзьями',
-          date: '30 июня 2023',
-          destination: 'Красная Поляна',
-        ),
-      ],
+      children: upcomingTrips.map((trip) => Column(
+        children: [
+          _buildTripCard(
+            trip: trip,
+            viewModel: viewModel,
+          ),
+          const SizedBox(height: 16),
+        ],
+      )).toList(),
     );
   }
 
   Widget _buildTripCard({
-    required String title,
-    required String date,
-    required String destination,
-    bool isUpcoming = false,
+    required Trip trip,
+    required TripsViewModel viewModel,
   }) {
+    final isUpcoming = trip.status == TripStatus.upcoming;
+    
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -280,7 +293,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  title,
+                  trip.name,
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -289,7 +302,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  date,
+                  viewModel.getFormattedDateRange(trip),
                   style: const TextStyle(
                     fontSize: 14,
                     color: Color(0xFF4B5563),
@@ -306,7 +319,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      destination,
+                      trip.destination,
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
@@ -323,12 +336,12 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
               padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
               margin: const EdgeInsets.only(left: 16, bottom: 16),
               decoration: BoxDecoration(
-                color: AppColors.secondary,
+                color: viewModel.getStatusColor(trip.status),
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: const Text(
-                'Скоро начнётся',
-                style: TextStyle(
+              child: Text(
+                viewModel.getStatusText(trip.status),
+                style: const TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
                   fontFamily: 'NotoSans',
