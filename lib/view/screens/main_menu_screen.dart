@@ -7,6 +7,7 @@ import 'package:putevod/view-model/trips_view_model.dart';
 import 'package:putevod/view/widgets/app_bottom_navigation.dart';
 import 'package:putevod/view/widgets/app_header.dart';
 import 'package:putevod/view/screens/trip_creation_screen.dart';
+import 'package:putevod/view/screens/trip_detail_screen.dart';
 
 /// Main menu screen displayed after login or guest mode
 class MainMenuScreen extends StatefulWidget {
@@ -273,84 +274,95 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
   }) {
     final isUpcoming = trip.status == TripStatus.upcoming;
     
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 2,
-            offset: const Offset(0, 1),
+    return GestureDetector(
+      onTap: () {
+        // Navigate to trip detail screen
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => TripDetailScreen(tripId: trip.id),
           ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  trip.name,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'NotoSans',
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  viewModel.getFormattedDateRange(trip),
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Color(0xFF4B5563),
-                    fontFamily: 'NotoSans',
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.location_on_outlined,
-                      size: 16,
-                      color: Colors.black,
+        );
+      },
+      child: Container(
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 2,
+              offset: const Offset(0, 1),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    trip.name,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'NotoSans',
                     ),
-                    const SizedBox(width: 8),
-                    Text(
-                      trip.destination,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        fontFamily: 'NotoSans',
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    viewModel.getFormattedDateRange(trip),
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Color(0xFF4B5563),
+                      fontFamily: 'NotoSans',
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.location_on_outlined,
+                        size: 16,
+                        color: Colors.black,
                       ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          if (isUpcoming)
-            Container(
-              padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-              margin: const EdgeInsets.only(left: 16, bottom: 16),
-              decoration: BoxDecoration(
-                color: viewModel.getStatusColor(trip.status),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Text(
-                viewModel.getStatusText(trip.status),
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  fontFamily: 'NotoSans',
-                ),
+                      const SizedBox(width: 8),
+                      Text(
+                        trip.destination,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          fontFamily: 'NotoSans',
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
-        ],
+            if (isUpcoming)
+              Container(
+                padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                margin: const EdgeInsets.only(left: 16, bottom: 16),
+                decoration: BoxDecoration(
+                  color: viewModel.getStatusColor(trip.status),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Text(
+                  viewModel.getStatusText(trip.status),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    fontFamily: 'NotoSans',
+                  ),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }

@@ -5,6 +5,7 @@ import 'package:putevod/model/trip.dart';
 import 'package:putevod/view-model/navigation_view_model.dart';
 import 'package:putevod/view-model/trips_view_model.dart';
 import 'package:putevod/view/screens/trip_creation_screen.dart';
+import 'package:putevod/view/screens/trip_detail_screen.dart';
 import 'package:putevod/view/widgets/app_header.dart';
 import 'package:putevod/view/widgets/app_bottom_navigation.dart';
 import 'package:putevod/view/widgets/trip_card.dart';
@@ -162,7 +163,7 @@ class TripsScreen extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => TripCreationScreen(tripToEdit: trip),
+                builder: (context) => TripDetailScreen(tripId: trip.id),
               ),
             );
           },

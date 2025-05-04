@@ -1,0 +1,241 @@
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import 'package:putevod/model/app_colors.dart';
+import 'package:putevod/view-model/trip_detail_view_model.dart';
+import 'package:putevod/view/widgets/trip_day_selector.dart';
+import 'package:putevod/view/widgets/trip_event_item.dart';
+
+/// Screen for viewing trip details and itinerary
+class TripDetailScreen extends StatefulWidget {
+  /// The ID of the trip to display
+  final String tripId;
+  
+  /// Creates a trip detail screen
+  const TripDetailScreen({
+    super.key,
+    required this.tripId,
+  });
+
+  @override
+  State<TripDetailScreen> createState() => _TripDetailScreenState();
+}
+
+class _TripDetailScreenState extends State<TripDetailScreen> {
+  late TripDetailViewModel _viewModel;
+  
+  @override
+  void initState() {
+    super.initState();
+    _viewModel = Provider.of<TripDetailViewModel>(context, listen: false);
+    
+    // Load trip data after the widget is built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadTripDetail();
+    });
+  }
+  
+  Future<void> _loadTripDetail() async {
+    await _viewModel.loadTripDetail(widget.tripId);
+  }
+  
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      body: SafeArea(
+        child: Consumer<TripDetailViewModel>(
+          builder: (context, viewModel, _) {
+            if (viewModel.isLoading) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            
+            if (viewModel.tripDetail == null) {
+              return const Center(child: Text('Trip not found'));
+            }
+            
+            final tripDetail = viewModel.tripDetail!;
+            
+            return Column(
+              children: [
+                _buildHeader(tripDetail.trip.name, tripDetail.trip.startDate, tripDetail.trip.endDate),
+                if (tripDetail.days.isNotEmpty && viewModel.selectedDay != null) ...[
+                  TripDaySelector(
+                    days: tripDetail.days,
+                    selectedDay: viewModel.selectedDay!,
+                    onDaySelected: viewModel.selectDay,
+                  ),
+                  Expanded(
+                    child: _buildEventsList(viewModel),
+                  ),
+                  _buildMapButton(),
+                ],
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+  
+  Widget _buildHeader(String tripName, DateTime startDate, DateTime endDate) {
+    final dateFormat = DateFormat('d MMMM yyyy');
+    final dateRange = '${dateFormat.format(startDate)} - ${dateFormat.format(endDate)}';
+    
+    return Container(
+      color: Colors.white,
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              GestureDetector(
+                onTap: () => Navigator.pop(context),
+                child: const Icon(Icons.arrow_back, size: 20),
+              ),
+              GestureDetector(
+                onTap: () {
+                  // Show a dialog to confirm deletion
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text('Удалить поездку?'),
+                      content: const Text('Это действие нельзя отменить.'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text('Отмена'),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            Navigator.pop(context); // Return to previous screen after deletion
+                          },
+                          child: const Text('Удалить'),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+                child: const Icon(
+                  Icons.delete_outline,
+                  size: 20,
+                  color: AppColors.accent,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Text(
+            tripName,
+            style: const TextStyle(
+              fontFamily: 'NotoSans',
+              fontSize: 24,
+              fontWeight: FontWeight.w500,
+              color: AppColors.text,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            dateRange,
+            style: const TextStyle(
+              fontFamily: 'NotoSans',
+              fontSize: 16,
+              color: Color(0xFF4B5562),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  Widget _buildEventsList(TripDetailViewModel viewModel) {
+    final events = viewModel.eventsForSelectedDay;
+    
+    if (events.isEmpty) {
+      return const Center(
+        child: Text(
+          'Нет событий на этот день',
+          style: TextStyle(
+            fontFamily: 'NotoSans',
+            fontSize: 16,
+            color: Color(0xFF6B7280),
+          ),
+        ),
+      );
+    }
+    
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+      child: ReorderableListView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: events.length,
+        onReorder: viewModel.reorderEvents,
+        proxyDecorator: (child, index, animation) {
+          return AnimatedBuilder(
+            animation: animation,
+            builder: (BuildContext context, Widget? child) {
+              return Material(
+                elevation: 0,
+                color: Colors.transparent,
+                child: child,
+              );
+            },
+            child: child,
+          );
+        },
+        itemBuilder: (context, index) {
+          final event = events[index];
+          return Dismissible(
+            key: Key(event.id),
+            background: Container(
+              color: AppColors.accent,
+              alignment: Alignment.centerRight,
+              padding: const EdgeInsets.only(right: 20),
+              child: const Icon(Icons.delete, color: Colors.white),
+            ),
+            direction: DismissDirection.endToStart,
+            onDismissed: (_) {
+              viewModel.deleteEvent(event.id);
+            },
+            child: TripEventItem(event: event),
+          );
+        },
+      ),
+    );
+  }
+  
+  Widget _buildMapButton() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      child: ElevatedButton(
+        onPressed: () {
+          // Navigate to map view
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Map view is not implemented yet')),
+          );
+        },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.accent,
+          foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          padding: const EdgeInsets.symmetric(vertical: 16),
+        ),
+        child: const Text(
+          'Открыть на карте',
+          style: TextStyle(
+            fontFamily: 'NotoSans',
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ),
+    );
+  }
+} 
