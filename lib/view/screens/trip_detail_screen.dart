@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:putevod/model/app_colors.dart';
 import 'package:putevod/view-model/trip_detail_view_model.dart';
+import 'package:putevod/view/screens/place_editing_screen.dart';
 import 'package:putevod/view/widgets/trip_day_selector.dart';
 import 'package:putevod/view/widgets/trip_event_item.dart';
 
@@ -235,7 +236,17 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
             onDismissed: (_) {
               viewModel.deleteEvent(event.id);
             },
-            child: TripEventItem(event: event),
+            child: GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => PlaceEditingScreen.update(placeId: event.id),
+                  ),
+                );
+              },
+              child: TripEventItem(event: event),
+            ),
           );
         },
       ),
@@ -276,7 +287,12 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   Widget _buildCreateEventButton() {
     return FloatingActionButton.extended(
       onPressed: () {
-        // TODO: Navigate to create event screen
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const PlaceEditingScreen.create(),
+          ),
+        );
       },
       backgroundColor: AppColors.secondary,
       label: const Row(

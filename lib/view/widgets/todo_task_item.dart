@@ -61,7 +61,7 @@ class TodoTaskItem extends StatelessWidget {
                 task.title,
                 style: TextStyle(
                   fontSize: 16,
-                  fontFamily: 'Noto Sans',
+                  fontFamily: 'NotoSans',
                   color: task.isCompleted ? const Color(0xFF4B5562) : AppColors.text,
                   decoration: task.isCompleted ? TextDecoration.lineThrough : null,
                 ),
