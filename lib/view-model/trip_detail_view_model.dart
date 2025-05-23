@@ -7,6 +7,16 @@ import 'package:uuid/uuid.dart';
 
 /// ViewModel for the trip detail screen
 class TripDetailViewModel with ChangeNotifier {
+  Trip currentTrip = new Trip(
+          id: '2',
+          name: 'Выходные в Барселоне',
+          startDate: DateTime(2024, 12, 10),
+          endDate: DateTime(2024, 12, 12),
+          status: TripStatus.completed,
+          imageUrl: 'https://images.unsplash.com/photo-1583422409516-2895a77efded?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8YmFyY2Vsb25hfGVufDB8fDB8fHww',
+          destination: 'Барселона, Испания',
+        );
+
   /// Current trip detail
   TripDetail? _tripDetail;
   

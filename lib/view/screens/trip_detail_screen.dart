@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:putevod/model/app_colors.dart';
+import 'package:putevod/model/trip.dart';
 import 'package:putevod/view-model/trip_detail_view_model.dart';
 import 'package:putevod/view/screens/place_editing_screen.dart';
 import 'package:putevod/view/screens/trip_creation_screen.dart';
 import 'package:putevod/view/widgets/trip_day_selector.dart';
 import 'package:putevod/view/widgets/trip_event_item.dart';
-
-import '../../model/trip.dart';
+import 'package:putevod/view/screens/trip_sharing_screen.dart';
 
 /// Screen for viewing trip details and itinerary
 class TripDetailScreen extends StatefulWidget {
@@ -182,21 +182,20 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => TripCreationScreen(
-        tripToEdit: new Trip(
-          id: '2',
-          name: 'Выходные в Барселоне',
-          startDate: DateTime(2024, 12, 10),
-          endDate: DateTime(2024, 12, 12),
-          status: TripStatus.completed,
-          imageUrl: 'assets/images/barcelona.jpg',
-          destination: 'Барселона, Испания',
-        ),
+        tripToEdit: _viewModel.currentTrip,
       )),
     );
   }
 
   void _showShareTripScreen() {
-
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => TripSharingScreen(
+          trip: _viewModel.currentTrip,
+        ),
+      ),
+    );
   }
 
   void _showDeleteConfirmationDialog() {
