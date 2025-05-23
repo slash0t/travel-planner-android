@@ -128,21 +128,61 @@ class _TodoListScreenState extends State<TodoListScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               ),
               onPressed: () {
-                viewModel.createNewTodoList().then((newId) {
-                  if (newId.isNotEmpty) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => TodoItemDetailScreen(todoItemId: newId),
-                      ),
-                    );
-                  }
-                });
+                _showCreateTodoListDialog(context, viewModel);
               },
             ),
           ],
         ),
       ],
+    );
+  }
+  
+  void _showCreateTodoListDialog(BuildContext context, TodoListViewModel viewModel) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text(
+            'Создать новый список',
+            style: TextStyle(fontFamily: 'Noto Sans'),
+            ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                title: const Text(
+                  'Создать пустой',
+                  style: TextStyle(fontFamily: 'Noto Sans'),
+                  ),
+                onTap: () {
+                  Navigator.of(context).pop(); // Close the dialog
+                  viewModel.createNewTodoList().then((newId) {
+                    if (newId.isNotEmpty) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => TodoItemDetailScreen(todoItemId: newId),
+                        ),
+                      );
+                    }
+                  });
+                },
+              ),
+              ListTile(
+                title: const Text(
+                  'Создать с помощью ИИ',
+                  style: TextStyle(fontFamily: 'Noto Sans'),
+                  ),
+                onTap: () {
+                  Navigator.of(context).pop(); // Close the dialog
+                  // TODO: Navigate to the AI creation screen
+                  print('Navigate to AI creation screen');
+                },
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
   
