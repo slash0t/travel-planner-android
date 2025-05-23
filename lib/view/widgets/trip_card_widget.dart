@@ -50,8 +50,8 @@ class TripCardWidget extends StatelessWidget {
             topLeft: Radius.circular(12),
             topRight: Radius.circular(12),
           ),
-          child: Image.asset(
-            trip.imageUrl,
+          child: Image(
+            image: NetworkImage(trip.imageUrl),
             height: 192,
             width: double.infinity,
             fit: BoxFit.cover,

@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 
 /// ViewModel for the profile screen
 class ProfileViewModel extends ChangeNotifier {
-  String _nickname = 'andrew_moskalenko';
+  String _nickname = 'ivan_sahalin';
   String _email = 'melpeters@gmail.com';
   String _password = '************';
-  String _name = 'Андрей Москаленко';
+  String _name = 'Иван Баранов';
   String _status = 'Путешественник';
   
   int _tripsCount = 12;
   int _placesCount = 27;
-  int _photosCount = 93;
+  int _photosCount = 69;
   
   /// Gets the user's nickname
   String get nickname => _nickname;
