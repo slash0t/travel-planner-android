@@ -7,6 +7,7 @@ import 'package:putevod/view/widgets/app_header.dart';
 import 'package:putevod/view/widgets/app_bottom_navigation.dart';
 import 'package:putevod/view/widgets/todo_item_card.dart';
 import 'package:putevod/view/screens/todo_item_detail_screen.dart';
+import 'package:putevod/view/screens/todo_ai_creation_screen.dart';
 
 /// Screen that displays the user's todo lists
 class TodoListScreen extends StatefulWidget {
@@ -89,7 +90,7 @@ class _TodoListScreenState extends State<TodoListScreen> {
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.w500,
-            fontFamily: 'Noto Sans',
+            fontFamily: 'NotoSans',
             color: AppColors.text,
           ),
         ),
@@ -98,7 +99,7 @@ class _TodoListScreenState extends State<TodoListScreen> {
           '${viewModel.activeListCount} активных списка',
           style: const TextStyle(
             fontSize: 16,
-            fontFamily: 'Noto Sans',
+            fontFamily: 'NotoSans',
             color: Color(0xFF4B5562),
           ),
         ),
@@ -116,7 +117,7 @@ class _TodoListScreenState extends State<TodoListScreen> {
                 'Новый список',
                 style: TextStyle(
                   color: Colors.white,
-                  fontFamily: 'Noto Sans',
+                  fontFamily: 'NotoSans',
                 ),
               ),
               style: ElevatedButton.styleFrom(
@@ -144,7 +145,7 @@ class _TodoListScreenState extends State<TodoListScreen> {
         return AlertDialog(
           title: const Text(
             'Создать новый список',
-            style: TextStyle(fontFamily: 'Noto Sans'),
+            style: TextStyle(fontFamily: 'NotoSans'),
             ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -152,7 +153,7 @@ class _TodoListScreenState extends State<TodoListScreen> {
               ListTile(
                 title: const Text(
                   'Создать пустой',
-                  style: TextStyle(fontFamily: 'Noto Sans'),
+                  style: TextStyle(fontFamily: 'NotoSans'),
                   ),
                 onTap: () {
                   Navigator.of(context).pop(); // Close the dialog
@@ -171,12 +172,17 @@ class _TodoListScreenState extends State<TodoListScreen> {
               ListTile(
                 title: const Text(
                   'Создать с помощью ИИ',
-                  style: TextStyle(fontFamily: 'Noto Sans'),
+                  style: TextStyle(fontFamily: 'NotoSans'),
                   ),
                 onTap: () {
                   Navigator.of(context).pop(); // Close the dialog
-                  // TODO: Navigate to the AI creation screen
-                  print('Navigate to AI creation screen');
+                  // Navigate to the AI creation screen
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const TodoAICreationScreen(),
+                    ),
+                  );
                 },
               ),
             ],
