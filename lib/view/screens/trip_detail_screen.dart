@@ -9,6 +9,7 @@ import 'package:putevod/view/screens/trip_creation_screen.dart';
 import 'package:putevod/view/widgets/trip_day_selector.dart';
 import 'package:putevod/view/widgets/trip_event_item.dart';
 import 'package:putevod/view/screens/trip_sharing_screen.dart';
+import 'package:putevod/view/screens/trip_publishing_screen.dart';
 
 /// Screen for viewing trip details and itinerary
 class TripDetailScreen extends StatefulWidget {
@@ -117,6 +118,8 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                     _showDeleteConfirmationDialog();
                   } else if (value == 'share') {
                     _showShareTripScreen();
+                  } else if (value == 'publish') {
+                    _showPublishTripScreen();
                   }
                 },
                 itemBuilder: (context) => [
@@ -137,6 +140,16 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                         Icon(Icons.share, size: 20),
                         SizedBox(width: 8),
                         Text('Поделиться'),
+                      ],
+                    ),
+                  ),
+                  const PopupMenuItem(
+                    value: 'publish',
+                    child: Row(
+                      children: [
+                        Icon(Icons.publish, size: 20),
+                        SizedBox(width: 8),
+                        Text('Опубликовать'),
                       ],
                     ),
                   ),
@@ -194,6 +207,15 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
         builder: (context) => TripSharingScreen(
           trip: _viewModel.currentTrip,
         ),
+      ),
+    );
+  }
+
+  void _showPublishTripScreen() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const TripPublishingScreen(),
       ),
     );
   }
