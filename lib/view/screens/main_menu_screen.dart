@@ -4,6 +4,7 @@ import 'package:putevod/model/app_colors.dart';
 import 'package:putevod/model/trip.dart';
 import 'package:putevod/view-model/navigation_view_model.dart';
 import 'package:putevod/view-model/trips_view_model.dart';
+import 'package:putevod/view/screens/trip_search_screen.dart';
 import 'package:putevod/view/widgets/app_bottom_navigation.dart';
 import 'package:putevod/view/widgets/app_header.dart';
 import 'package:putevod/view/screens/trip_creation_screen.dart';
@@ -43,8 +44,9 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
 
   void _handleLibraryPressed() {
     // Handle library button pressed
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Library pressed')),
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const TripSearchScreen()),
     );
   }
 
