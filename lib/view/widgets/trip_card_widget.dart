@@ -104,24 +104,24 @@ class TripCardWidget extends StatelessWidget {
             },
           ),
         ),
-        Positioned(
-          top: 12,
-          right: 12,
-          child: InkWell(
-            child: Container(
-              padding: const EdgeInsets.all(6),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                trip.isFavorite ? Icons.favorite : Icons.favorite_border,
-                color: AppColors.accent,
-                size: 16,
-              ),
-            ),
-          ),
-        ),
+        // Positioned(
+        //   top: 12,
+        //   right: 12,
+        //   child: InkWell(
+        //     child: Container(
+        //       padding: const EdgeInsets.all(6),
+        //       decoration: const BoxDecoration(
+        //         color: Colors.white,
+        //         shape: BoxShape.circle,
+        //       ),
+        //       child: Icon(
+        //         trip.isFavorite ? Icons.favorite : Icons.favorite_border,
+        //         color: AppColors.accent,
+        //         size: 16,
+        //       ),
+        //     ),
+        //   ),
+        // ),
       ],
     );
   }

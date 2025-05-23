@@ -89,7 +89,7 @@ class TripSearchScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text(
-                'Популярные поездки',
+                'Поездки',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
@@ -97,24 +97,24 @@ class TripSearchScreen extends StatelessWidget {
                   color: AppColors.text,
                 ),
               ),
-              Row(
-                children: [
-                  Icon(
-                    Icons.sort,
-                    size: 16,
-                    color: AppColors.accent,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Популярные',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontFamily: 'NotoSans',
-                      color: AppColors.text,
-                    ),
-                  ),
-                ],
-              ),
+              // Row(
+              //   children: [
+              //     Icon(
+              //       Icons.sort,
+              //       size: 16,
+              //       color: AppColors.accent,
+              //     ),
+              //     const SizedBox(width: 8),
+              //     Text(
+              //       'Популярные',
+              //       style: TextStyle(
+              //         fontSize: 14,
+              //         fontFamily: 'NotoSans',
+              //         color: AppColors.text,
+              //       ),
+              //     ),
+              //   ],
+              // ),
             ],
           ),
         ),
