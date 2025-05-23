@@ -74,12 +74,12 @@ class TripsScreen extends StatelessWidget {
                     color: AppColors.secondary,
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Row(
+                  child: const Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.add, size: 14, color: Colors.black),
-                      const SizedBox(width: 8),
-                      const Text(
+                      Icon(Icons.add, size: 14, color: Colors.black),
+                      SizedBox(width: 8),
+                      Text(
                         'Создать',
                         style: TextStyle(
                           fontSize: 16,
@@ -117,15 +117,10 @@ class TripsScreen extends StatelessWidget {
     final trips = viewModel.filteredTrips;
     
     if (trips.isEmpty) {
-      return Center(
+      return const Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Image.asset(
-              'assets/images/empty_trips.png',
-              width: 120,
-              height: 120,
-            ),
             const SizedBox(height: 16),
             const Text(
               'Нет путешествий',

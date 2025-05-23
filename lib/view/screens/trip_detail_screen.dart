@@ -4,8 +4,11 @@ import 'package:provider/provider.dart';
 import 'package:putevod/model/app_colors.dart';
 import 'package:putevod/view-model/trip_detail_view_model.dart';
 import 'package:putevod/view/screens/place_editing_screen.dart';
+import 'package:putevod/view/screens/trip_creation_screen.dart';
 import 'package:putevod/view/widgets/trip_day_selector.dart';
 import 'package:putevod/view/widgets/trip_event_item.dart';
+
+import '../../model/trip.dart';
 
 /// Screen for viewing trip details and itinerary
 class TripDetailScreen extends StatefulWidget {
@@ -109,9 +112,11 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                 icon: const Icon(Icons.more_vert, size: 20),
                 onSelected: (value) {
                   if (value == 'edit') {
-                    // TODO: Navigate to edit trip screen
+                    _showEditTripScreen();
                   } else if (value == 'delete') {
                     _showDeleteConfirmationDialog();
+                  } else if (value == 'share') {
+                    _showShareTripScreen();
                   }
                 },
                 itemBuilder: (context) => [
@@ -122,6 +127,16 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                         Icon(Icons.edit_outlined, size: 20),
                         SizedBox(width: 8),
                         Text('Редактировать'),
+                      ],
+                    ),
+                  ),
+                  const PopupMenuItem(
+                    value: 'share',
+                    child: Row(
+                      children: [
+                        Icon(Icons.share, size: 20),
+                        SizedBox(width: 8),
+                        Text('Поделиться'),
                       ],
                     ),
                   ),
@@ -162,7 +177,28 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       ),
     );
   }
-  
+
+  void _showEditTripScreen() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => TripCreationScreen(
+        tripToEdit: new Trip(
+          id: '2',
+          name: 'Выходные в Барселоне',
+          startDate: DateTime(2024, 12, 10),
+          endDate: DateTime(2024, 12, 12),
+          status: TripStatus.completed,
+          imageUrl: 'assets/images/barcelona.jpg',
+          destination: 'Барселона, Испания',
+        ),
+      )),
+    );
+  }
+
+  void _showShareTripScreen() {
+
+  }
+
   void _showDeleteConfirmationDialog() {
     showDialog(
       context: context,
