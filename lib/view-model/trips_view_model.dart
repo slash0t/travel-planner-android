@@ -1,7 +1,11 @@
 import 'package:flutter/foundation.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:putevod/model/trip.dart';
 import 'package:flutter/material.dart';
 import 'package:putevod/model/app_colors.dart';
+import 'package:putevod/model/trip_location.dart';
+
+import '../model/trip_day.dart';
 
 /// ViewModel for the trips screen
 class TripsViewModel extends ChangeNotifier {
@@ -17,6 +21,49 @@ class TripsViewModel extends ChangeNotifier {
       status: TripStatus.ongoing,
       imageUrl: 'assets/images/paris.jpg',
       destination: 'Париж, Франция',
+      days: [
+        TripDay(
+          id: '1',
+          dayNumber: 1,
+          name: 'day 1',
+          color: AppColors.accent
+        ),
+        TripDay(
+            id: '2',
+            dayNumber: 2,
+            name: 'day 2',
+            color: AppColors.accent
+        )
+      ],
+      locations: [
+        TripLocation(
+            id: '1',
+            name: 'name',
+            coordinates: const LatLng(55.751670, 37.629053),
+            dayNumber: 1,
+            startTime: 'utro',
+            endTime: 'utro tozhe',
+            orderInDay: 1
+        ),
+        TripLocation(
+            id: '2',
+            name: 'name1',
+            coordinates: const LatLng(55.751673, 37.629052),
+            dayNumber: 1,
+            startTime: 'utro',
+            endTime: 'utro tozhe',
+            orderInDay: 2
+        ),
+        TripLocation(
+            id: '3',
+            name: 'name2',
+            coordinates: const LatLng(55.751677, 37.629023),
+            dayNumber: 2,
+            startTime: 'utro',
+            endTime: 'utro tozhe',
+            orderInDay: 1
+        ),
+      ]
     ),
     Trip(
       id: '2',
@@ -26,6 +73,8 @@ class TripsViewModel extends ChangeNotifier {
       status: TripStatus.completed,
       imageUrl: 'assets/images/barcelona.jpg',
       destination: 'Барселона, Испания',
+      days: [],
+      locations: []
     ),
     Trip(
       id: '3',
@@ -35,6 +84,8 @@ class TripsViewModel extends ChangeNotifier {
       status: TripStatus.upcoming,
       imageUrl: 'assets/images/rome.jpg',
       destination: 'Рим, Италия',
+      days: [],
+      locations: []
     ),
     Trip(
       id: '4',
@@ -44,6 +95,8 @@ class TripsViewModel extends ChangeNotifier {
       status: TripStatus.upcoming,
       imageUrl: 'assets/images/japan.jpg',
       destination: 'Токио, Япония',
+      days: [],
+      locations: []
     ),
     Trip(
       id: '5',
@@ -53,6 +106,8 @@ class TripsViewModel extends ChangeNotifier {
       status: TripStatus.upcoming,
       imageUrl: 'assets/images/greece.jpg',
       destination: 'Афины, Греция',
+      days: [],
+      locations: []
     ),
     Trip(
       id: '6',
@@ -62,6 +117,8 @@ class TripsViewModel extends ChangeNotifier {
       status: TripStatus.upcoming,
       imageUrl: 'assets/images/turkey.jpg',
       destination: 'Стамбул, Турция',
+      days: [],
+      locations: []
     ),
   ];
 

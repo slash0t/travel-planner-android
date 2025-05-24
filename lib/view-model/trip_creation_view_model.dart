@@ -140,6 +140,8 @@ class TripCreationViewModel extends ChangeNotifier {
         country: countryController.text,
         city: cityController.text,
         description: descriptionController.text,
+        days: [],
+        locations: []
       );
     }
     

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:putevod/model/trip_day.dart';
+import 'package:putevod/model/trip_location.dart';
 
 /// Model representing a trip
 class Trip {
@@ -32,6 +34,10 @@ class Trip {
   /// Description of the trip
   final String description;
 
+  final List<TripDay> days;
+
+  final List<TripLocation> locations;
+
   /// Creates a new trip instance
   const Trip({
     required this.id,
@@ -41,6 +47,8 @@ class Trip {
     required this.status,
     required this.imageUrl,
     required this.destination,
+    required this.days,
+    required this.locations,
     this.country = '',
     this.city = '',
     this.description = '',
@@ -55,6 +63,8 @@ class Trip {
     TripStatus? status,
     String? imageUrl,
     String? destination,
+    List<TripDay>? days,
+    List<TripLocation>? locations,
     String? country,
     String? city,
     String? description,
@@ -67,11 +77,23 @@ class Trip {
       status: status ?? this.status,
       imageUrl: imageUrl ?? this.imageUrl,
       destination: destination ?? this.destination,
+      days: days ?? this.days,
+      locations: locations ?? this.locations,
       country: country ?? this.country,
       city: city ?? this.city,
       description: description ?? this.description,
     );
   }
+
+  List<TripLocation> getLocationsForDay(int dayNumber) {
+    return locations
+        .where((location) => location.dayNumber == dayNumber)
+        .toList()
+        ..sort((a, b) => a.orderInDay.compareTo(b.orderInDay));
+  }
+
+  /// Get formatted title for display
+  String get formattedTitle => '$destination, $startDate - $endDate';
 }
 
 /// Enum representing the status of a trip
