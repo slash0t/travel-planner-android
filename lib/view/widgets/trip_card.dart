@@ -98,7 +98,7 @@ class TripCard extends StatelessWidget {
       child: Stack(
         children: [
           Image.asset(
-            trip.imageUrl,
+            trip.imageUrl!,
             height: 200,
             width: double.infinity,
             fit: BoxFit.cover,

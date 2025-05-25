@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:putevod/model/trip.dart';
 import 'package:putevod/model/trip_detail.dart';
 import 'package:putevod/model/trip_event.dart';
-import 'package:uuid/uuid.dart';
+import 'package:putevod/external/sync_service.dart';
 
 /// ViewModel for the trip detail screen
 class TripDetailViewModel with ChangeNotifier {
@@ -16,6 +16,9 @@ class TripDetailViewModel with ChangeNotifier {
   /// Loading state indicator
   bool _isLoading = false;
   
+  /// Error message
+  String? _errorMessage;
+  
   /// Getter for trip detail
   TripDetail? get tripDetail => _tripDetail;
   
@@ -24,6 +27,9 @@ class TripDetailViewModel with ChangeNotifier {
   
   /// Getter for loading state
   bool get isLoading => _isLoading;
+  
+  /// Getter for error message
+  String? get errorMessage => _errorMessage;
   
   /// Getter for events of the selected day
   List<TripEvent> get eventsForSelectedDay {
@@ -35,22 +41,38 @@ class TripDetailViewModel with ChangeNotifier {
   }
   
   /// Loads trip detail data for the provided trip ID
-  Future<void> loadTripDetail(String tripId) async {
+  Future<void> loadTripDetail(int tripId) async {
     _isLoading = true;
+    _errorMessage = null;
     notifyListeners();
     
     try {
-      // In a real app, this would fetch data from a repository
-      // For now, we'll create mock data
-      await Future.delayed(const Duration(milliseconds: 500));
-      _tripDetail = await _createMockTripDetail(tripId);
+      final tripResponse = await SyncService.instance.getTripDetails(tripId);
       
-      // Select the first day by default
-      if (_tripDetail != null && _tripDetail!.days.isNotEmpty) {
-        _selectedDay = _tripDetail!.days.first;
+      if (tripResponse != null) {
+        final trip = Trip.fromJson(tripResponse);
+        
+        // Получить все события поездки
+        final eventsResponse = await SyncService.instance.getTripEvents(tripId);
+        final events = eventsResponse.map((eventData) => TripEvent(
+          id: eventData['eventId'].toString(),
+          time: eventData['startTime'] ?? '00:00',
+          title: eventData['title'] ?? 'Без названия',
+          address: eventData['place']?['address'] ?? '',
+          day: DateTime.parse(eventData['day']['date']),
+        )).toList();
+        
+        _tripDetail = TripDetail(trip: trip, events: events);
+        
+        // Select the first day by default
+        if (_tripDetail != null && _tripDetail!.days.isNotEmpty) {
+          _selectedDay = _tripDetail!.days.first;
+        }
+      } else {
+        _errorMessage = 'Поездка не найдена';
       }
     } catch (e) {
-      debugPrint('Error loading trip detail: $e');
+      _errorMessage = 'Ошибка загрузки поездки: ${e.toString()}';
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -95,15 +117,88 @@ class TripDetailViewModel with ChangeNotifier {
   }
   
   /// Deletes an event by its ID
-  void deleteEvent(String eventId) {
+  Future<void> deleteEvent(String eventId) async {
     if (_tripDetail == null) return;
     
-    final List<TripEvent> updatedEvents = _tripDetail!.events
-        .where((event) => event.id != eventId)
-        .toList();
+    try {
+      // Найти событие для получения tripId и dayId
+      final event = _tripDetail!.events.firstWhere((e) => e.id == eventId);
+      final tripId = _tripDetail!.trip.id;
+      
+      // Найти dayId (пока используем простую логику)
+      // TODO: Получить правильный dayId из API
+      final dayId = 1; // Placeholder
+      
+      await SyncService.instance.deleteEvent(tripId, dayId, int.parse(eventId));
+      
+      // Обновить локальный список
+      final List<TripEvent> updatedEvents = _tripDetail!.events
+          .where((event) => event.id != eventId)
+          .toList();
+      
+      _tripDetail = _tripDetail!.copyWith(events: updatedEvents);
+      notifyListeners();
+    } catch (e) {
+      _errorMessage = 'Ошибка удаления события: ${e.toString()}';
+      notifyListeners();
+    }
+  }
+  
+  /// Create a new event
+  Future<void> createEvent(Map<String, dynamic> eventData) async {
+    if (_tripDetail == null) return;
     
-    _tripDetail = _tripDetail!.copyWith(events: updatedEvents);
-    notifyListeners();
+    try {
+      final tripId = _tripDetail!.trip.id;
+      // TODO: Получить правильный dayId
+      final dayId = 1; // Placeholder
+      
+      final newEventResponse = await SyncService.instance.createEvent(tripId, dayId, eventData);
+      final newEvent = TripEvent(
+        id: newEventResponse['eventId'].toString(),
+        time: newEventResponse['startTime'] ?? '00:00',
+        title: newEventResponse['title'] ?? 'Без названия',
+        address: newEventResponse['place']?['address'] ?? '',
+        day: DateTime.parse(newEventResponse['day']['date']),
+      );
+      
+      final updatedEvents = List<TripEvent>.from(_tripDetail!.events)..add(newEvent);
+      _tripDetail = _tripDetail!.copyWith(events: updatedEvents);
+      notifyListeners();
+    } catch (e) {
+      _errorMessage = 'Ошибка создания события: ${e.toString()}';
+      notifyListeners();
+    }
+  }
+  
+  /// Update an existing event
+  Future<void> updateEvent(String eventId, Map<String, dynamic> eventData) async {
+    if (_tripDetail == null) return;
+    
+    try {
+      final tripId = _tripDetail!.trip.id;
+      // TODO: Получить правильный dayId
+      final dayId = 1; // Placeholder
+      
+      final updatedEventResponse = await SyncService.instance.updateEvent(tripId, dayId, int.parse(eventId), eventData);
+      final updatedEvent = TripEvent(
+        id: updatedEventResponse['eventId'].toString(),
+        time: updatedEventResponse['startTime'] ?? '00:00',
+        title: updatedEventResponse['title'] ?? 'Без названия',
+        address: updatedEventResponse['place']?['address'] ?? '',
+        day: DateTime.parse(updatedEventResponse['day']['date']),
+      );
+      
+      final events = _tripDetail!.events.map((event) {
+        return event.id == eventId ? updatedEvent : event;
+      }).toList();
+      
+      _tripDetail = _tripDetail!.copyWith(events: events);
+      notifyListeners();
+    } catch (e) {
+      _errorMessage = 'Ошибка обновления события: ${e.toString()}';
+      notifyListeners();
+    }
   }
   
   /// Helper to check if two dates are the same day
@@ -111,65 +206,9 @@ class TripDetailViewModel with ChangeNotifier {
     return a.year == b.year && a.month == b.month && a.day == b.day;
   }
   
-  /// Creates mock trip detail data for demo
-  Future<TripDetail> _createMockTripDetail(String tripId) async {
-    // Create a mock trip
-    final trip = Trip(
-      id: tripId,
-      name: 'Путешествие в Париж',
-      startDate: DateTime(2025, 3, 15),
-      endDate: DateTime(2025, 3, 22),
-      status: TripStatus.upcoming,
-      imageUrl: 'assets/images/paris.jpg',
-      destination: 'Париж, Франция',
-    );
-    
-    // Create mock events
-    final events = [
-      // Day 1 - March 15
-      TripEvent(
-        id: const Uuid().v4(),
-        time: '09:00',
-        title: 'Эйфелева башня',
-        address: 'Champ de Mars, 5 Avenue',
-        day: DateTime(2025, 3, 15),
-      ),
-      TripEvent(
-        id: const Uuid().v4(),
-        time: '12:30',
-        title: 'Лувр',
-        address: 'Rue de Rivoli, 75001',
-        day: DateTime(2025, 3, 15),
-      ),
-      
-      // Day 2 - March 16
-      TripEvent(
-        id: const Uuid().v4(),
-        time: '10:00',
-        title: 'Собор Парижской Богоматери',
-        address: '6 Parvis Notre-Dame',
-        day: DateTime(2025, 3, 16),
-      ),
-      
-      // Day 3 - March 17
-      TripEvent(
-        id: const Uuid().v4(),
-        time: '11:00',
-        title: 'Триумфальная арка',
-        address: 'Place Charles de Gaulle',
-        day: DateTime(2025, 3, 17),
-      ),
-      
-      // Day 4 - March 18
-      TripEvent(
-        id: const Uuid().v4(),
-        time: '09:30',
-        title: 'Монмартр',
-        address: 'Montmartre, 75018',
-        day: DateTime(2025, 3, 18),
-      ),
-    ];
-    
-    return TripDetail(trip: trip, events: events);
+  /// Clear error message
+  void clearError() {
+    _errorMessage = null;
+    notifyListeners();
   }
 } 

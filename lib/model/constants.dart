@@ -5,21 +5,47 @@ class Constants {
   /// Private constructor to prevent instantiation
   Constants._();
   
-  /// Base API URL from environment variables
-  static String get apiUrl => dotenv.env['API_URL'] ?? 'http://localhost:3000';
+  /// Environment configuration
+  static bool get isProduction => dotenv.env['ENVIRONMENT'] == 'prod';
   
-  /// Login endpoint
-  static String get loginEndpoint => '$apiUrl/login';
+  /// Base API URLs
+  static String get authServiceUrl => isProduction 
+    ? 'https://www.putevod-app.ru/auth/api/v1'
+    : 'http://localhost:8081/api/v1';
+    
+  static String get plannerServiceUrl => isProduction 
+    ? 'https://www.putevod-app.ru/planner/api/v1'
+    : 'http://localhost:8082/api/v1';
+    
+  static String get externalServiceUrl => isProduction 
+    ? 'https://www.putevod-app.ru/external/api/v1'
+    : 'http://localhost:8083/api/v1';
+    
+  static String get libraryServiceUrl => isProduction 
+    ? 'https://www.putevod-app.ru/library/api/v1'
+    : 'http://localhost:8084/api/v1';
   
-  /// Register endpoint
-  static String get registerEndpoint => '$apiUrl/register';
+  /// Auth endpoints
+  static String get loginEndpoint => '$authServiceUrl/login';
+  static String get registerEndpoint => '$authServiceUrl/register';
+  static String get forgotPasswordEndpoint => '$authServiceUrl/forgot-password';
+  static String get verifyResetCodeEndpoint => '$authServiceUrl/verify-reset-code';
+  static String get resetPasswordEndpoint => '$authServiceUrl/reset-password';
+  static String get refreshTokenEndpoint => '$authServiceUrl/refresh';
+  static String get logoutEndpoint => '$authServiceUrl/logout';
+  static String get verifyEmailEndpoint => '$authServiceUrl/verify-email';
+  static String get resendVerificationEndpoint => '$authServiceUrl/resend-verification';
+  static String get validateTokenEndpoint => '$authServiceUrl/auth/validate';
+  static String get userInfoEndpoint => '$authServiceUrl/auth/userinfo';
   
-  /// Forgot password endpoint
-  static String get forgotPasswordEndpoint => '$apiUrl/forgot-password';
+  /// Trip endpoints
+  static String get tripsEndpoint => '$plannerServiceUrl/trips';
   
-  /// Verify reset code endpoint
-  static String get verifyResetCodeEndpoint => '$apiUrl/verify-reset-code';
+  /// External endpoints
+  static String get placesEndpoint => '$externalServiceUrl/places';
+  static String get aiEndpoint => '$externalServiceUrl/ai';
   
-  /// Reset password endpoint
-  static String get resetPasswordEndpoint => '$apiUrl/reset-password';
+  /// Library endpoints
+  static String get libraryEndpoint => '$libraryServiceUrl/library';
+  static String get reviewsEndpoint => '$libraryServiceUrl/reviews';
 }

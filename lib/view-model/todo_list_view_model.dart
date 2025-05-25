@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:uuid/uuid.dart';
+import 'package:putevod/external/sync_service.dart';
 
 /// Model for a Todo item
 class TodoItem {
@@ -35,9 +35,6 @@ class TodoListViewModel extends ChangeNotifier {
   
   /// Number of active lists
   int _activeListCount = 0;
-  
-  /// UUID generator for new todo lists
-  final _uuid = const Uuid();
 
   /// Gets the list of todo items
   List<TodoItem> get todoItems => _todoItems;
@@ -47,55 +44,67 @@ class TodoListViewModel extends ChangeNotifier {
 
   /// Loads the todo items
   Future<void> loadTodoItems() async {
-    // In a real app, this would fetch data from a repository or service
-    await Future.delayed(const Duration(milliseconds: 500));
-    
-    _todoItems.clear();
-    _todoItems.addAll([
-      TodoItem(
-        id: '1',
-        title: 'Чеклист по ТП. 1 этап',
-        createdAt: DateTime(2025, 4, 2),
-        completedTasks: 20,
-        totalTasks: 20,
-      ),
-      TodoItem(
-        id: '2',
-        title: 'Tokyo Adventure',
-        createdAt: DateTime(2025, 5, 15),
-        completedTasks: 5,
-        totalTasks: 15,
-      ),
-    ]);
-    
-    _activeListCount = _todoItems.length;
-    notifyListeners();
+    try {
+      final response = await SyncService.instance.getUserTodoLists();
+      final List<dynamic> todoLists = response['content'] ?? [];
+      
+      _todoItems.clear();
+      _todoItems.addAll(todoLists.map((data) => TodoItem(
+        id: data['id'].toString(),
+        title: data['title'] ?? 'Без названия',
+        createdAt: DateTime.parse(data['createdAt']),
+        completedTasks: data['completedCount'] ?? 0,
+        totalTasks: data['itemCount'] ?? 0,
+      )));
+      
+      _activeListCount = _todoItems.length;
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Ошибка загрузки todo-списков: $e');
+      _activeListCount = 0;
+      notifyListeners();
+    }
   }
 
   /// Creates a new todo list and returns its ID
   Future<String> createNewTodoList() async {
-    final newId = _uuid.v4();
-    
-    final newTodoItem = TodoItem(
-      id: newId,
-      title: 'Новый список',
-      createdAt: DateTime.now(),
-      completedTasks: 0,
-      totalTasks: 0,
-    );
-    
-    _todoItems.add(newTodoItem);
-    _activeListCount = _todoItems.length;
-    notifyListeners();
-    
-    return newId;
+    try {
+      final response = await SyncService.instance.createTodoList({
+        'title': 'Новый список',
+        'description': '',
+      });
+      
+      final newTodoItem = TodoItem(
+        id: response['id'].toString(),
+        title: response['title'] ?? 'Новый список',
+        createdAt: DateTime.parse(response['createdAt']),
+        completedTasks: 0,
+        totalTasks: 0,
+      );
+      
+      _todoItems.add(newTodoItem);
+      _activeListCount = _todoItems.length;
+      notifyListeners();
+      
+      return response['id'].toString();
+    } catch (e) {
+      debugPrint('Ошибка создания todo-списка: $e');
+      rethrow;
+    }
   }
   
   /// Deletes a todo list by ID
   Future<void> deleteTodoList(String id) async {
-    _todoItems.removeWhere((item) => item.id == id);
-    _activeListCount = _todoItems.length;
-    notifyListeners();
+    try {
+      await SyncService.instance.deleteTodoList(int.parse(id));
+      
+      _todoItems.removeWhere((item) => item.id == id);
+      _activeListCount = _todoItems.length;
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Ошибка удаления todo-списка: $e');
+      rethrow;
+    }
   }
   
   /// Updates a todo list with new information

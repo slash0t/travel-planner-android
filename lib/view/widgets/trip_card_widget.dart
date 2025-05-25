@@ -7,14 +7,14 @@ class TripCardWidget extends StatelessWidget {
   /// The trip item to display
   final TripItem trip;
   
-  /// Callback when the favorite button is pressed
-  final Function(String) onFavoriteToggle;
+  /// Callback when the copy trip button is pressed
+  final Function(String) onCopyTrip;
 
   /// Creates a trip card widget
   const TripCardWidget({
     super.key,
     required this.trip,
-    required this.onFavoriteToggle,
+    required this.onCopyTrip,
   });
 
   @override
@@ -69,15 +69,15 @@ class TripCardWidget extends StatelessWidget {
           top: 12,
           right: 12,
           child: InkWell(
-            onTap: () => onFavoriteToggle(trip.id),
+            onTap: () => onCopyTrip(trip.id),
             child: Container(
               padding: const EdgeInsets.all(6),
               decoration: const BoxDecoration(
                 color: Colors.white,
                 shape: BoxShape.circle,
               ),
-              child: Icon(
-                trip.isFavorite ? Icons.favorite : Icons.favorite_border,
+              child: const Icon(
+                Icons.download,
                 color: AppColors.accent,
                 size: 16,
               ),

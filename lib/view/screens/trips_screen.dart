@@ -9,11 +9,26 @@ import 'package:putevod/view/screens/trip_detail_screen.dart';
 import 'package:putevod/view/widgets/app_header.dart';
 import 'package:putevod/view/widgets/app_bottom_navigation.dart';
 import 'package:putevod/view/widgets/trip_card.dart';
+import 'package:putevod/view/widgets/sync_status_widget.dart';
 
 /// Trips screen implementation matching design
-class TripsScreen extends StatelessWidget {
+class TripsScreen extends StatefulWidget {
   /// Creates a trips screen
   const TripsScreen({super.key});
+
+  @override
+  State<TripsScreen> createState() => _TripsScreenState();
+}
+
+class _TripsScreenState extends State<TripsScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Загружаем поездки при инициализации экрана
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<TripsViewModel>(context, listen: false).loadTrips();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,8 +42,12 @@ class TripsScreen extends StatelessWidget {
           children: [
             Column(
               children: [
-                const AppHeader(
+                AppHeader(
                   showBackButton: false,
+                  actions: [
+                    const SyncStatusWidget(),
+                    const SizedBox(width: 16),
+                  ],
                 ),
                 Expanded(
                   child: Column(
@@ -114,6 +133,56 @@ class TripsScreen extends StatelessWidget {
   }
   
   Widget _buildTripsList(TripsViewModel viewModel, BuildContext context) {
+    // Показываем индикатор загрузки
+    if (viewModel.isLoading) {
+      return const Center(
+        child: CircularProgressIndicator(
+          color: AppColors.accent,
+        ),
+      );
+    }
+    
+    // Показываем ошибку если есть
+    if (viewModel.errorMessage != null) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              Icons.error_outline,
+              size: 48,
+              color: Colors.red,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Ошибка загрузки',
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              viewModel.errorMessage!,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 14,
+                color: Colors.black54,
+              ),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                viewModel.clearError();
+                viewModel.loadTrips(forceRefresh: true);
+              },
+              child: const Text('Повторить'),
+            ),
+          ],
+        ),
+      );
+    }
+    
     final trips = viewModel.filteredTrips;
     
     if (trips.isEmpty) {
@@ -150,25 +219,29 @@ class TripsScreen extends StatelessWidget {
       );
     }
     
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: trips.length,
-      itemBuilder: (context, index) {
-        final trip = trips[index];
-        return TripCard(
-          trip: trip,
-          viewModel: viewModel,
-          onTap: () {
-            // Navigate to trip details or edit screen
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => TripDetailScreen(tripId: trip.id),
-              ),
-            );
-          },
-        );
-      },
+    return RefreshIndicator(
+      color: AppColors.accent,
+      onRefresh: () => viewModel.loadTrips(forceRefresh: true),
+      child: ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: trips.length,
+        itemBuilder: (context, index) {
+          final trip = trips[index];
+          return TripCard(
+            trip: trip,
+            viewModel: viewModel,
+            onTap: () {
+              // Navigate to trip details or edit screen
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => TripDetailScreen(tripId: trip.id),
+                ),
+              );
+            },
+          );
+        },
+      ),
     );
   }
 } 

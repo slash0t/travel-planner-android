@@ -10,7 +10,7 @@ import 'package:putevod/view/widgets/trip_event_item.dart';
 /// Screen for viewing trip details and itinerary
 class TripDetailScreen extends StatefulWidget {
   /// The ID of the trip to display
-  final String tripId;
+  final int tripId;
   
   /// Creates a trip detail screen
   const TripDetailScreen({
@@ -233,8 +233,8 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
               child: const Icon(Icons.delete, color: Colors.white),
             ),
             direction: DismissDirection.endToStart,
-            onDismissed: (_) {
-              viewModel.deleteEvent(event.id);
+            onDismissed: (_) async {
+              await viewModel.deleteEvent(event.id);
             },
             child: GestureDetector(
               onTap: () {

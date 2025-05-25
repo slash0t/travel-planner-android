@@ -2,68 +2,16 @@ import 'package:flutter/foundation.dart';
 import 'package:putevod/model/trip.dart';
 import 'package:flutter/material.dart';
 import 'package:putevod/model/app_colors.dart';
+import 'package:putevod/external/sync_service.dart';
 
 /// ViewModel for the trips screen
 class TripsViewModel extends ChangeNotifier {
   TripStatus _currentFilter = TripStatus.upcoming;
+  bool _isLoading = false;
+  String? _errorMessage;
   
   /// List of all trips
-  final List<Trip> _trips = [
-    Trip(
-      id: '1',
-      name: 'Путешествие в Париж',
-      startDate: DateTime(2025, 3, 15),
-      endDate: DateTime(2025, 3, 22),
-      status: TripStatus.upcoming,
-      imageUrl: 'assets/images/paris.jpg',
-      destination: 'Париж, Франция',
-    ),
-    Trip(
-      id: '2',
-      name: 'Выходные в Барселоне',
-      startDate: DateTime(2024, 12, 10),
-      endDate: DateTime(2024, 12, 12),
-      status: TripStatus.upcoming,
-      imageUrl: 'assets/images/barcelona.jpg',
-      destination: 'Барселона, Испания',
-    ),
-    Trip(
-      id: '3',
-      name: 'Поездка в Рим',
-      startDate: DateTime(2023, 6, 10),
-      endDate: DateTime(2023, 6, 20),
-      status: TripStatus.upcoming,
-      imageUrl: 'assets/images/rome.jpg',
-      destination: 'Рим, Италия',
-    ),
-    Trip(
-      id: '4',
-      name: 'Тур по Японии',
-      startDate: DateTime(2023, 7, 5),
-      endDate: DateTime(2023, 7, 20),
-      status: TripStatus.upcoming,
-      imageUrl: 'assets/images/japan.jpg',
-      destination: 'Токио, Япония',
-    ),
-    Trip(
-      id: '5',
-      name: 'Поездка в Грецию',
-      startDate: DateTime(2022, 10, 5),
-      endDate: DateTime(2022, 10, 15),
-      status: TripStatus.upcoming,
-      imageUrl: 'assets/images/greece.jpg',
-      destination: 'Афины, Греция',
-    ),
-    Trip(
-      id: '6',
-      name: 'Отдых в Турции',
-      startDate: DateTime(2022, 8, 10),
-      endDate: DateTime(2022, 8, 20),
-      status: TripStatus.upcoming,
-      imageUrl: 'assets/images/turkey.jpg',
-      destination: 'Стамбул, Турция',
-    ),
-  ];
+  List<Trip> _trips = [];
 
   /// Get the current filter
   TripStatus get currentFilter => _currentFilter;
@@ -80,17 +28,52 @@ class TripsViewModel extends ChangeNotifier {
   /// Get filtered trips based on status
   List<Trip> get filteredTrips => 
       _trips.where((trip) => trip.status == _currentFilter).toList();
+      
+  /// Get loading state
+  bool get isLoading => _isLoading;
+  
+  /// Get error message
+  String? get errorMessage => _errorMessage;
+  
+  /// Load trips from API/cache
+  Future<void> loadTrips({bool forceRefresh = false}) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+    
+    try {
+      final tripsResponse = await SyncService.instance.getTrips(forceRefresh: forceRefresh);
+      // Преобразуем List<dynamic> в List<Trip>
+      _trips = tripsResponse.map((tripData) => Trip.fromJson(tripData)).toList();
+    } catch (e) {
+      _errorMessage = e.toString();
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
 
   /// Creates a new trip
-  void createTrip(Trip trip) {
-    _trips.add(trip);
-    notifyListeners();
+  Future<void> createTrip(Map<String, dynamic> tripData) async {
+    try {
+      await SyncService.instance.createTrip(tripData);
+      await loadTrips(forceRefresh: true);
+    } catch (e) {
+      _errorMessage = e.toString();
+      notifyListeners();
+    }
   }
 
   /// Deletes a trip by id
-  void deleteTrip(String id) {
-    _trips.removeWhere((trip) => trip.id == id);
-    notifyListeners();
+  Future<void> deleteTrip(int id) async {
+    try {
+      await SyncService.instance.deleteTrip(id);
+      _trips.removeWhere((trip) => trip.id == id);
+      notifyListeners();
+    } catch (e) {
+      _errorMessage = e.toString();
+      notifyListeners();
+    }
   }
 
   /// Returns a human-readable date range for a trip
@@ -131,19 +114,24 @@ class TripsViewModel extends ChangeNotifier {
   }
 
   /// Add a new trip to the list
-  void addTrip(Trip trip) {
-    _trips.add(trip);
-    notifyListeners();
-    // TODO: Add trip to database
+  Future<void> addTrip(Map<String, dynamic> tripData) async {
+    await createTrip(tripData);
   }
 
   /// Update an existing trip in the list
-  void updateTrip(Trip updatedTrip) {
-    final index = _trips.indexWhere((trip) => trip.id == updatedTrip.id);
-    if (index != -1) {
-      _trips[index] = updatedTrip;
+  Future<void> updateTrip(int tripId, Map<String, dynamic> tripData) async {
+    try {
+      await SyncService.instance.updateTrip(tripId, tripData);
+      await loadTrips(forceRefresh: true);
+    } catch (e) {
+      _errorMessage = e.toString();
       notifyListeners();
-      // TODO: Update trip in database
     }
+  }
+  
+  /// Clear error message
+  void clearError() {
+    _errorMessage = null;
+    notifyListeners();
   }
 } 

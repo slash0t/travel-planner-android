@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:json_annotation/json_annotation.dart';
+
+part 'place.g.dart';
 
 /// Enum for place types
 enum PlaceType {
@@ -13,9 +16,10 @@ enum PlaceType {
 }
 
 /// Model class for places in the journey
+@JsonSerializable()
 class Place {
   /// Unique identifier for the place
-  final String id;
+  final int id;
   
   /// Name of the place
   final String name;
@@ -27,9 +31,11 @@ class Place {
   final bool hasTime;
   
   /// Start time for the visit (null if hasTime is false)
+  @JsonKey(fromJson: _timeFromJson, toJson: _timeToJson)
   final TimeOfDay? startTime;
   
   /// End time for the visit (null if hasTime is false)
+  @JsonKey(fromJson: _timeFromJson, toJson: _timeToJson)
   final TimeOfDay? endTime;
   
   /// Latitude coordinate
@@ -60,7 +66,7 @@ class Place {
   
   /// Creates a copy of this place with the given fields replaced
   Place copyWith({
-    String? id,
+    int? id,
     String? name,
     PlaceType? type,
     bool? hasTime,
@@ -88,10 +94,28 @@ class Place {
   /// Factory method to create a new empty place
   factory Place.empty() {
     return Place(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      id: DateTime.now().millisecondsSinceEpoch,
       name: '',
       type: PlaceType.place,
       hasTime: false,
     );
   }
+  
+  /// Create a Place from JSON
+  factory Place.fromJson(Map<String, dynamic> json) => _$PlaceFromJson(json);
+  
+  /// Convert Place to JSON
+  Map<String, dynamic> toJson() => _$PlaceToJson(this);
+}
+
+// Helper functions for TimeOfDay serialization
+TimeOfDay? _timeFromJson(String? timeString) {
+  if (timeString == null) return null;
+  final parts = timeString.split(':');
+  return TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
+}
+
+String? _timeToJson(TimeOfDay? time) {
+  if (time == null) return null;
+  return '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
 } 

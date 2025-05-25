@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:putevod/model/todo_item_detail.dart';
 import 'package:putevod/view-model/todo_list_view_model.dart';
+import 'package:putevod/external/sync_service.dart';
 import 'package:uuid/uuid.dart';
 
 /// ViewModel for the Todo Item Detail screen
 class TodoItemDetailViewModel extends ChangeNotifier {
+  static const Uuid _uuid = Uuid();
+  
   /// The current todo item detail
   TodoItemDetail? _todoItemDetail;
   
@@ -13,9 +16,6 @@ class TodoItemDetailViewModel extends ChangeNotifier {
   
   /// Flag to indicate if the completed tasks section is expanded
   bool _isCompletedExpanded = false;
-  
-  /// UUID generator for new tasks
-  final _uuid = const Uuid();
   
   /// Reference to the TodoListViewModel for updates
   TodoListViewModel? _todoListViewModel;
@@ -54,21 +54,27 @@ class TodoItemDetailViewModel extends ChangeNotifier {
     notifyListeners();
     
     try {
-      // In a real app, this would fetch data from a repository or service
-      await Future.delayed(const Duration(milliseconds: 500));
+      final response = await SyncService.instance.getTodoListById(int.parse(id));
+      
+      final tasks = (response['items'] as List<dynamic>? ?? []).map((itemData) => Task(
+        id: itemData['id'].toString(),
+        title: itemData['text'] ?? '',
+        isCompleted: itemData['completed'] ?? false,
+      )).toList();
       
       _todoItemDetail = TodoItemDetail(
         id: id,
-        title: 'Подготовка к поездке',
+        title: response['title'] ?? 'Список задач',
+        createdAt: DateTime.parse(response['createdAt']),
+        tasks: tasks,
+      );
+    } catch (e) {
+      debugPrint('Ошибка загрузки todo-списка: $e');
+      _todoItemDetail = TodoItemDetail(
+        id: id,
+        title: 'Список задач',
         createdAt: DateTime.now(),
-        tasks: [
-          Task(id: '1', title: 'Составить маршрут', isCompleted: true),
-          Task(id: '2', title: 'Забронировать отель', isCompleted: false),
-          Task(id: '3', title: 'Купить билеты на самолет', isCompleted: false),
-          Task(id: '4', title: 'Подготовить документы', isCompleted: true),
-          Task(id: '5', title: 'Обменять валюту', isCompleted: true),
-          Task(id: '6', title: 'Упаковать багаж', isCompleted: true),
-        ],
+        tasks: [],
       );
     } finally {
       _isLoading = false;
@@ -78,35 +84,56 @@ class TodoItemDetailViewModel extends ChangeNotifier {
   }
 
   /// Adds a new task to the todo list
-  void addTask(String title) {
+  Future<void> addTask(String title) async {
     if (_todoItemDetail == null || title.trim().isEmpty) return;
     
-    final tasks = List<Task>.from(_todoItemDetail!.tasks);
-    tasks.add(Task(
-      id: _uuid.v4(),
-      title: title.trim(),
-    ));
-    
-    _todoItemDetail = _todoItemDetail!.copyWith(tasks: tasks);
-    _updateTodoListViewModel();
-    notifyListeners();
-  }
-
-  /// Toggles a task's completion status
-  void toggleTaskCompletion(String taskId) {
-    if (_todoItemDetail == null) return;
-    
-    final tasks = List<Task>.from(_todoItemDetail!.tasks);
-    final taskIndex = tasks.indexWhere((task) => task.id == taskId);
-    
-    if (taskIndex != -1) {
-      tasks[taskIndex] = tasks[taskIndex].copyWith(
-        isCompleted: !tasks[taskIndex].isCompleted,
+    try {
+      final response = await SyncService.instance.addTodoItem(
+        int.parse(_todoItemDetail!.id),
+        {'text': title.trim(), 'completed': false},
       );
+      
+      final newTask = Task(
+        id: response['id'].toString(),
+        title: response['text'] ?? title.trim(),
+        isCompleted: response['completed'] ?? false,
+      );
+      
+      final tasks = List<Task>.from(_todoItemDetail!.tasks);
+      tasks.add(newTask);
       
       _todoItemDetail = _todoItemDetail!.copyWith(tasks: tasks);
       _updateTodoListViewModel();
       notifyListeners();
+    } catch (e) {
+      debugPrint('Ошибка добавления задачи: $e');
+    }
+  }
+
+  /// Toggles a task's completion status
+  Future<void> toggleTaskCompletion(String taskId) async {
+    if (_todoItemDetail == null) return;
+    
+    try {
+      final response = await SyncService.instance.toggleTodoItem(
+        int.parse(_todoItemDetail!.id),
+        int.parse(taskId),
+      );
+      
+      final tasks = List<Task>.from(_todoItemDetail!.tasks);
+      final taskIndex = tasks.indexWhere((task) => task.id == taskId);
+      
+      if (taskIndex != -1) {
+        tasks[taskIndex] = tasks[taskIndex].copyWith(
+          isCompleted: response['completed'] ?? !tasks[taskIndex].isCompleted,
+        );
+        
+        _todoItemDetail = _todoItemDetail!.copyWith(tasks: tasks);
+        _updateTodoListViewModel();
+        notifyListeners();
+      }
+    } catch (e) {
+      debugPrint('Ошибка переключения статуса задачи: $e');
     }
   }
 
@@ -147,13 +174,22 @@ class TodoItemDetailViewModel extends ChangeNotifier {
   }
 
   /// Deletes a task from the todo list
-  void deleteTask(String taskId) {
+  Future<void> deleteTask(String taskId) async {
     if (_todoItemDetail == null) return;
     
-    final tasks = _todoItemDetail!.tasks.where((task) => task.id != taskId).toList();
-    _todoItemDetail = _todoItemDetail!.copyWith(tasks: tasks);
-    _updateTodoListViewModel();
-    notifyListeners();
+    try {
+      await SyncService.instance.deleteTodoItem(
+        int.parse(_todoItemDetail!.id),
+        int.parse(taskId),
+      );
+      
+      final tasks = _todoItemDetail!.tasks.where((task) => task.id != taskId).toList();
+      _todoItemDetail = _todoItemDetail!.copyWith(tasks: tasks);
+      _updateTodoListViewModel();
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Ошибка удаления задачи: $e');
+    }
   }
 
   /// Creates a copy of the current todo list and returns its ID

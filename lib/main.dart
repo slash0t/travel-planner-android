@@ -17,10 +17,26 @@ import 'package:putevod/view/widgets/app_header_view_model.dart';
 import 'package:putevod/view-model/login_view_model.dart';
 import 'package:putevod/view-model/registration_view_model.dart';
 import 'package:putevod/view-model/password_recovery_view_model.dart';
+import 'package:putevod/external/offline_storage.dart';
+import 'package:putevod/external/sync_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load(fileName: '.env');
+  
+  // Загружаем переменные окружения
+  try {
+    await dotenv.load(fileName: '.env');
+  } catch (e) {
+    // Если .env файл не найден, используем значения по умолчанию
+    print('Warning: .env file not found, using default values');
+  }
+  
+  // Инициализируем оффлайн хранилище
+  await OfflineStorage.init();
+  
+  // Инициализируем сервис синхронизации
+  SyncService.instance.init();
+  
   runApp(const MyApp());
 }
 

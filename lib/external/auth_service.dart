@@ -1,11 +1,14 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
 import 'package:putevod/model/auth_model.dart';
 import 'package:putevod/model/constants.dart';
 import 'package:putevod/external/device_info.dart';
+import 'package:putevod/external/api_client.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
+  final ApiClient _authClient = ApiClients.auth;
+  
   Future<AuthResponse> login(String email, String password) async {
     try {
       final deviceId = await DeviceInfoUtil.getDeviceId();
@@ -15,22 +18,22 @@ class AuthService {
         deviceId: deviceId,
       );
       
-      final response = await http.post(
-        Uri.parse(Constants.loginEndpoint),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(authModel.toLoginJson()),
+      final response = await _authClient.post(
+        '/login',
+        data: authModel.toLoginJson(),
       );
       
       if (response.statusCode == 200) {
-        final jsonResponse = jsonDecode(response.body);
-        final authResponse = AuthResponse.fromJson(jsonResponse);
+        final authResponse = AuthResponse.fromJson(response.data);
         await _saveTokens(authResponse.accessToken!, authResponse.refreshToken!);
         return authResponse;
       } else {
         return AuthResponse.error(
-          'Login failed: ${response.statusCode} ${response.reasonPhrase}',
+          'Login failed: ${response.statusCode} ${response.statusMessage}',
         );
       }
+    } on DioException catch (e) {
+      return AuthResponse.error(_handleDioError(e));
     } catch (e) {
       return AuthResponse.error('Login failed: $e');
     }
@@ -43,19 +46,24 @@ class AuthService {
         password: password,
       );
       
-      final response = await http.post(
-        Uri.parse(Constants.registerEndpoint),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(authModel.toRegisterJson()),
+      final response = await _authClient.post(
+        '/register',
+        data: authModel.toRegisterJson(),
       );
       
       if (response.statusCode == 201) {
-        return await login(email, password);
+        // Вместо автоматического логина возвращаем успешную регистрацию
+        return AuthResponse(
+          success: true, 
+          message: 'Регистрация успешна. Проверьте email для подтверждения.',
+        );
       } else {
         return AuthResponse.error(
-          'Registration failed: ${response.statusCode} ${response.reasonPhrase}',
+          'Registration failed: ${response.statusCode} ${response.statusMessage}',
         );
       }
+    } on DioException catch (e) {
+      return AuthResponse.error(_handleDioError(e));
     } catch (e) {
       return AuthResponse.error('Registration failed: $e');
     }
@@ -68,19 +76,20 @@ class AuthService {
         password: '',
       );
       
-      final response = await http.post(
-        Uri.parse(Constants.forgotPasswordEndpoint),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(authModel.toForgotPasswordJson()),
+      final response = await _authClient.post(
+        '/forgot-password',
+        data: authModel.toForgotPasswordJson(),
       );
       
       if (response.statusCode == 200) {
         return AuthResponse(success: true, message: 'Reset code sent to your email');
       } else {
         return AuthResponse.error(
-          'Password recovery request failed: ${response.statusCode} ${response.reasonPhrase}',
+          'Password recovery request failed: ${response.statusCode} ${response.statusMessage}',
         );
       }
+    } on DioException catch (e) {
+      return AuthResponse.error(_handleDioError(e));
     } catch (e) {
       return AuthResponse.error('Password recovery request failed: $e');
     }
@@ -93,20 +102,20 @@ class AuthService {
         password: '',
       );
       
-      final response = await http.post(
-        Uri.parse(Constants.verifyResetCodeEndpoint),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(authModel.toVerifyResetCodeJson(code)),
+      final response = await _authClient.post(
+        '/verify-reset-code',
+        data: authModel.toVerifyResetCodeJson(code),
       );
       
       if (response.statusCode == 200) {
-        final jsonResponse = jsonDecode(response.body);
-        return AuthResponse.fromJson(jsonResponse);
+        return AuthResponse.fromJson(response.data);
       } else {
         return AuthResponse.error(
-          'Code verification failed: ${response.statusCode} ${response.reasonPhrase}',
+          'Code verification failed: ${response.statusCode} ${response.statusMessage}',
         );
       }
+    } on DioException catch (e) {
+      return AuthResponse.error(_handleDioError(e));
     } catch (e) {
       return AuthResponse.error('Code verification failed: $e');
     }
@@ -119,19 +128,20 @@ class AuthService {
         password: newPassword,
       );
       
-      final response = await http.post(
-        Uri.parse(Constants.resetPasswordEndpoint),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(authModel.toResetPasswordJson(resetToken))
+      final response = await _authClient.post(
+        '/reset-password',
+        data: authModel.toResetPasswordJson(resetToken),
       );
       
       if (response.statusCode == 200) {
         return AuthResponse(success: true, message: 'Password has been reset successfully');
       } else {
         return AuthResponse.error(
-          'Password reset failed: ${response.statusCode} ${response.reasonPhrase}',
+          'Password reset failed: ${response.statusCode} ${response.statusMessage}',
         );
       }
+    } on DioException catch (e) {
+      return AuthResponse.error(_handleDioError(e));
     } catch (e) {
       return AuthResponse.error('Password reset failed: $e');
     }
@@ -152,5 +162,26 @@ class AuthService {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('accessToken');
     await prefs.remove('refreshToken');
+  }
+  
+  String _handleDioError(DioException e) {
+    switch (e.type) {
+      case DioExceptionType.connectionTimeout:
+        return 'Превышено время ожидания соединения';
+      case DioExceptionType.sendTimeout:
+        return 'Превышено время ожидания отправки';
+      case DioExceptionType.receiveTimeout:
+        return 'Превышено время ожидания ответа';
+      case DioExceptionType.badResponse:
+        final statusCode = e.response?.statusCode;
+        final message = e.response?.data?['message'] ?? 'Ошибка сервера';
+        return 'Ошибка $statusCode: $message';
+      case DioExceptionType.cancel:
+        return 'Запрос был отменен';
+      case DioExceptionType.connectionError:
+        return 'Ошибка соединения. Проверьте интернет-подключение';
+      default:
+        return 'Неизвестная ошибка: ${e.message}';
+    }
   }
 } 

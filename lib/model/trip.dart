@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:json_annotation/json_annotation.dart';
+
+part 'trip.g.dart';
 
 /// Model representing a trip
+@JsonSerializable()
 class Trip {
   /// Unique identifier for the trip
-  final String id;
+  final int id;
   
-  /// Name of the trip
+  /// Name/title of the trip
+  @JsonKey(name: 'title')
   final String name;
   
   /// Trip start date
@@ -15,12 +20,14 @@ class Trip {
   final DateTime endDate;
   
   /// Trip status (upcoming, ongoing, completed)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   final TripStatus status;
   
   /// URL of the trip image
-  final String imageUrl;
+  final String? imageUrl;
   
   /// Destination of the trip
+  @JsonKey(includeFromJson: false, includeToJson: false)
   final String destination;
 
   /// Country of the trip
@@ -31,6 +38,12 @@ class Trip {
   
   /// Description of the trip
   final String description;
+  
+  /// Version for conflict resolution
+  final int? version;
+  
+  /// Whether the trip is published
+  final bool? published;
 
   /// Creates a new trip instance
   const Trip({
@@ -38,17 +51,19 @@ class Trip {
     required this.name,
     required this.startDate,
     required this.endDate,
-    required this.status,
-    required this.imageUrl,
-    required this.destination,
+    this.status = TripStatus.upcoming,
+    this.imageUrl,
+    this.destination = '',
     this.country = '',
     this.city = '',
     this.description = '',
+    this.version,
+    this.published,
   });
 
   /// Creates a copy of this trip with the given fields replaced
   Trip copyWith({
-    String? id,
+    int? id,
     String? name,
     DateTime? startDate,
     DateTime? endDate,
@@ -58,6 +73,8 @@ class Trip {
     String? country,
     String? city,
     String? description,
+    int? version,
+    bool? published,
   }) {
     return Trip(
       id: id ?? this.id,
@@ -70,8 +87,33 @@ class Trip {
       country: country ?? this.country,
       city: city ?? this.city,
       description: description ?? this.description,
+      version: version ?? this.version,
+      published: published ?? this.published,
     );
   }
+  
+  /// Create a Trip from JSON
+  factory Trip.fromJson(Map<String, dynamic> json) {
+    final trip = _$TripFromJson(json);
+    // Определяем статус на основе дат
+    final now = DateTime.now();
+    TripStatus status;
+    if (trip.startDate.isAfter(now)) {
+      status = TripStatus.upcoming;
+    } else if (trip.endDate.isBefore(now)) {
+      status = TripStatus.completed;
+    } else {
+      status = TripStatus.ongoing;
+    }
+    
+    return trip.copyWith(
+      status: status,
+      destination: '${trip.city}, ${trip.country}',
+    );
+  }
+  
+  /// Convert Trip to JSON
+  Map<String, dynamic> toJson() => _$TripToJson(this);
 }
 
 /// Enum representing the status of a trip
