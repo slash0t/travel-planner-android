@@ -3,10 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:putevod/model/trip.dart';
 import 'package:putevod/model/trip_detail.dart';
 import 'package:putevod/model/trip_event.dart';
-import 'package:putevod/external/sync_service.dart';
+import 'package:putevod/external/trip_service.dart';
 
 /// ViewModel for the trip detail screen
 class TripDetailViewModel with ChangeNotifier {
+  final TripService _tripService = TripService();
+  
   /// Current trip detail
   TripDetail? _tripDetail;
   
@@ -47,13 +49,13 @@ class TripDetailViewModel with ChangeNotifier {
     notifyListeners();
     
     try {
-      final tripResponse = await SyncService.instance.getTripDetails(tripId);
+      final tripResponse = await _tripService.getTrip(tripId);
       
       if (tripResponse != null) {
         final trip = Trip.fromJson(tripResponse);
         
         // Получить все события поездки
-        final eventsResponse = await SyncService.instance.getTripEvents(tripId);
+        final eventsResponse = await _tripService.getTripEvents(tripId);
         final events = eventsResponse.map((eventData) => TripEvent(
           id: eventData['eventId'].toString(),
           time: eventData['startTime'] ?? '00:00',
@@ -129,7 +131,7 @@ class TripDetailViewModel with ChangeNotifier {
       // TODO: Получить правильный dayId из API
       final dayId = 1; // Placeholder
       
-      await SyncService.instance.deleteEvent(tripId, dayId, int.parse(eventId));
+      await _tripService.deleteEvent(tripId, dayId, int.parse(eventId));
       
       // Обновить локальный список
       final List<TripEvent> updatedEvents = _tripDetail!.events
@@ -153,7 +155,7 @@ class TripDetailViewModel with ChangeNotifier {
       // TODO: Получить правильный dayId
       final dayId = 1; // Placeholder
       
-      final newEventResponse = await SyncService.instance.createEvent(tripId, dayId, eventData);
+      final newEventResponse = await _tripService.createEvent(tripId, dayId, eventData);
       final newEvent = TripEvent(
         id: newEventResponse['eventId'].toString(),
         time: newEventResponse['startTime'] ?? '00:00',
@@ -180,7 +182,7 @@ class TripDetailViewModel with ChangeNotifier {
       // TODO: Получить правильный dayId
       final dayId = 1; // Placeholder
       
-      final updatedEventResponse = await SyncService.instance.updateEvent(tripId, dayId, int.parse(eventId), eventData);
+      final updatedEventResponse = await _tripService.updateEvent(tripId, dayId, int.parse(eventId), eventData);
       final updatedEvent = TripEvent(
         id: updatedEventResponse['eventId'].toString(),
         time: updatedEventResponse['startTime'] ?? '00:00',

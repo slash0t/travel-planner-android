@@ -2,10 +2,12 @@ import 'package:flutter/foundation.dart';
 import 'package:putevod/model/trip.dart';
 import 'package:flutter/material.dart';
 import 'package:putevod/model/app_colors.dart';
-import 'package:putevod/external/sync_service.dart';
+import 'package:putevod/external/trip_service.dart';
 
 /// ViewModel for the trips screen
 class TripsViewModel extends ChangeNotifier {
+  final TripService _tripService = TripService();
+  
   TripStatus _currentFilter = TripStatus.upcoming;
   bool _isLoading = false;
   String? _errorMessage;
@@ -35,16 +37,47 @@ class TripsViewModel extends ChangeNotifier {
   /// Get error message
   String? get errorMessage => _errorMessage;
   
-  /// Load trips from API/cache
+  /// Load trips from API
   Future<void> loadTrips({bool forceRefresh = false}) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
     
     try {
-      final tripsResponse = await SyncService.instance.getTrips(forceRefresh: forceRefresh);
-      // Преобразуем List<dynamic> в List<Trip>
-      _trips = tripsResponse.map((tripData) => Trip.fromJson(tripData)).toList();
+      List<dynamic> tripsData;
+      
+      // Загружаем разные типы поездок в зависимости от фильтра
+      switch (_currentFilter) {
+        case TripStatus.upcoming:
+          tripsData = await _tripService.getUpcomingTrips();
+          break;
+        case TripStatus.ongoing:
+          tripsData = await _tripService.getOngoingTrips();
+          break;
+        case TripStatus.completed:
+          tripsData = await _tripService.getPastTrips();
+          break;
+      }
+      
+      _trips = tripsData.map((tripData) => Trip.fromJson(tripData)).toList();
+    } catch (e) {
+      _errorMessage = e.toString();
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  /// Load all trips regardless of status
+  Future<void> loadAllTrips({String filter = 'all', int page = 0, int size = 20}) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+    
+    try {
+      final response = await _tripService.getUserTrips(filter: filter, page: page, size: size);
+      final List<dynamic> tripsData = response['content'] ?? [];
+      _trips = tripsData.map((tripData) => Trip.fromJson(tripData)).toList();
     } catch (e) {
       _errorMessage = e.toString();
     } finally {
@@ -56,8 +89,8 @@ class TripsViewModel extends ChangeNotifier {
   /// Creates a new trip
   Future<void> createTrip(Map<String, dynamic> tripData) async {
     try {
-      await SyncService.instance.createTrip(tripData);
-      await loadTrips(forceRefresh: true);
+      await _tripService.createTrip(tripData);
+      await loadTrips();
     } catch (e) {
       _errorMessage = e.toString();
       notifyListeners();
@@ -67,9 +100,43 @@ class TripsViewModel extends ChangeNotifier {
   /// Deletes a trip by id
   Future<void> deleteTrip(int id) async {
     try {
-      await SyncService.instance.deleteTrip(id);
+      await _tripService.deleteTrip(id);
       _trips.removeWhere((trip) => trip.id == id);
       notifyListeners();
+    } catch (e) {
+      _errorMessage = e.toString();
+      notifyListeners();
+    }
+  }
+
+  /// Update an existing trip in the list
+  Future<void> updateTrip(int tripId, Map<String, dynamic> tripData) async {
+    try {
+      await _tripService.updateTrip(tripId, tripData);
+      await loadTrips();
+    } catch (e) {
+      _errorMessage = e.toString();
+      notifyListeners();
+    }
+  }
+
+  /// Share a trip
+  Future<void> shareTrip(int tripId, Map<String, dynamic> accessData) async {
+    try {
+      await _tripService.shareTrip(tripId, accessData);
+      // Уведомляем об успешном шеринге
+      notifyListeners();
+    } catch (e) {
+      _errorMessage = e.toString();
+      notifyListeners();
+    }
+  }
+
+  /// Publish a trip
+  Future<void> publishTrip(int tripId, bool publish) async {
+    try {
+      await _tripService.publishTrip(tripId, publish);
+      await loadTrips(); // Перезагружаем список
     } catch (e) {
       _errorMessage = e.toString();
       notifyListeners();
@@ -116,17 +183,6 @@ class TripsViewModel extends ChangeNotifier {
   /// Add a new trip to the list
   Future<void> addTrip(Map<String, dynamic> tripData) async {
     await createTrip(tripData);
-  }
-
-  /// Update an existing trip in the list
-  Future<void> updateTrip(int tripId, Map<String, dynamic> tripData) async {
-    try {
-      await SyncService.instance.updateTrip(tripId, tripData);
-      await loadTrips(forceRefresh: true);
-    } catch (e) {
-      _errorMessage = e.toString();
-      notifyListeners();
-    }
   }
   
   /// Clear error message

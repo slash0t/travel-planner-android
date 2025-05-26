@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:putevod/model/trip.dart';
-import 'package:putevod/external/sync_service.dart';
+import 'package:putevod/external/trip_service.dart';
 
 /// View model for trip creation and editing
 class TripCreationViewModel extends ChangeNotifier {
+  final TripService _tripService = TripService();
+  
   /// Text controller for trip name input
   final TextEditingController nameController = TextEditingController();
   
@@ -125,7 +127,7 @@ class TripCreationViewModel extends ChangeNotifier {
     
     if (isEditingMode && _tripToEdit != null) {
       // Update existing trip
-      await SyncService.instance.updateTrip(_tripToEdit!.id, tripData);
+      await _tripService.updateTrip(_tripToEdit!.id, tripData);
       return _tripToEdit!.copyWith(
         name: nameController.text,
         startDate: _startDate!,
@@ -136,11 +138,11 @@ class TripCreationViewModel extends ChangeNotifier {
       );
     } else {
       // Create new trip
-      await SyncService.instance.createTrip(tripData);
+      final response = await _tripService.createTrip(tripData);
       
-      // Return a temp trip object (actual trip will be loaded from server)
+      // Return a trip object with the real ID from server
       return Trip(
-        id: 0, // Will be replaced with real ID from server
+        id: response['tripId'] ?? 0,
         name: nameController.text,
         startDate: _startDate!,
         endDate: _endDate!,

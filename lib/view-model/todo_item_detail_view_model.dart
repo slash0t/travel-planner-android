@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:putevod/model/todo_item_detail.dart';
 import 'package:putevod/view-model/todo_list_view_model.dart';
-import 'package:putevod/external/sync_service.dart';
+import 'package:putevod/external/trip_service.dart';
 import 'package:uuid/uuid.dart';
 
 /// ViewModel for the Todo Item Detail screen
 class TodoItemDetailViewModel extends ChangeNotifier {
+  final TripService _tripService = TripService();
   static const Uuid _uuid = Uuid();
   
   /// The current todo item detail
@@ -54,7 +55,7 @@ class TodoItemDetailViewModel extends ChangeNotifier {
     notifyListeners();
     
     try {
-      final response = await SyncService.instance.getTodoListById(int.parse(id));
+      final response = await _tripService.getTodoList(int.parse(id));
       
       final tasks = (response['items'] as List<dynamic>? ?? []).map((itemData) => Task(
         id: itemData['id'].toString(),
@@ -88,9 +89,9 @@ class TodoItemDetailViewModel extends ChangeNotifier {
     if (_todoItemDetail == null || title.trim().isEmpty) return;
     
     try {
-      final response = await SyncService.instance.addTodoItem(
+      final response = await _tripService.addTodoItem(
         int.parse(_todoItemDetail!.id),
-        {'text': title.trim(), 'completed': false},
+        title.trim(),
       );
       
       final newTask = Task(
@@ -115,7 +116,7 @@ class TodoItemDetailViewModel extends ChangeNotifier {
     if (_todoItemDetail == null) return;
     
     try {
-      final response = await SyncService.instance.toggleTodoItem(
+      final response = await _tripService.toggleTodoItemComplete(
         int.parse(_todoItemDetail!.id),
         int.parse(taskId),
       );
@@ -178,7 +179,7 @@ class TodoItemDetailViewModel extends ChangeNotifier {
     if (_todoItemDetail == null) return;
     
     try {
-      await SyncService.instance.deleteTodoItem(
+      await _tripService.deleteTodoItem(
         int.parse(_todoItemDetail!.id),
         int.parse(taskId),
       );

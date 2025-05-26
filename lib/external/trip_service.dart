@@ -7,25 +7,70 @@ class TripService {
   // === TRIPS API ===
 
   /// Получить все поездки пользователя
-  Future<List<dynamic>> getUserTrips({
-    String status = 'all',
-    int limit = 20,
-    int offset = 0,
+  Future<Map<String, dynamic>> getUserTrips({
+    String filter = 'all',
+    int page = 0,
+    int size = 20,
   }) async {
     try {
       final response = await _plannerClient.get(
         '/trips',
         queryParameters: {
-          'status': status,
-          'limit': limit,
-          'offset': offset,
+          'filter': filter,
+          'page': page,
+          'size': size,
         },
       );
 
       if (response.statusCode == 200) {
-        return response.data['trips'] ?? [];
+        return response.data;
       } else {
         throw Exception('Failed to get user trips: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      throw Exception(_handleDioError(e));
+    }
+  }
+
+  /// Получить предстоящие поездки
+  Future<List<dynamic>> getUpcomingTrips() async {
+    try {
+      final response = await _plannerClient.get('/trips/upcoming');
+
+      if (response.statusCode == 200) {
+        return response.data;
+      } else {
+        throw Exception('Failed to get upcoming trips: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      throw Exception(_handleDioError(e));
+    }
+  }
+
+  /// Получить текущие поездки
+  Future<List<dynamic>> getOngoingTrips() async {
+    try {
+      final response = await _plannerClient.get('/trips/ongoing');
+
+      if (response.statusCode == 200) {
+        return response.data;
+      } else {
+        throw Exception('Failed to get ongoing trips: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      throw Exception(_handleDioError(e));
+    }
+  }
+
+  /// Получить прошедшие поездки
+  Future<List<dynamic>> getPastTrips() async {
+    try {
+      final response = await _plannerClient.get('/trips/past');
+
+      if (response.statusCode == 200) {
+        return response.data;
+      } else {
+        throw Exception('Failed to get past trips: ${response.statusCode}');
       }
     } on DioException catch (e) {
       throw Exception(_handleDioError(e));
@@ -90,6 +135,287 @@ class TripService {
     }
   }
 
+  /// Поделиться поездкой
+  Future<Map<String, dynamic>> shareTrip(int tripId, Map<String, dynamic> accessData) async {
+    try {
+      final response = await _plannerClient.post('/trips/$tripId/share', data: accessData);
+
+      if (response.statusCode == 201) {
+        return response.data;
+      } else {
+        throw Exception('Failed to share trip: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      throw Exception(_handleDioError(e));
+    }
+  }
+
+  /// Получить список пользователей с доступом к поездке
+  Future<List<dynamic>> getTripShares(int tripId) async {
+    try {
+      final response = await _plannerClient.get('/trips/$tripId/shares');
+
+      if (response.statusCode == 200) {
+        return response.data;
+      } else {
+        throw Exception('Failed to get trip shares: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      throw Exception(_handleDioError(e));
+    }
+  }
+
+  /// Удалить доступ к поездке для пользователя
+  Future<void> removeShare(int tripId, int shareUserId) async {
+    try {
+      final response = await _plannerClient.delete('/trips/$tripId/shares/$shareUserId');
+
+      if (response.statusCode != 204) {
+        throw Exception('Failed to remove share: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      throw Exception(_handleDioError(e));
+    }
+  }
+
+  /// Ответить на приглашение в поездку
+  Future<Map<String, dynamic>> respondToInvitation(int tripId, String status) async {
+    try {
+      final response = await _plannerClient.put(
+        '/trips/$tripId/invitation',
+        queryParameters: {'status': status},
+      );
+
+      if (response.statusCode == 200) {
+        return response.data;
+      } else {
+        throw Exception('Failed to respond to invitation: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      throw Exception(_handleDioError(e));
+    }
+  }
+
+  /// Проверить, может ли пользователь публиковать маршрут
+  Future<bool> canPublishTrip(int tripId, int userId) async {
+    try {
+      final response = await _plannerClient.get(
+        '/trips/$tripId/can-publish',
+        queryParameters: {'userId': userId},
+      );
+
+      if (response.statusCode == 200) {
+        return response.data == true;
+      } else {
+        throw Exception('Failed to check publish permission: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      throw Exception(_handleDioError(e));
+    }
+  }
+
+  /// Опубликовать или снять с публикации маршрут
+  Future<Map<String, dynamic>> publishTrip(int tripId, bool publish) async {
+    try {
+      final response = await _plannerClient.post(
+        '/trips/$tripId/publish',
+        queryParameters: {'publish': publish},
+      );
+
+      if (response.statusCode == 200) {
+        return response.data;
+      } else {
+        throw Exception('Failed to publish trip: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      throw Exception(_handleDioError(e));
+    }
+  }
+
+  // === TODO LISTS API ===
+
+  /// Создать новый список задач
+  Future<dynamic> createTodoList(Map<String, dynamic> todoListData) async {
+    try {
+      final response = await _plannerClient.post('/todo-lists', data: todoListData);
+
+      if (response.statusCode == 201) {
+        return response.data;
+      } else {
+        throw Exception('Failed to create todo list: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      throw Exception(_handleDioError(e));
+    }
+  }
+
+  /// Создать новый список задач для поездки
+  Future<dynamic> createTripTodoList(int tripId, Map<String, dynamic> todoListData) async {
+    try {
+      final response = await _plannerClient.post('/trips/$tripId/todo-lists', data: todoListData);
+
+      if (response.statusCode == 201) {
+        return response.data;
+      } else {
+        throw Exception('Failed to create trip todo list: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      throw Exception(_handleDioError(e));
+    }
+  }
+
+  /// Получить все списки задач пользователя
+  Future<Map<String, dynamic>> getUserTodoLists({int page = 0, int size = 20}) async {
+    try {
+      final response = await _plannerClient.get(
+        '/todo-lists',
+        queryParameters: {'page': page, 'size': size},
+      );
+
+      if (response.statusCode == 200) {
+        return response.data;
+      } else {
+        throw Exception('Failed to get user todo lists: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      throw Exception(_handleDioError(e));
+    }
+  }
+
+  /// Получить все списки задач для поездки
+  Future<List<dynamic>> getTripTodoLists(int tripId) async {
+    try {
+      final response = await _plannerClient.get('/trips/$tripId/todo-lists');
+
+      if (response.statusCode == 200) {
+        return response.data;
+      } else {
+        throw Exception('Failed to get trip todo lists: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      throw Exception(_handleDioError(e));
+    }
+  }
+
+  /// Получить список задач по ID
+  Future<dynamic> getTodoListById(int listId) async {
+    try {
+      final response = await _plannerClient.get('/todo-lists/$listId');
+
+      if (response.statusCode == 200) {
+        return response.data;
+      } else {
+        throw Exception('Failed to get todo list: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      throw Exception(_handleDioError(e));
+    }
+  }
+
+  /// Обновить список задач
+  Future<dynamic> updateTodoList(int listId, Map<String, dynamic> todoListData) async {
+    try {
+      final response = await _plannerClient.put('/todo-lists/$listId', data: todoListData);
+
+      if (response.statusCode == 200) {
+        return response.data;
+      } else {
+        throw Exception('Failed to update todo list: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      throw Exception(_handleDioError(e));
+    }
+  }
+
+  /// Удалить список задач
+  Future<void> deleteTodoList(int listId) async {
+    try {
+      final response = await _plannerClient.delete('/todo-lists/$listId');
+
+      if (response.statusCode != 204) {
+        throw Exception('Failed to delete todo list: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      throw Exception(_handleDioError(e));
+    }
+  }
+
+  /// Добавить элемент в список задач
+  Future<dynamic> addTodoItem(int listId, Map<String, dynamic> todoItemData) async {
+    try {
+      final response = await _plannerClient.post('/todo-lists/$listId/items', data: todoItemData);
+
+      if (response.statusCode == 201) {
+        return response.data;
+      } else {
+        throw Exception('Failed to add todo item: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      throw Exception(_handleDioError(e));
+    }
+  }
+
+  /// Обновить элемент списка задач
+  Future<dynamic> updateTodoItem(int listId, int itemId, Map<String, dynamic> todoItemData) async {
+    try {
+      final response = await _plannerClient.put('/todo-lists/$listId/items/$itemId', data: todoItemData);
+
+      if (response.statusCode == 200) {
+        return response.data;
+      } else {
+        throw Exception('Failed to update todo item: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      throw Exception(_handleDioError(e));
+    }
+  }
+
+  /// Переключить статус выполнения задачи
+  Future<dynamic> toggleTodoItemComplete(int listId, int itemId) async {
+    try {
+      final response = await _plannerClient.put('/todo-lists/$listId/items/$itemId/toggle');
+
+      if (response.statusCode == 200) {
+        return response.data;
+      } else {
+        throw Exception('Failed to toggle todo item: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      throw Exception(_handleDioError(e));
+    }
+  }
+
+  /// Переключить статус всех задач в списке
+  Future<void> toggleAllTodoItemsComplete(int listId, bool completed) async {
+    try {
+      final response = await _plannerClient.put(
+        '/todo-lists/$listId/items/toggle-all',
+        queryParameters: {'completed': completed},
+      );
+
+      if (response.statusCode != 204) {
+        throw Exception('Failed to toggle all todo items: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      throw Exception(_handleDioError(e));
+    }
+  }
+
+  /// Удалить элемент списка задач
+  Future<void> deleteTodoItem(int listId, int itemId) async {
+    try {
+      final response = await _plannerClient.delete('/todo-lists/$listId/items/$itemId');
+
+      if (response.statusCode != 204) {
+        throw Exception('Failed to delete todo item: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      throw Exception(_handleDioError(e));
+    }
+  }
+
+  // === TRIP DAYS API ===
+
   /// Получить дни поездки
   Future<List<dynamic>> getTripDays(int tripId) async {
     try {
@@ -105,33 +431,43 @@ class TripService {
     }
   }
 
-  /// Поделиться поездкой
-  Future<Map<String, dynamic>> shareTrip(int tripId, String recipient, String permission) async {
+  /// Создать день поездки
+  Future<dynamic> createTripDay(int tripId, Map<String, dynamic> dayData) async {
     try {
-      final response = await _plannerClient.post('/trips/$tripId/share', data: {
-        'recipient': recipient,
-        'permission': permission,
-      });
+      final response = await _plannerClient.post('/trips/$tripId/days', data: dayData);
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 201) {
         return response.data;
       } else {
-        throw Exception('Failed to share trip: ${response.statusCode}');
+        throw Exception('Failed to create trip day: ${response.statusCode}');
       }
     } on DioException catch (e) {
       throw Exception(_handleDioError(e));
     }
   }
 
-  /// Опубликовать поездку в библиотеке
-  Future<Map<String, dynamic>> publishTrip(int tripId, Map<String, dynamic> publishData) async {
+  /// Обновить день поездки
+  Future<dynamic> updateTripDay(int tripId, int dayId, Map<String, dynamic> dayData) async {
     try {
-      final response = await _plannerClient.post('/trips/$tripId/publish', data: publishData);
+      final response = await _plannerClient.put('/trips/$tripId/days/$dayId', data: dayData);
 
       if (response.statusCode == 200) {
         return response.data;
       } else {
-        throw Exception('Failed to publish trip: ${response.statusCode}');
+        throw Exception('Failed to update trip day: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      throw Exception(_handleDioError(e));
+    }
+  }
+
+  /// Удалить день поездки
+  Future<void> deleteTripDay(int tripId, int dayId) async {
+    try {
+      final response = await _plannerClient.delete('/trips/$tripId/days/$dayId');
+
+      if (response.statusCode != 204) {
+        throw Exception('Failed to delete trip day: ${response.statusCode}');
       }
     } on DioException catch (e) {
       throw Exception(_handleDioError(e));
@@ -139,21 +475,6 @@ class TripService {
   }
 
   // === EVENTS API ===
-
-  /// Получить все события дня
-  Future<List<dynamic>> getDayEvents(int tripId, int dayId) async {
-    try {
-      final response = await _plannerClient.get('/trips/$tripId/days/$dayId/events');
-
-      if (response.statusCode == 200) {
-        return response.data;
-      } else {
-        throw Exception('Failed to get day events: ${response.statusCode}');
-      }
-    } on DioException catch (e) {
-      throw Exception(_handleDioError(e));
-    }
-  }
 
   /// Получить все события поездки
   Future<List<dynamic>> getTripEvents(int tripId) async {
@@ -164,6 +485,21 @@ class TripService {
         return response.data;
       } else {
         throw Exception('Failed to get trip events: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      throw Exception(_handleDioError(e));
+    }
+  }
+
+  /// Получить все события дня
+  Future<List<dynamic>> getDayEvents(int tripId, int dayId) async {
+    try {
+      final response = await _plannerClient.get('/trips/$tripId/days/$dayId/events');
+
+      if (response.statusCode == 200) {
+        return response.data;
+      } else {
+        throw Exception('Failed to get day events: ${response.statusCode}');
       }
     } on DioException catch (e) {
       throw Exception(_handleDioError(e));
@@ -228,233 +564,22 @@ class TripService {
     }
   }
 
-  /// Изменить порядок событий
-  Future<void> reorderEvents(int tripId, int dayId, List<int> eventIds) async {
-    try {
-      final response = await _plannerClient.put('/trips/$tripId/days/$dayId/events/reorder', data: {
-        'eventIds': eventIds,
-      });
-
-      if (response.statusCode != 200) {
-        throw Exception('Failed to reorder events: ${response.statusCode}');
-      }
-    } on DioException catch (e) {
-      throw Exception(_handleDioError(e));
-    }
-  }
-
-  // === TODO LISTS API ===
-
-  /// Получить все todo-списки пользователя
-  Future<Map<String, dynamic>> getUserTodoLists({int page = 0, int size = 20}) async {
-    try {
-      final response = await _plannerClient.get('/todo-lists', queryParameters: {
-        'page': page,
-        'size': size,
-      });
-
-      if (response.statusCode == 200) {
-        return response.data;
-      } else {
-        throw Exception('Failed to get todo lists: ${response.statusCode}');
-      }
-    } on DioException catch (e) {
-      throw Exception(_handleDioError(e));
-    }
-  }
-
-  /// Получить todo-списки для поездки
-  Future<List<dynamic>> getTripTodoLists(int tripId) async {
-    try {
-      final response = await _plannerClient.get('/trips/$tripId/todo-lists');
-
-      if (response.statusCode == 200) {
-        return response.data;
-      } else {
-        throw Exception('Failed to get trip todo lists: ${response.statusCode}');
-      }
-    } on DioException catch (e) {
-      throw Exception(_handleDioError(e));
-    }
-  }
-
-  /// Получить todo-список по ID
-  Future<dynamic> getTodoListById(int listId) async {
-    try {
-      final response = await _plannerClient.get('/todo-lists/$listId');
-
-      if (response.statusCode == 200) {
-        return response.data;
-      } else {
-        throw Exception('Failed to get todo list: ${response.statusCode}');
-      }
-    } on DioException catch (e) {
-      throw Exception(_handleDioError(e));
-    }
-  }
-
-  /// Создать todo-список
-  Future<dynamic> createTodoList(Map<String, dynamic> todoListData) async {
-    try {
-      final response = await _plannerClient.post('/todo-lists', data: todoListData);
-
-      if (response.statusCode == 201) {
-        return response.data;
-      } else {
-        throw Exception('Failed to create todo list: ${response.statusCode}');
-      }
-    } on DioException catch (e) {
-      throw Exception(_handleDioError(e));
-    }
-  }
-
-  /// Создать todo-список для поездки
-  Future<dynamic> createTripTodoList(int tripId, Map<String, dynamic> todoListData) async {
-    try {
-      final response = await _plannerClient.post('/trips/$tripId/todo-lists', data: todoListData);
-
-      if (response.statusCode == 201) {
-        return response.data;
-      } else {
-        throw Exception('Failed to create trip todo list: ${response.statusCode}');
-      }
-    } on DioException catch (e) {
-      throw Exception(_handleDioError(e));
-    }
-  }
-
-  /// Обновить todo-список
-  Future<dynamic> updateTodoList(int listId, Map<String, dynamic> todoListData) async {
-    try {
-      final response = await _plannerClient.put('/todo-lists/$listId', data: todoListData);
-
-      if (response.statusCode == 200) {
-        return response.data;
-      } else {
-        throw Exception('Failed to update todo list: ${response.statusCode}');
-      }
-    } on DioException catch (e) {
-      throw Exception(_handleDioError(e));
-    }
-  }
-
-  /// Удалить todo-список
-  Future<void> deleteTodoList(int listId) async {
-    try {
-      final response = await _plannerClient.delete('/todo-lists/$listId');
-
-      if (response.statusCode != 204) {
-        throw Exception('Failed to delete todo list: ${response.statusCode}');
-      }
-    } on DioException catch (e) {
-      throw Exception(_handleDioError(e));
-    }
-  }
-
-  /// Добавить задачу в список
-  Future<dynamic> addTodoItem(int listId, Map<String, dynamic> itemData) async {
-    try {
-      final response = await _plannerClient.post('/todo-lists/$listId/items', data: itemData);
-
-      if (response.statusCode == 201) {
-        return response.data;
-      } else {
-        throw Exception('Failed to add todo item: ${response.statusCode}');
-      }
-    } on DioException catch (e) {
-      throw Exception(_handleDioError(e));
-    }
-  }
-
-  /// Обновить задачу
-  Future<dynamic> updateTodoItem(int listId, int itemId, Map<String, dynamic> itemData) async {
-    try {
-      final response = await _plannerClient.put('/todo-lists/$listId/items/$itemId', data: itemData);
-
-      if (response.statusCode == 200) {
-        return response.data;
-      } else {
-        throw Exception('Failed to update todo item: ${response.statusCode}');
-      }
-    } on DioException catch (e) {
-      throw Exception(_handleDioError(e));
-    }
-  }
-
-  /// Переключить статус задачи
-  Future<dynamic> toggleTodoItem(int listId, int itemId) async {
-    try {
-      final response = await _plannerClient.put('/todo-lists/$listId/items/$itemId/toggle');
-
-      if (response.statusCode == 200) {
-        return response.data;
-      } else {
-        throw Exception('Failed to toggle todo item: ${response.statusCode}');
-      }
-    } on DioException catch (e) {
-      throw Exception(_handleDioError(e));
-    }
-  }
-
-  /// Удалить задачу
-  Future<void> deleteTodoItem(int listId, int itemId) async {
-    try {
-      final response = await _plannerClient.delete('/todo-lists/$listId/items/$itemId');
-
-      if (response.statusCode != 204) {
-        throw Exception('Failed to delete todo item: ${response.statusCode}');
-      }
-    } on DioException catch (e) {
-      throw Exception(_handleDioError(e));
-    }
-  }
-
-  /// Получить шаблоны todo-списков
-  Future<List<dynamic>> getTodoTemplates() async {
-    try {
-      final response = await _plannerClient.get('/templates');
-
-      if (response.statusCode == 200) {
-        return response.data;
-      } else {
-        throw Exception('Failed to get todo templates: ${response.statusCode}');
-      }
-    } on DioException catch (e) {
-      throw Exception(_handleDioError(e));
-    }
-  }
-
-  /// Получить элементы шаблона
-  Future<List<String>> getTemplateItems(int templateId) async {
-    try {
-      final response = await _plannerClient.get('/templates/$templateId/items');
-
-      if (response.statusCode == 200) {
-        return List<String>.from(response.data);
-      } else {
-        throw Exception('Failed to get template items: ${response.statusCode}');
-      }
-    } on DioException catch (e) {
-      throw Exception(_handleDioError(e));
-    }
-  }
+  // === ERROR HANDLING ===
 
   String _handleDioError(DioException e) {
     switch (e.type) {
       case DioExceptionType.connectionTimeout:
-        return 'Превышено время ожидания соединения';
       case DioExceptionType.sendTimeout:
-        return 'Превышено время ожидания отправки';
       case DioExceptionType.receiveTimeout:
-        return 'Превышено время ожидания ответа';
+        return 'Timeout: Проверьте подключение к интернету';
       case DioExceptionType.badResponse:
         final statusCode = e.response?.statusCode;
-        final message = e.response?.data?['message'] ?? 'Ошибка сервера';
+        final message = e.response?.data?['message'] ?? 'Неизвестная ошибка';
         return 'Ошибка $statusCode: $message';
       case DioExceptionType.cancel:
         return 'Запрос был отменен';
-      case DioExceptionType.connectionError:
-        return 'Ошибка соединения. Проверьте интернет-подключение';
+      case DioExceptionType.unknown:
+        return 'Ошибка соединения: ${e.message}';
       default:
         return 'Неизвестная ошибка: ${e.message}';
     }

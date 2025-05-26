@@ -17,8 +17,7 @@ import 'package:putevod/view/widgets/app_header_view_model.dart';
 import 'package:putevod/view-model/login_view_model.dart';
 import 'package:putevod/view-model/registration_view_model.dart';
 import 'package:putevod/view-model/password_recovery_view_model.dart';
-import 'package:putevod/external/offline_storage.dart';
-import 'package:putevod/external/sync_service.dart';
+import 'package:putevod/view-model/library_view_model.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,12 +29,6 @@ Future<void> main() async {
     // Если .env файл не найден, используем значения по умолчанию
     print('Warning: .env file not found, using default values');
   }
-  
-  // Инициализируем оффлайн хранилище
-  await OfflineStorage.init();
-  
-  // Инициализируем сервис синхронизации
-  SyncService.instance.init();
   
   runApp(const MyApp());
 }
@@ -60,6 +53,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => PasswordRecoveryViewModel()),
         ChangeNotifierProvider(create: (_) => TripCreationViewModel()),
         ChangeNotifierProvider(create: (_) => TripDetailViewModel()),
+        ChangeNotifierProvider(create: (_) => LibraryViewModel()),
       ],
       child: MaterialApp(
         title: 'Putevod',

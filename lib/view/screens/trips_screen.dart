@@ -9,7 +9,7 @@ import 'package:putevod/view/screens/trip_detail_screen.dart';
 import 'package:putevod/view/widgets/app_header.dart';
 import 'package:putevod/view/widgets/app_bottom_navigation.dart';
 import 'package:putevod/view/widgets/trip_card.dart';
-import 'package:putevod/view/widgets/sync_status_widget.dart';
+
 
 /// Trips screen implementation matching design
 class TripsScreen extends StatefulWidget {
@@ -42,12 +42,8 @@ class _TripsScreenState extends State<TripsScreen> {
           children: [
             Column(
               children: [
-                AppHeader(
+                const AppHeader(
                   showBackButton: false,
-                  actions: [
-                    const SyncStatusWidget(),
-                    const SizedBox(width: 16),
-                  ],
                 ),
                 Expanded(
                   child: Column(

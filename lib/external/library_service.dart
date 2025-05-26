@@ -89,17 +89,20 @@ class LibraryService {
     int size = 20,
   }) async {
     try {
+      Map<String, dynamic> queryParams = {
+        'page': page,
+        'size': size,
+      };
+
+      if (country != null) queryParams['country'] = country;
+      if (city != null) queryParams['city'] = city;
+      if (durationMin != null) queryParams['durationMin'] = durationMin;
+      if (durationMax != null) queryParams['durationMax'] = durationMax;
+      if (tag != null) queryParams['tag'] = tag;
+
       final response = await _libraryClient.get(
         '/routes/filter',
-        queryParameters: {
-          if (country != null) 'country': country,
-          if (city != null) 'city': city,
-          if (durationMin != null) 'durationMin': durationMin,
-          if (durationMax != null) 'durationMax': durationMax,
-          if (tag != null) 'tag': tag,
-          'page': page,
-          'size': size,
-        },
+        queryParameters: queryParams,
       );
       
       if (response.statusCode == 200) {
@@ -161,7 +164,7 @@ class LibraryService {
   }
   
   /// Получить детальную информацию о маршруте
-  Future<Map<String, dynamic>> getRouteDetails(int routeId) async {
+  Future<dynamic> getRouteDetails(int routeId) async {
     try {
       final response = await _libraryClient.get('/routes/$routeId');
       
@@ -176,12 +179,12 @@ class LibraryService {
   }
   
   /// Получить маршруты опубликованные пользователем
-  Future<List<Map<String, dynamic>>> getUserRoutes(int userId) async {
+  Future<List<dynamic>> getUserRoutes(int userId) async {
     try {
       final response = await _libraryClient.get('/routes/user/$userId');
       
       if (response.statusCode == 200) {
-        return List<Map<String, dynamic>>.from(response.data);
+        return response.data;
       } else {
         throw Exception('Failed to get user routes: ${response.statusCode}');
       }
@@ -191,7 +194,7 @@ class LibraryService {
   }
   
   /// Опубликовать маршрут в библиотеке
-  Future<Map<String, dynamic>> publishRoute(int tripId) async {
+  Future<dynamic> publishRoute(int tripId) async {
     try {
       final response = await _libraryClient.post('/routes/publish/$tripId');
       
@@ -206,7 +209,7 @@ class LibraryService {
   }
   
   /// Одобрить публикацию маршрута (для админов)
-  Future<Map<String, dynamic>> approveRoute(int routeId) async {
+  Future<dynamic> approveRoute(int routeId) async {
     try {
       final response = await _libraryClient.put('/routes/approve/$routeId');
       
@@ -233,22 +236,133 @@ class LibraryService {
     }
   }
   
+  /// Получить отзывы на маршрут
+  Future<Map<String, dynamic>> getRouteReviews(
+    int routeId, {
+    int page = 0,
+    int size = 20,
+  }) async {
+    try {
+      final response = await _libraryClient.get(
+        '/routes/$routeId/reviews',
+        queryParameters: {
+          'page': page,
+          'size': size,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return response.data;
+      } else {
+        throw Exception('Failed to get route reviews: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      throw Exception(_handleDioError(e));
+    }
+  }
+  
+  /// Добавить отзыв к маршруту
+  Future<dynamic> addReview(
+    int routeId,
+    int rating, {
+    String? comment,
+  }) async {
+    try {
+      Map<String, dynamic> queryParams = {
+        'rating': rating,
+      };
+
+      if (comment != null && comment.isNotEmpty) {
+        queryParams['comment'] = comment;
+      }
+
+      final response = await _libraryClient.post(
+        '/routes/$routeId/reviews',
+        queryParameters: queryParams,
+      );
+
+      if (response.statusCode == 200) {
+        return response.data;
+      } else {
+        throw Exception('Failed to add review: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      throw Exception(_handleDioError(e));
+    }
+  }
+  
+  /// Обновить отзыв к маршруту
+  Future<dynamic> updateReview(
+    int routeId,
+    int rating, {
+    String? comment,
+  }) async {
+    try {
+      Map<String, dynamic> queryParams = {
+        'rating': rating,
+      };
+
+      if (comment != null && comment.isNotEmpty) {
+        queryParams['comment'] = comment;
+      }
+
+      final response = await _libraryClient.put(
+        '/routes/$routeId/reviews',
+        queryParameters: queryParams,
+      );
+
+      if (response.statusCode == 200) {
+        return response.data;
+      } else {
+        throw Exception('Failed to update review: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      throw Exception(_handleDioError(e));
+    }
+  }
+  
+  /// Удалить отзыв
+  Future<void> deleteReview(int routeId) async {
+    try {
+      final response = await _libraryClient.delete('/routes/$routeId/reviews');
+
+      if (response.statusCode != 204) {
+        throw Exception('Failed to delete review: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      throw Exception(_handleDioError(e));
+    }
+  }
+  
+  /// Получить мой отзыв на маршрут
+  Future<dynamic> getMyReview(int routeId) async {
+    try {
+      final response = await _libraryClient.get('/routes/$routeId/reviews/my');
+
+      if (response.statusCode == 200) {
+        return response.data;
+      } else {
+        throw Exception('Failed to get my review: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      throw Exception(_handleDioError(e));
+    }
+  }
+  
   String _handleDioError(DioException e) {
     switch (e.type) {
       case DioExceptionType.connectionTimeout:
-        return 'Превышено время ожидания соединения';
       case DioExceptionType.sendTimeout:
-        return 'Превышено время ожидания отправки';
       case DioExceptionType.receiveTimeout:
-        return 'Превышено время ожидания ответа';
+        return 'Timeout: Проверьте подключение к интернету';
       case DioExceptionType.badResponse:
         final statusCode = e.response?.statusCode;
-        final message = e.response?.data?['message'] ?? 'Ошибка сервера';
+        final message = e.response?.data?['message'] ?? 'Неизвестная ошибка';
         return 'Ошибка $statusCode: $message';
       case DioExceptionType.cancel:
         return 'Запрос был отменен';
-      case DioExceptionType.connectionError:
-        return 'Ошибка соединения. Проверьте интернет-подключение';
+      case DioExceptionType.unknown:
+        return 'Ошибка соединения: ${e.message}';
       default:
         return 'Неизвестная ошибка: ${e.message}';
     }

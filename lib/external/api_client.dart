@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:putevod/model/constants.dart';
 
 class ApiClient {
@@ -97,12 +96,6 @@ class ApiClient {
     } else {
       throw Exception('Failed to refresh token');
     }
-  }
-  
-  // Проверка соединения с интернетом
-  Future<bool> hasConnection() async {
-    final connectivityResult = await Connectivity().checkConnectivity();
-    return connectivityResult != ConnectivityResult.none;
   }
   
   // GET запрос

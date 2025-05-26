@@ -31,7 +31,7 @@ class Constants {
   static String get forgotPasswordEndpoint => '$authServiceUrl/forgot-password';
   static String get verifyResetCodeEndpoint => '$authServiceUrl/verify-reset-code';
   static String get resetPasswordEndpoint => '$authServiceUrl/reset-password';
-  static String get refreshTokenEndpoint => '$authServiceUrl/refresh';
+  static String get refreshTokenEndpoint => '$authServiceUrl/auth/refresh';
   static String get logoutEndpoint => '$authServiceUrl/logout';
   static String get verifyEmailEndpoint => '$authServiceUrl/verify-email';
   static String get resendVerificationEndpoint => '$authServiceUrl/resend-verification';
@@ -46,6 +46,6 @@ class Constants {
   static String get aiEndpoint => '$externalServiceUrl/ai';
   
   /// Library endpoints
-  static String get libraryEndpoint => '$libraryServiceUrl/library';
-  static String get reviewsEndpoint => '$libraryServiceUrl/reviews';
+  static String get libraryEndpoint => '$libraryServiceUrl/routes';
+  static String get reviewsEndpoint => '$libraryServiceUrl/routes';
 }
