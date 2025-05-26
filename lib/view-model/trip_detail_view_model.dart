@@ -49,7 +49,7 @@ class TripDetailViewModel with ChangeNotifier {
     notifyListeners();
     
     try {
-      final tripResponse = await _tripService.getTrip(tripId);
+      final tripResponse = await _tripService.getTripById(tripId);
       
       if (tripResponse != null) {
         final trip = Trip.fromJson(tripResponse);

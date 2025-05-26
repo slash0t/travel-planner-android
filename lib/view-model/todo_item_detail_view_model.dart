@@ -55,7 +55,7 @@ class TodoItemDetailViewModel extends ChangeNotifier {
     notifyListeners();
     
     try {
-      final response = await _tripService.getTodoList(int.parse(id));
+      final response = await _tripService.getTodoListById(int.parse(id));
       
       final tasks = (response['items'] as List<dynamic>? ?? []).map((itemData) => Task(
         id: itemData['id'].toString(),
@@ -91,7 +91,7 @@ class TodoItemDetailViewModel extends ChangeNotifier {
     try {
       final response = await _tripService.addTodoItem(
         int.parse(_todoItemDetail!.id),
-        title.trim(),
+        {'text': title.trim(), 'completed': false},
       );
       
       final newTask = Task(
@@ -225,7 +225,7 @@ class TodoItemDetailViewModel extends ChangeNotifier {
   /// Updates the TodoListViewModel with the current state
   void _updateTodoListViewModel() {
     if (_todoListViewModel != null && _todoItemDetail != null) {
-      _todoListViewModel!.updateTodoList(
+      _todoListViewModel!.updateTodoListLocal(
         _todoItemDetail!.id, 
         completedTasks: _todoItemDetail!.completedTasks, 
         totalTasks: _todoItemDetail!.totalTasks,
