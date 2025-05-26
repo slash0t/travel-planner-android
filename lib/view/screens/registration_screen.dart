@@ -5,6 +5,8 @@ import 'package:putevod/view/screens/main_menu_screen.dart';
 import 'package:putevod/model/app_colors.dart';
 import 'package:putevod/view-model/registration_view_model.dart';
 
+import '../widgets/password_field.dart';
+
 class RegistrationScreen extends StatelessWidget {
   const RegistrationScreen({super.key});
 
@@ -64,6 +66,34 @@ class RegistrationScreen extends StatelessWidget {
                     ),
                   ),
                 TextField(
+                  onChanged: (value) => viewModel.setUsername(value),
+                  decoration: InputDecoration(
+                    labelText: 'Ваш никнейм',
+                    labelStyle: const TextStyle(
+                      color: Color(0xFF9A9A9A),
+                      fontFamily: 'NotoSans',
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: const BorderSide(
+                        color: Color(0xFFD9D9D9),
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: const BorderSide(
+                        color: AppColors.accent,
+                        width: 2.0,
+                      ),
+                    ),
+                    floatingLabelStyle: const TextStyle(
+                      color: AppColors.accent,
+                      fontFamily: 'NotoSans',
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                TextField(
                   onChanged: (value) => viewModel.setEmail(value),
                   decoration: InputDecoration(
                     labelText: 'Email',
@@ -91,70 +121,14 @@ class RegistrationScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 20),
-                TextField(
+                PasswordField(
                   onChanged: (value) => viewModel.setPassword(value),
-                  obscureText: true,
-                  decoration: InputDecoration(
-                    labelText: 'Пароль',
-                    labelStyle: const TextStyle(
-                      color: Color(0xFF9A9A9A),
-                      fontFamily: 'NotoSans',
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(
-                        color: Color(0xFFD9D9D9),
-                      ),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(
-                        color: AppColors.accent,
-                        width: 2.0,
-                      ),
-                    ),
-                    floatingLabelStyle: const TextStyle(
-                      color: AppColors.accent,
-                      fontFamily: 'NotoSans',
-                    ),
-                    suffixIcon: const Icon(
-                      Icons.visibility_off,
-                      color: Color(0xFF9A9A9A),
-                    ),
-                  ),
+                  label: 'Пароль'
                 ),
                 const SizedBox(height: 20),
-                TextField(
-                  onChanged: (value) => viewModel.setConfirmPassword(value),
-                  obscureText: true,
-                  decoration: InputDecoration(
-                    labelText: 'Подтвердите пароль',
-                    labelStyle: const TextStyle(
-                      color: Color(0xFF9A9A9A),
-                      fontFamily: 'NotoSans',
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(
-                        color: Color(0xFFD9D9D9),
-                      ),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(
-                        color: AppColors.accent,
-                        width: 2.0,
-                      ),
-                    ),
-                    floatingLabelStyle: const TextStyle(
-                      color: AppColors.accent,
-                      fontFamily: 'NotoSans',
-                    ),
-                    suffixIcon: const Icon(
-                      Icons.visibility_off,
-                      color: Color(0xFF9A9A9A),
-                    ),
-                  ),
+                PasswordField(
+                    onChanged: (value) => viewModel.setConfirmPassword(value),
+                    label: 'Подтвердите пароль'
                 ),
                 const SizedBox(height: 20),
                 ElevatedButton(

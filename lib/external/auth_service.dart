@@ -39,9 +39,10 @@ class AuthService {
     }
   }
   
-  Future<AuthResponse> register(String email, String password) async {
+  Future<AuthResponse> register(String username, String email, String password) async {
     try {
       final authModel = AuthModel(
+        username: username,
         email: email,
         password: password,
       );
@@ -52,11 +53,18 @@ class AuthService {
       );
       
       if (response.statusCode == 201) {
-        // Вместо автоматического логина возвращаем успешную регистрацию
-        return AuthResponse(
-          success: true, 
-          message: 'Регистрация успешна. Проверьте email для подтверждения.',
-        );
+        final responseLogin = await login(authModel.email, authModel.password);
+
+        if (responseLogin.success) {
+          return AuthResponse(
+            success: true,
+            message: 'Регистрация успешна. Проверьте email для подтверждения.',
+          );
+        } else {
+          return AuthResponse.error(
+            'Login failed: ${response.statusCode} ${response.statusMessage}',
+          );
+        }
       } else {
         return AuthResponse.error(
           'Registration failed: ${response.statusCode} ${response.statusMessage}',
