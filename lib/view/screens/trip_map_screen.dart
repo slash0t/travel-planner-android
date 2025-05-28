@@ -43,7 +43,7 @@ class _TripMapView extends StatelessWidget {
           _buildHeader(context, trip.formattedTitle),
           
           // Day selector tabs
-          _buildDaySelector(context, viewModel),
+          //_buildDaySelector(context, viewModel),
           
           // Location details at the bottom
           if (viewModel.selectedLocation != null) 
@@ -155,18 +155,18 @@ class _TripMapView extends StatelessWidget {
                     title,
                     style: const TextStyle(
                       fontFamily: 'NotoSans',
-                      fontSize: 18,
+                      fontSize: 22,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
               ),
-              IconButton(
-                icon: const Icon(Icons.more_vert),
-                onPressed: () {
-                  // Show more options menu
-                },
-              ),
+              // IconButton(
+              //   icon: const Icon(Icons.more_vert),
+              //   onPressed: () {
+              //     // Show more options menu
+              //   },
+              // ),
             ],
           ),
         ),
@@ -249,7 +249,7 @@ class _TripMapView extends StatelessWidget {
   Widget _buildMapControls(BuildContext context, TripMapViewModel viewModel) {
     return Positioned(
       right: 16,
-      bottom: 300,
+      bottom: 400,
       child: Column(
         children: [
           _buildMapControlButton(
@@ -261,15 +261,15 @@ class _TripMapView extends StatelessWidget {
             icon: Icons.remove,
             onPressed: () => viewModel.setMapZoom(viewModel.mapZoom - 1),
           ),
-          const SizedBox(height: 8),
-          _buildMapControlButton(
-            icon: Icons.location_on,
-            onPressed: () {
-              // Center map on selected location or default center
-              // Implementation would go here
-            },
-            color: AppColors.accent,
-          ),
+          // const SizedBox(height: 8),
+          // _buildMapControlButton(
+          //   icon: Icons.location_on,
+          //   onPressed: () {
+          //     // Center map on selected location or default center
+          //     // Implementation would go here
+          //   },
+          //   color: AppColors.accent,
+          // ),
         ],
       ),
     );
@@ -396,17 +396,17 @@ class _TripMapView extends StatelessWidget {
                     onPressed: () => viewModel.navigateToLocation(location),
                   ),
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _buildActionButton(
-                    label: 'Напоминание',
-                    icon: Icons.notifications_none,
-                    color: Colors.white,
-                    textColor: Colors.black,
-                    borderColor: Colors.black,
-                    onPressed: () => viewModel.setReminder(location),
-                  ),
-                ),
+                // const SizedBox(width: 16),
+                // Expanded(
+                //   child: _buildActionButton(
+                //     label: 'Напоминание',
+                //     icon: Icons.notifications_none,
+                //     color: Colors.white,
+                //     textColor: Colors.black,
+                //     borderColor: Colors.black,
+                //     onPressed: () => viewModel.setReminder(location),
+                //   ),
+                // ),
               ],
             ),
           ],

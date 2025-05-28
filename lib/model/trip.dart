@@ -93,7 +93,7 @@ class Trip {
   }
 
   /// Get formatted title for display
-  String get formattedTitle => '$destination, $startDate - $endDate';
+  String get formattedTitle => '$destination';
 }
 
 /// Enum representing the status of a trip

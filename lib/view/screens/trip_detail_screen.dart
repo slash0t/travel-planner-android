@@ -6,6 +6,7 @@ import 'package:putevod/model/trip.dart';
 import 'package:putevod/view-model/trip_detail_view_model.dart';
 import 'package:putevod/view/screens/place_editing_screen.dart';
 import 'package:putevod/view/screens/trip_creation_screen.dart';
+import 'package:putevod/view/screens/trip_map_screen.dart';
 import 'package:putevod/view/widgets/trip_day_selector.dart';
 import 'package:putevod/view/widgets/trip_event_item.dart';
 import 'package:putevod/view/screens/trip_sharing_screen.dart';
@@ -93,7 +94,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   }
   
   Widget _buildHeader(String tripName, DateTime startDate, DateTime endDate) {
-    final dateFormat = DateFormat('d MMMM yyyy');
+    final dateFormat = DateFormat('d MMMM yyyy', 'ru');
     final dateRange = '${dateFormat.format(startDate)} - ${dateFormat.format(endDate)}';
     
     return Container(
@@ -317,8 +318,11 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       child: ElevatedButton(
         onPressed: () {
           // Navigate to map view
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Map view is not implemented yet')),
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const TripMapScreen(),
+            ),
           );
         },
         style: ElevatedButton.styleFrom(

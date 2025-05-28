@@ -17,9 +17,11 @@ import 'package:putevod/view/widgets/app_header_view_model.dart';
 import 'package:putevod/view-model/login_view_model.dart';
 import 'package:putevod/view-model/registration_view_model.dart';
 import 'package:putevod/view-model/password_recovery_view_model.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await initializeDateFormatting('ru', null);
   await dotenv.load(fileName: '.env');
   runApp(const MyApp());
 }
@@ -46,6 +48,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => TripDetailViewModel()),
       ],
       child: MaterialApp(
+        debugShowCheckedModeBanner: false,
         title: 'Putevod',
         theme: ThemeData(
           primaryColor: AppColors.accent,

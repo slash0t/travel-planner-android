@@ -54,17 +54,24 @@ class TodoListViewModel extends ChangeNotifier {
     _todoItems.addAll([
       TodoItem(
         id: '1',
-        title: 'Чеклист по ТП. 1 этап',
-        createdAt: DateTime(2025, 4, 2),
-        completedTasks: 20,
-        totalTasks: 20,
+        title: 'Сбор вещей для поездки',
+        createdAt: DateTime(2025, 4, 8),
+        completedTasks: 4,
+        totalTasks: 4,
       ),
       TodoItem(
         id: '2',
-        title: 'Tokyo Adventure',
-        createdAt: DateTime(2025, 5, 15),
-        completedTasks: 5,
-        totalTasks: 15,
+        title: 'Список купленных сувениров',
+        createdAt: DateTime(2025, 5, 13),
+        completedTasks: 1,
+        totalTasks: 6,
+      ),
+      TodoItem(
+        id: '3',
+        title: 'Список вещей, для похода в музей',
+        createdAt: DateTime(2025, 5, 14),
+        completedTasks: 0,
+        totalTasks: 3,
       ),
     ]);
     

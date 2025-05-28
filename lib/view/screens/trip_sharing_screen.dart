@@ -55,8 +55,8 @@ class TripSharingView extends StatelessWidget {
             _AddParticipantsSection(viewModel: viewModel),
             const SizedBox(height: 24),
             _CurrentParticipantsSection(viewModel: viewModel),
-            const SizedBox(height: 24),
-            _SendInvitationsButton(viewModel: viewModel),
+            //const SizedBox(height: 24),
+            //_SendInvitationsButton(viewModel: viewModel),
           ],
         ),
       ),
@@ -193,36 +193,37 @@ class _AddParticipantsSection extends StatelessWidget {
             icon: Icons.mail_outline,
           ),
           const SizedBox(height: 16),
-          _InputField(
-            controller: viewModel.searchController,
-            hintText: 'Поиск по имени',
-            icon: Icons.person_outline,
-          ),
-          const SizedBox(height: 16),
-          TextField(
-            controller: viewModel.messageController,
-            decoration: const InputDecoration(
-              hintText: 'Добавить сообщение (необязательно)',
-              hintStyle: TextStyle(
-                color: AppColors.text,
-                fontSize: 14,
-                fontFamily: 'NotoSans',
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.all(Radius.circular(8)),
-                borderSide: BorderSide(color: AppColors.text),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.all(Radius.circular(8)),
-                borderSide: BorderSide(color: AppColors.text),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.all(Radius.circular(8)),
-                borderSide: BorderSide(color: AppColors.accent),
-              ),
-            ),
-            maxLines: 4,
-          ),
+          _SendInvitationsButton(viewModel: viewModel),
+          // _InputField(
+          //   controller: viewModel.searchController,
+          //   hintText: 'Поиск по имени',
+          //   icon: Icons.person_outline,
+          // ),
+          // const SizedBox(height: 16),
+          // TextField(
+          //   controller: viewModel.messageController,
+          //   decoration: const InputDecoration(
+          //     hintText: 'Добавить сообщение (необязательно)',
+          //     hintStyle: TextStyle(
+          //       color: AppColors.text,
+          //       fontSize: 14,
+          //       fontFamily: 'NotoSans',
+          //     ),
+          //     border: OutlineInputBorder(
+          //       borderRadius: BorderRadius.all(Radius.circular(8)),
+          //       borderSide: BorderSide(color: AppColors.text),
+          //     ),
+          //     enabledBorder: OutlineInputBorder(
+          //       borderRadius: BorderRadius.all(Radius.circular(8)),
+          //       borderSide: BorderSide(color: AppColors.text),
+          //     ),
+          //     focusedBorder: OutlineInputBorder(
+          //       borderRadius: BorderRadius.all(Radius.circular(8)),
+          //       borderSide: BorderSide(color: AppColors.accent),
+          //     ),
+          //   ),
+          //   maxLines: 4,
+          // ),
         ],
       ),
     );

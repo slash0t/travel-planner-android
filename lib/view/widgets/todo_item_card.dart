@@ -73,7 +73,7 @@ class TodoItemCard extends StatelessWidget {
   }
 
   Widget _buildCreatedDateInfo() {
-    final dateFormatter = DateFormat('d MMMM yyyy');
+    final dateFormatter = DateFormat('d MMMM yyyy', 'ru');
     return Row(
       children: [
         const Icon(

@@ -20,7 +20,7 @@ class TripMapViewModel extends ChangeNotifier {
   double _mapZoom = 13.0;
 
   /// Map center position
-  LatLng _mapCenter = LatLng(55.7558, 37.6173); // Default to Moscow coordinates
+  LatLng _mapCenter = LatLng(48.859939001968996, 2.31719161871743); // Default to Moscow coordinates
 
   /// List of mock trip days for testing
   List<TripDay> get mockDays => [
@@ -48,8 +48,8 @@ class TripMapViewModel extends ChangeNotifier {
   List<TripLocation> get mockLocations => [
     TripLocation(
       id: '1',
-      name: 'Красная площадь',
-      coordinates: LatLng(55.7539, 37.6208),
+      name: 'Эйфелева башня',
+      coordinates: LatLng(48.85834855392802, 2.294449206765905),
       dayNumber: 1,
       startTime: '10:00',
       endTime: '12:00',
@@ -57,8 +57,8 @@ class TripMapViewModel extends ChangeNotifier {
     ),
     TripLocation(
       id: '2',
-      name: 'Парк Горького',
-      coordinates: LatLng(55.7298, 37.6035),
+      name: 'Лувр',
+      coordinates: LatLng(48.86061805585402, 2.3373435763419947),
       dayNumber: 1,
       startTime: '13:00',
       endTime: '15:00',
@@ -110,22 +110,22 @@ class TripMapViewModel extends ChangeNotifier {
         ],
         locations: [
           TripLocation(
-              id: '1',
-              name: 'name',
-              coordinates: const LatLng(55.751670, 37.629053),
-              dayNumber: 1,
-              startTime: 'utro',
-              endTime: 'utro tozhe',
-              orderInDay: 1
+            id: '1',
+            name: 'Эйфелева башня',
+            coordinates: LatLng(48.85834855392802, 2.294449206765905),
+            dayNumber: 1,
+            startTime: '10:00',
+            endTime: '12:00',
+            orderInDay: 1,
           ),
           TripLocation(
-              id: '2',
-              name: 'name1',
-              coordinates: const LatLng(55.751673, 37.629052),
-              dayNumber: 1,
-              startTime: 'utro',
-              endTime: 'utro tozhe',
-              orderInDay: 2
+            id: '2',
+            name: 'Лувр',
+            coordinates: LatLng(48.86061805585402, 2.3373435763419947),
+            dayNumber: 1,
+            startTime: '13:00',
+            endTime: '15:00',
+            orderInDay: 2,
           ),
           TripLocation(
               id: '3',
@@ -139,7 +139,7 @@ class TripMapViewModel extends ChangeNotifier {
         ]
     );
     
-    _mapCenter = LatLng(55.7558, 37.6173);
+    _mapCenter = LatLng(48.859939001968996, 2.31719161871743);
     _mapZoom = 13.0;
   }
 

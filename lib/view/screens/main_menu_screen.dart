@@ -240,7 +240,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
     final upcomingTrips = viewModel.trips.where((trip) => trip.status == TripStatus.upcoming).toList();
     
     if (upcomingTrips.isEmpty) {
-      return Center(
+      return const Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: const [
