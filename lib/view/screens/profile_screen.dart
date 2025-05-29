@@ -61,8 +61,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       _buildUserProfile(profileViewModel),
                       const SizedBox(height: 16),
                       _buildStatistics(profileViewModel),
-                      const SizedBox(height: 15),
-                      _buildEditProfileButton(),
+                      //const SizedBox(height: 15),
+                     // _buildEditProfileButton(),
                       const SizedBox(height: 12),
                       _buildEditableFields(),
                       const SizedBox(height: 20),
@@ -162,8 +162,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _buildStatItem('Путешествия', viewModel.tripsCount, const Color(0xFF4850D3)),
           const SizedBox(width: 16),
           _buildStatItem('Места', viewModel.placesCount, const Color(0xFF84BA83)),
-          const SizedBox(width: 16),
-          _buildStatItem('Фото', viewModel.photosCount, const Color(0xFFF1C021)),
+          // const SizedBox(width: 16),
+          // _buildStatItem('Фото', viewModel.photosCount, const Color(0xFFF1C021)),
         ],
       ),
     );
@@ -232,8 +232,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _buildInputField('Никнейм', _nicknameController),
         const SizedBox(height: 16),
         _buildInputField('Email', _emailController),
-        const SizedBox(height: 16),
-        _buildInputField('Пароль', _passwordController, isPassword: true),
+        //const SizedBox(height: 16),
+        //_buildInputField('Пароль', _passwordController, isPassword: true),
       ],
     );
   }
