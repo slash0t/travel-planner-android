@@ -6,6 +6,8 @@ import 'package:putevod/view-model/profile_view_model.dart';
 import 'package:putevod/view/widgets/app_header.dart';
 import 'package:putevod/view/widgets/app_bottom_navigation.dart';
 
+import '../widgets/basic_text_field.dart';
+
 /// Profile screen implementation matching design
 class ProfileScreen extends StatefulWidget {
   /// Creates a profile screen
@@ -242,58 +244,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            fontFamily: 'NotoSans',
-          ),
-        ),
-        const SizedBox(height: 8),
         Container(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 0),
-            /*child: TextField(
-              controller: controller,
-              obscureText: isPassword,
-              decoration: const InputDecoration(
-                border: InputBorder.none,
-                contentPadding: EdgeInsets.symmetric(vertical: 12),
-              ),
-              style: TextStyle(
-                fontSize: 16,
-                color: const Color(0xFF545454).withOpacity(0.9),
-                fontFamily: 'NotoSans',
-              ),
-            ),*/
-            child: TextField(
-              controller: controller,
-              obscureText: isPassword,
-              decoration: InputDecoration(
-                labelStyle: const TextStyle(
-                  color: Color(0xFF9A9A9A),
-                  fontFamily: 'NotoSans',
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: const BorderSide(
-                    color: Color(0xFFD9D9D9),
-                  ),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: const BorderSide(
-                    color: Color(0xFFEA2517),
-                    width: 2.0,
-                  ),
-                ),
-                floatingLabelStyle: const TextStyle(
-                  color: Color(0xFFEA2517),
-                  fontFamily: 'NotoSans',
-                ),
-              ),
-            ),
+            child: BasicTextField(label:label, controller: controller)
           ),
         ),
       ],
@@ -306,7 +260,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         // Update view model with edited values
         viewModel.updateNickname(_nicknameController.text);
         viewModel.updateEmail(_emailController.text);
-        viewModel.updatePassword(_passwordController.text);
+        //viewModel.updatePassword(_passwordController.text);
         
         // Save changes
         bool success = await viewModel.saveChanges();
