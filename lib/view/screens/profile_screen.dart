@@ -18,7 +18,7 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  final TextEditingController _nicknameController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   
@@ -27,14 +27,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.initState();
     // Initialize controllers with current values from view model
     final profileViewModel = Provider.of<ProfileViewModel>(context, listen: false);
-    _nicknameController.text = profileViewModel.nickname;
+    _usernameController.text = profileViewModel.username;
     _emailController.text = profileViewModel.email;
     _passwordController.text = profileViewModel.password;
   }
   
   @override
   void dispose() {
-    _nicknameController.dispose();
+    _usernameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
@@ -45,6 +45,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final navigationViewModel = Provider.of<NavigationViewModel>(context);
     final profileViewModel = Provider.of<ProfileViewModel>(context);
     
+    // Update text fields when profile data changes
+    if (profileViewModel.username != _usernameController.text) {
+      _usernameController.text = profileViewModel.username;
+    }
+    if (profileViewModel.email != _emailController.text) {
+      _emailController.text = profileViewModel.email;
+    }
+    
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -54,7 +62,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
               showBackButton: false,
             ),
             Expanded(
-              child: SingleChildScrollView(
+              child: profileViewModel.isLoading 
+              ? const Center(child: CircularProgressIndicator(color: AppColors.accent)) 
+              : SingleChildScrollView(
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
@@ -63,8 +73,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       _buildUserProfile(profileViewModel),
                       const SizedBox(height: 16),
                       _buildStatistics(profileViewModel),
-                      //const SizedBox(height: 15),
-                     // _buildEditProfileButton(),
                       const SizedBox(height: 12),
                       _buildEditableFields(),
                       const SizedBox(height: 20),
@@ -112,7 +120,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  viewModel.name,
+                  viewModel.username,
                   style: const TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -205,37 +213,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
   
-  Widget _buildEditProfileButton() {
-    return Container(
-      width: double.infinity,
-      height: 50,
-      decoration: BoxDecoration(
-        color: AppColors.accent,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: const Center(
-        child: Text(
-          'Редактировать профиль',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.w500,
-            fontFamily: 'NotoSans',
-          ),
-        ),
-      ),
-    );
-  }
-  
   Widget _buildEditableFields() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildInputField('Никнейм', _nicknameController),
+        _buildInputField('Никнейм', _usernameController),
         const SizedBox(height: 16),
         _buildInputField('Email', _emailController),
-        //const SizedBox(height: 16),
-        //_buildInputField('Пароль', _passwordController, isPassword: true),
       ],
     );
   }
@@ -258,9 +242,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return GestureDetector(
       onTap: () async {
         // Update view model with edited values
-        viewModel.updateNickname(_nicknameController.text);
+        viewModel.updateUsername(_usernameController.text);
         viewModel.updateEmail(_emailController.text);
-        //viewModel.updatePassword(_passwordController.text);
         
         // Save changes
         bool success = await viewModel.saveChanges();
