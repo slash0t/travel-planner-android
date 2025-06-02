@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:putevod/model/place.dart';
+import 'package:putevod/external/event_service.dart';
 import 'dart:io';
 
 /// View model for place editing screen
 class PlaceEditingViewModel extends ChangeNotifier {
+  /// Event service for API calls
+  final EventService _eventService = EventService();
+  
   /// Current place being edited
   Place? _place;
   
@@ -19,11 +23,18 @@ class PlaceEditingViewModel extends ChangeNotifier {
   /// Error message to display, if any
   String? _errorMessage;
   
+  /// Trip ID and Day ID for API context
+  int? _tripId;
+  int? _dayId;
+  
   /// Attached files list (local File objects)
   final List<File> _attachedFiles = [];
 
   /// Creates a new place editing view model
-  PlaceEditingViewModel({required bool isCreateMode}) : _isCreateMode = isCreateMode {
+  PlaceEditingViewModel({required bool isCreateMode, int? tripId, int? dayId}) : 
+    _isCreateMode = isCreateMode,
+    _tripId = tripId,
+    _dayId = dayId {
     if (isCreateMode) {
       _place = Place.empty();
     }
@@ -49,6 +60,12 @@ class PlaceEditingViewModel extends ChangeNotifier {
   
   /// Local attached files
   List<File> get attachedFiles => List.unmodifiable(_attachedFiles);
+  
+  /// Sets the trip and day context
+  void setContext(int tripId, int dayId) {
+    _tripId = tripId;
+    _dayId = dayId;
+  }
   
   /// Sets the place type
   void setPlaceType(PlaceType type) {
@@ -132,23 +149,22 @@ class PlaceEditingViewModel extends ChangeNotifier {
     notifyListeners();
     
     try {
-      // TODO: Implement actual API call to get place from backend
-      await Future.delayed(const Duration(seconds: 1));
+      // Validate context is set
+      if (_tripId == null || _dayId == null) {
+        throw Exception('Trip ID and Day ID must be set before loading a place');
+      }
       
-      // Placeholder implementation - replace with actual API call
-      _place = Place(
-        id: int.parse(placeId),
-        name: 'Sample Place',
-        type: PlaceType.place,
-        hasTime: true,
-        startTime: const TimeOfDay(hour: 9, minute: 0),
-        endTime: const TimeOfDay(hour: 11, minute: 0),
-        latitude: 55.7558,
-        longitude: 37.6176,
-        notes: 'Sample notes about this place.',
-      );
+      // Convert placeId to eventId (same concept in our app)
+      final eventId = int.parse(placeId);
+      
+      // Call API
+      final eventData = await _eventService.getEvent(_tripId!, _dayId!, eventId);
+      
+      // Convert to Place model
+      _place = _eventService.eventDataToPlace(eventData);
     } catch (e) {
       _errorMessage = 'Failed to load place: ${e.toString()}';
+      debugPrint(_errorMessage);
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -164,16 +180,27 @@ class PlaceEditingViewModel extends ChangeNotifier {
     notifyListeners();
     
     try {
-      // TODO: Implement actual API call to save place
-      await Future.delayed(const Duration(seconds: 1));
+      // Validate context is set
+      if (_tripId == null || _dayId == null) {
+        throw Exception('Trip ID and Day ID must be set before saving a place');
+      }
       
-      // Placeholder for actual save logic
-      final successMessage = _isCreateMode ? 'Place created' : 'Place updated';
-      debugPrint(successMessage);
+      // Convert Place to API format
+      final eventData = _eventService.placeToEventData(_place!);
+      
+      if (_isCreateMode) {
+        // Create new event
+        await _eventService.createEvent(_tripId!, _dayId!, eventData);
+      } else {
+        // Update existing event
+        final eventId = _place!.id!;
+        await _eventService.updateEvent(_tripId!, _dayId!, eventId, eventData);
+      }
       
       return true;
     } catch (e) {
       _errorMessage = 'Failed to save place: ${e.toString()}';
+      debugPrint(_errorMessage);
       return false;
     } finally {
       _isSaving = false;

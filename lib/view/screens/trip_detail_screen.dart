@@ -299,7 +299,11 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => PlaceEditingScreen.update(placeId: event.id),
+                    builder: (context) => PlaceEditingScreen.update(
+                      placeId: event.id,
+                      tripId: viewModel.trip!.id,
+                      dayId: viewModel.selectedDay!.id,
+                    ),
                   ),
                 );
               },
@@ -346,31 +350,43 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   }
   
   Widget _buildCreateEventButton() {
-    return FloatingActionButton.extended(
-      onPressed: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const PlaceEditingScreen.create(),
+    return Consumer<TripDetailViewModel>(
+      builder: (context, viewModel, _) {
+        // Don't show the button if no trip or day is selected
+        if (viewModel.trip == null || viewModel.selectedDay == null) {
+          return const SizedBox.shrink();
+        }
+        
+        return FloatingActionButton.extended(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => PlaceEditingScreen.create(
+                  tripId: viewModel.trip!.id,
+                  dayId: viewModel.selectedDay!.id,
+                ),
+              ),
+            );
+          },
+          backgroundColor: AppColors.secondary,
+          label: const Row(
+            children: [
+              Icon(Icons.add, color: AppColors.text),
+              SizedBox(width: 8),
+              Text(
+                'Создать',
+                style: TextStyle(
+                  fontFamily: 'NotoSans',
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.text,
+                ),
+              ),
+            ],
           ),
         );
       },
-      backgroundColor: AppColors.secondary,
-      label: const Row(
-        children: [
-          Icon(Icons.add, color: AppColors.text),
-          SizedBox(width: 8),
-          Text(
-            'Создать',
-            style: TextStyle(
-              fontFamily: 'NotoSans',
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-              color: AppColors.text,
-            ),
-          ),
-        ],
-      ),
     );
   }
 } 

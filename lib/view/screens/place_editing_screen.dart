@@ -11,12 +11,27 @@ import 'package:file_picker/file_picker.dart';
 class PlaceEditingScreen extends StatefulWidget {
   /// ID of the place to edit, null for creation mode
   final String? placeId;
+  
+  /// Trip ID for context
+  final int tripId;
+  
+  /// Day ID for context
+  final int dayId;
 
   /// Creates a new place editing screen in create mode
-  const PlaceEditingScreen.create({super.key}) : placeId = null;
+  const PlaceEditingScreen.create({
+    super.key,
+    required this.tripId,
+    required this.dayId,
+  }) : placeId = null;
 
   /// Creates a new place editing screen in update mode
-  const PlaceEditingScreen.update({super.key, required this.placeId});
+  const PlaceEditingScreen.update({
+    super.key,
+    required this.placeId,
+    required this.tripId,
+    required this.dayId,
+  });
 
   @override
   State<PlaceEditingScreen> createState() => _PlaceEditingScreenState();
@@ -33,7 +48,11 @@ class _PlaceEditingScreenState extends State<PlaceEditingScreen> {
   @override
   void initState() {
     super.initState();
-    _viewModel = PlaceEditingViewModel(isCreateMode: widget.placeId == null);
+    _viewModel = PlaceEditingViewModel(
+      isCreateMode: widget.placeId == null,
+      tripId: widget.tripId,
+      dayId: widget.dayId,
+    );
     
     // Load place data after the widget is built
     if (widget.placeId != null) {
@@ -148,8 +167,8 @@ class _PlaceEditingScreenState extends State<PlaceEditingScreen> {
                     _buildLocationSection(viewModel),
                     const SizedBox(height: 24),
                     _buildNotesSection(viewModel),
-                    const SizedBox(height: 24),
-                    _buildAttachmentsSection(viewModel),
+                    // const SizedBox(height: 24),
+                    // _buildAttachmentsSection(viewModel),
                     const SizedBox(height: 24),
                     _buildSaveButton(viewModel),
                   ],
@@ -375,89 +394,93 @@ class _PlaceEditingScreenState extends State<PlaceEditingScreen> {
             ),
           ],
         ),
-        const SizedBox(height: 24),
         if (viewModel.place?.hasTime ?? false)
-          Row(
+          Column(
             children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Время начала',
-                      style: TextStyle(
-                        fontFamily: 'NotoSans',
-                        fontSize: 14,
-                        color: Color(0xFF4B5562),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    GestureDetector(
-                      onTap: () => _selectTimeOfDay(viewModel, true),
-                      child: Container(
-                        height: 52,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF9FAFB),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: const Color(0xFFE5E7EB),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Время начала',
+                          style: TextStyle(
+                            fontFamily: 'NotoSans',
+                            fontSize: 14,
+                            color: Color(0xFF4B5562),
                           ),
                         ),
-                        child: Center(
-                          child: Text(
-                            viewModel.formatTimeOfDay(viewModel.place?.startTime),
-                            style: const TextStyle(
-                              fontFamily: 'NotoSans',
-                              fontSize: 16,
+                        const SizedBox(height: 8),
+                        GestureDetector(
+                          onTap: () => _selectTimeOfDay(viewModel, true),
+                          child: Container(
+                            height: 52,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF9FAFB),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: const Color(0xFFE5E7EB),
+                              ),
+                            ),
+                            child: Center(
+                              child: Text(
+                                viewModel.formatTimeOfDay(viewModel.place?.startTime),
+                                style: const TextStyle(
+                                  fontFamily: 'NotoSans',
+                                  fontSize: 16,
+                                ),
+                              ),
                             ),
                           ),
                         ),
-                      ),
+                      ],
                     ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Время окончания',
-                      style: TextStyle(
-                        fontFamily: 'NotoSans',
-                        fontSize: 14,
-                        color: Color(0xFF4B5562),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    GestureDetector(
-                      onTap: () => _selectTimeOfDay(viewModel, false),
-                      child: Container(
-                        height: 52,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF9FAFB),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: const Color(0xFFE5E7EB),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Время окончания',
+                          style: TextStyle(
+                            fontFamily: 'NotoSans',
+                            fontSize: 14,
+                            color: Color(0xFF4B5562),
                           ),
                         ),
-                        child: Center(
-                          child: Text(
-                            viewModel.formatTimeOfDay(viewModel.place?.endTime),
-                            style: const TextStyle(
-                              fontFamily: 'NotoSans',
-                              fontSize: 16,
+                        const SizedBox(height: 8),
+                        GestureDetector(
+                          onTap: () => _selectTimeOfDay(viewModel, false),
+                          child: Container(
+                            height: 52,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF9FAFB),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: const Color(0xFFE5E7EB),
+                              ),
+                            ),
+                            child: Center(
+                              child: Text(
+                                viewModel.formatTimeOfDay(viewModel.place?.endTime),
+                                style: const TextStyle(
+                                  fontFamily: 'NotoSans',
+                                  fontSize: 16,
+                                ),
+                              ),
                             ),
                           ),
                         ),
-                      ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ],
-          ),
+          )
       ],
     );
   }
@@ -565,22 +588,22 @@ class _PlaceEditingScreenState extends State<PlaceEditingScreen> {
                       color: Color(0xFF4B5562),
                     ),
                   ),
-                  GestureDetector(
-                    onTap: () {
-                      // Logic for entering coordinates manually
-                      setState(() {
-                        // Show/hide the coordinate fields
-                      });
-                    },
-                    child: const Text(
-                      'Ввести вручную',
-                      style: TextStyle(
-                        fontFamily: 'NotoSans',
-                        fontSize: 14,
-                        color: AppColors.accent,
-                      ),
-                    ),
-                  ),
+                  // GestureDetector(
+                  //   onTap: () {
+                  //     // Logic for entering coordinates manually
+                  //     setState(() {
+                  //       // Show/hide the coordinate fields
+                  //     });
+                  //   },
+                  //   child: const Text(
+                  //     'Ввести вручную',
+                  //     style: TextStyle(
+                  //       fontFamily: 'NotoSans',
+                  //       fontSize: 14,
+                  //       color: AppColors.accent,
+                  //     ),
+                  //   ),
+                  // ),
                 ],
               ),
               const SizedBox(height: 8),
@@ -686,41 +709,41 @@ class _PlaceEditingScreenState extends State<PlaceEditingScreen> {
             ],
           ),
         ),
-        const SizedBox(height: 12),
-        OutlinedButton(
-          onPressed: () {
-            // TODO: Open saved places selection
-          },
-          style: OutlinedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-            side: const BorderSide(
-              color: Color(0xFFE5E7EB),
-            ),
-            minimumSize: const Size(double.infinity, 50),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(
-                Icons.bookmark_border,
-                size: 16,
-                color: Color(0xFF374151),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                'Выбрать из сохраненных мест',
-                style: TextStyle(
-                  fontFamily: 'NotoSans',
-                  fontSize: 16,
-                  color: Colors.grey[800],
-                ),
-              ),
-            ],
-          ),
-        ),
+        // const SizedBox(height: 12),
+        // OutlinedButton(
+        //   onPressed: () {
+        //     // TODO: Open saved places selection
+        //   },
+        //   style: OutlinedButton.styleFrom(
+        //     padding: const EdgeInsets.symmetric(vertical: 16),
+        //     shape: RoundedRectangleBorder(
+        //       borderRadius: BorderRadius.circular(8),
+        //     ),
+        //     side: const BorderSide(
+        //       color: Color(0xFFE5E7EB),
+        //     ),
+        //     minimumSize: const Size(double.infinity, 50),
+        //   ),
+        //   child: Row(
+        //     mainAxisAlignment: MainAxisAlignment.center,
+        //     children: [
+        //       const Icon(
+        //         Icons.bookmark_border,
+        //         size: 16,
+        //         color: Color(0xFF374151),
+        //       ),
+        //       const SizedBox(width: 8),
+        //       Text(
+        //         'Выбрать из сохраненных мест',
+        //         style: TextStyle(
+        //           fontFamily: 'NotoSans',
+        //           fontSize: 16,
+        //           color: Colors.grey[800],
+        //         ),
+        //       ),
+        //     ],
+        //   ),
+        // ),
       ],
     );
   }
