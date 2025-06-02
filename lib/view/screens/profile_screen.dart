@@ -18,25 +18,17 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  final TextEditingController _usernameController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  
   @override
   void initState() {
     super.initState();
-    // Initialize controllers with current values from view model
-    final profileViewModel = Provider.of<ProfileViewModel>(context, listen: false);
-    _usernameController.text = profileViewModel.username;
-    _emailController.text = profileViewModel.email;
-    _passwordController.text = profileViewModel.password;
+    // Ensure profile data is fetched when screen is initialized
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<ProfileViewModel>(context, listen: false).fetchProfileData();
+    });
   }
   
   @override
   void dispose() {
-    _usernameController.dispose();
-    _emailController.dispose();
-    _passwordController.dispose();
     super.dispose();
   }
 
@@ -44,14 +36,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     final navigationViewModel = Provider.of<NavigationViewModel>(context);
     final profileViewModel = Provider.of<ProfileViewModel>(context);
-    
-    // Update text fields when profile data changes
-    if (profileViewModel.username != _usernameController.text) {
-      _usernameController.text = profileViewModel.username;
-    }
-    if (profileViewModel.email != _emailController.text) {
-      _emailController.text = profileViewModel.email;
-    }
     
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -73,8 +57,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       _buildUserProfile(profileViewModel),
                       const SizedBox(height: 16),
                       _buildStatistics(profileViewModel),
-                      const SizedBox(height: 12),
-                      _buildEditableFields(),
+                      const SizedBox(height: 20),
+                      _buildEditableFields(profileViewModel),
                       const SizedBox(height: 20),
                       _buildSaveButton(profileViewModel),
                     ],
@@ -120,7 +104,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  viewModel.username,
+                  viewModel.usernameShown,
                   style: const TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -213,13 +197,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
   
-  Widget _buildEditableFields() {
+  Widget _buildEditableFields(ProfileViewModel viewModel) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildInputField('Никнейм', _usernameController),
+        _buildInputField('Никнейм', viewModel.usernameController),
         const SizedBox(height: 16),
-        _buildInputField('Email', _emailController),
+        _buildInputField('Email',  viewModel.emailController),
       ],
     );
   }
@@ -240,10 +224,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   
   Widget _buildSaveButton(ProfileViewModel viewModel) {
     return GestureDetector(
-      onTap: () async {
-        // Update view model with edited values
-        viewModel.updateUsername(_usernameController.text);
-        viewModel.updateEmail(_emailController.text);
+      onTap: viewModel.isLoading ? null : () async {
+        // No need to update the view model with edited values as controllers are directly used
         
         // Save changes
         bool success = await viewModel.saveChanges();
@@ -254,25 +236,41 @@ class _ProfileScreenState extends State<ProfileScreen> {
               backgroundColor: Colors.green,
             ),
           );
+        } else if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Ошибка при сохранении профиля'),
+              backgroundColor: Colors.red,
+            ),
+          );
         }
       },
       child: Container(
         width: double.infinity,
         height: 50,
         decoration: BoxDecoration(
-          color: AppColors.accent,
+          color: viewModel.isLoading ? AppColors.accent.withOpacity(0.7) : AppColors.accent,
           borderRadius: BorderRadius.circular(10),
         ),
-        child: const Center(
-          child: Text(
-            'Сохранить изменения',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.w500,
-              fontFamily: 'NotoSans',
-            ),
-          ),
+        child: Center(
+          child: viewModel.isLoading
+            ? const SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(
+                  color: Colors.white,
+                  strokeWidth: 2.0,
+                ),
+              )
+            : const Text(
+                'Сохранить изменения',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w500,
+                  fontFamily: 'NotoSans',
+                ),
+              ),
         ),
       ),
     );

@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 class ProfileViewModel extends ChangeNotifier {
   final ApiClient _plannerClient = ApiClients.planner;
 
+  String _usernameShown = '';
   String _username = '';
   String _email = '';
   String _password = '************';
@@ -18,9 +19,13 @@ class ProfileViewModel extends ChangeNotifier {
   int _placesCount = 0;
   int _photosCount = 0;
   
+  late TextEditingController usernameController;
+  late TextEditingController emailController;
+  
   /// Gets the user's username
   String get username => _username;
-  
+  String get usernameShown => _usernameShown;
+
   /// Gets the user's email
   String get email => _email;
   
@@ -50,7 +55,16 @@ class ProfileViewModel extends ChangeNotifier {
   
   /// Constructor that fetches profile data
   ProfileViewModel() {
+    usernameController = TextEditingController(text: _username);
+    emailController = TextEditingController(text: _email);
     fetchProfileData();
+  }
+  
+  @override
+  void dispose() {
+    usernameController.dispose();
+    emailController.dispose();
+    super.dispose();
   }
   
   /// Fetches profile data from backend
@@ -71,6 +85,14 @@ class ProfileViewModel extends ChangeNotifier {
         _username = userData['username'];
         _email = userData['email'];
         _isAdmin = userData['admin'];
+        
+        // Update UI controllers
+        usernameController.text = _username;
+        emailController.text = _email;
+        _usernameShown = _username;
+        
+        // Notify listeners after updating profile data
+        notifyListeners();
 
         // Fetch trips count
         await fetchTripsCount();
@@ -97,7 +119,7 @@ class ProfileViewModel extends ChangeNotifier {
       if (tripsResponse.statusCode == 200) {
         final tripsData = tripsResponse.data;
         _tripsCount = tripsData['totalElements'] as int;
-
+        notifyListeners();
       } else {
         print('Failed to load trips: ${tripsResponse.statusCode}');
       }
@@ -109,6 +131,16 @@ class ProfileViewModel extends ChangeNotifier {
   /// Updates the user's username
   void updateUsername(String value) {
     _username = value;
+    notifyListeners();
+  }
+
+  void updateUsernameShown(String value) {
+    _usernameShown = value;
+    notifyListeners();
+  }
+
+  void updateIsAdmin(bool value) {
+    _isAdmin = value;
     notifyListeners();
   }
   
@@ -126,12 +158,38 @@ class ProfileViewModel extends ChangeNotifier {
   
   /// Saves the user profile changes
   Future<bool> saveChanges() async {
+    _isLoading = true;
+    notifyListeners();
+    
     try {
-
+      final updateData = {
+        'username': usernameController.text,
+        'email': emailController.text,
+      };
       
-      return true;
+      final response = await _plannerClient.put(
+        '/users/me',
+        data: updateData,
+      );
+      
+      _isLoading = false;
+      notifyListeners();
+      
+      if (response.statusCode == 200) {
+        // Update local data after successful API call
+        _username = usernameController.text;
+        _email = emailController.text;
+        _usernameShown = _username;
+        notifyListeners();
+        return true;
+      } else {
+        print('Failed to update profile: ${response.statusCode}');
+        return false;
+      }
     } catch (e) {
       print('Error saving profile changes: $e');
+      _isLoading = false;
+      notifyListeners();
       return false;
     }
   }
