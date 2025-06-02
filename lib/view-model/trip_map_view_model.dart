@@ -23,121 +23,14 @@ class TripMapViewModel extends ChangeNotifier {
   LatLng _mapCenter = LatLng(48.859939001968996, 2.31719161871743); // Default to Moscow coordinates
 
   /// List of mock trip days for testing
-  List<TripDay> get mockDays => [
-    TripDay(
-      id: '1',
-      dayNumber: 1,
-      name: 'День 1',
-      color: AppColors.accent,
-    ),
-    TripDay(
-      id: '2',
-      dayNumber: 2,
-      name: 'День 2',
-      color: AppColors.link,
-    ),
-    TripDay(
-      id: '3',
-      dayNumber: 3,
-      name: 'День 3',
-      color: AppColors.secondary,
-    ),
-  ];
+  List<TripDay> get mockDays => [];
 
   /// List of mock trip locations for testing
-  List<TripLocation> get mockLocations => [
-    TripLocation(
-      id: '1',
-      name: 'Эйфелева башня',
-      coordinates: LatLng(48.85834855392802, 2.294449206765905),
-      dayNumber: 1,
-      startTime: '10:00',
-      endTime: '12:00',
-      orderInDay: 1,
-    ),
-    TripLocation(
-      id: '2',
-      name: 'Лувр',
-      coordinates: LatLng(48.86061805585402, 2.3373435763419947),
-      dayNumber: 1,
-      startTime: '13:00',
-      endTime: '15:00',
-      orderInDay: 2,
-    ),
-    TripLocation(
-      id: '3',
-      name: 'Третьяковская галерея',
-      coordinates: LatLng(55.7415, 37.6213),
-      dayNumber: 2,
-      startTime: '10:00',
-      endTime: '13:00',
-      orderInDay: 1,
-    ),
-    TripLocation(
-      id: '4',
-      name: 'ВДНХ',
-      coordinates: LatLng(55.8263, 37.6377),
-      dayNumber: 3,
-      startTime: '11:00',
-      endTime: '16:00',
-      orderInDay: 1,
-    ),
-  ];
+  List<TripLocation> get mockLocations => [];
 
   /// Constructor that creates a mock trip for testing
   TripMapViewModel() {
-    _trip = Trip(
-        id: 1,
-        name: 'Путешествие в Париж',
-        startDate: DateTime(2025, 3, 15),
-        endDate: DateTime(2025, 3, 22),
-        status: TripStatus.ongoing,
-        imageUrl: 'assets/images/paris.jpg',
-        destination: 'Париж, Франция',
-        days: [
-          TripDay(
-              id: '1',
-              dayNumber: 1,
-              name: 'day 1',
-              color: AppColors.accent
-          ),
-          TripDay(
-              id: '2',
-              dayNumber: 2,
-              name: 'day 2',
-              color: AppColors.accent
-          )
-        ],
-        locations: [
-          TripLocation(
-            id: '1',
-            name: 'Эйфелева башня',
-            coordinates: LatLng(48.85834855392802, 2.294449206765905),
-            dayNumber: 1,
-            startTime: '10:00',
-            endTime: '12:00',
-            orderInDay: 1,
-          ),
-          TripLocation(
-            id: '2',
-            name: 'Лувр',
-            coordinates: LatLng(48.86061805585402, 2.3373435763419947),
-            dayNumber: 1,
-            startTime: '13:00',
-            endTime: '15:00',
-            orderInDay: 2,
-          ),
-          TripLocation(
-              id: '3',
-              name: 'name2',
-              coordinates: const LatLng(55.751677, 37.629023),
-              dayNumber: 2,
-              startTime: 'utro',
-              endTime: 'utro tozhe',
-              orderInDay: 1
-          ),
-        ]
-    );
+    _trip = null;
     
     _mapCenter = LatLng(48.859939001968996, 2.31719161871743);
     _mapZoom = 13.0;

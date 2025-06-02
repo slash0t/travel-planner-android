@@ -26,6 +26,7 @@ class Trip {
   final TripStatus status;
   
   /// URL of the trip image
+  @JsonKey(name: 'previewUrl')
   final String imageUrl;
   
   /// Destination of the trip
@@ -41,8 +42,17 @@ class Trip {
   /// Description of the trip
   final String description;
 
+  /// When the trip was created
+  final DateTime? createdAt;
+  
+  /// When the trip was last updated
+  final DateTime? updatedAt;
+
+  /// Days of the trip
   final List<TripDay> days;
 
+  /// Locations in the trip
+  @JsonKey(defaultValue: [])
   final List<TripLocation> locations;
   
   /// Version for conflict resolution
@@ -58,13 +68,15 @@ class Trip {
     required this.startDate,
     required this.endDate,
     required this.days,
-    required this.locations,
-    this.status = TripStatus.upcoming,
     required this.imageUrl,
+    required this.country,
+    required this.city,
+    required this.description,
+    this.locations = const [],
+    this.status = TripStatus.upcoming,
     this.destination = '',
-    this.country = '',
-    this.city = '',
-    this.description = '',
+    this.createdAt,
+    this.updatedAt,
     this.version,
     this.published,
   });
@@ -81,6 +93,8 @@ class Trip {
     String? country,
     String? city,
     String? description,
+    DateTime? createdAt,
+    DateTime? updatedAt,
     int? version,
     bool? published,
     List<TripDay>? days,
@@ -97,6 +111,8 @@ class Trip {
       country: country ?? this.country,
       city: city ?? this.city,
       description: description ?? this.description,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
       version: version ?? this.version,
       published: published ?? this.published,
       days: days ?? this.days,
@@ -107,7 +123,7 @@ class Trip {
   /// Create a Trip from JSON
   factory Trip.fromJson(Map<String, dynamic> json) {
     final trip = _$TripFromJson(json);
-    // Определяем статус на основе дат
+    // Determine status based on dates
     final now = DateTime.now();
     TripStatus status;
     if (trip.startDate.isAfter(now)) {
@@ -127,7 +143,10 @@ class Trip {
   /// Convert Trip to JSON
   Map<String, dynamic> toJson() => _$TripToJson(this);
 
-  getLocationsForDay(int selectedDayNumber) {}
+  /// Get locations for a specific day
+  List<TripLocation> getLocationsForDay(int dayNumber) {
+    return locations.where((location) => location.dayNumber == dayNumber).toList();
+  }
 }
 
 /// Enum representing the status of a trip

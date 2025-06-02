@@ -185,30 +185,7 @@ class TripPublishingViewModel extends ChangeNotifier {
       // Simulating API call with mock data
       await Future.delayed(const Duration(milliseconds: 500));
       
-      _trips.addAll([
-        Trip(
-          id: 1,
-          name: 'Париж 2025', 
-          startDate: DateTime(2025, 5, 1), 
-          endDate: DateTime(2025, 5, 7), 
-          status: TripStatus.upcoming, 
-          imageUrl: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?q=80&w=2073&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-          destination: 'Париж, Франция',
-          days: [],
-          locations: []
-        ),
-        Trip(
-          id: 2,
-          name: 'Бали 2025', 
-          startDate: DateTime(2025, 7, 1), 
-          endDate: DateTime(2025, 7, 14), 
-          status: TripStatus.upcoming, 
-          imageUrl: 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?q=80&w=2938&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-          destination: 'Бали, Индонезия',
-          days: [],
-          locations: []
-        ),
-      ]);
+      _trips.addAll([]);
       
       _errorMessage = null;
     } catch (e) {

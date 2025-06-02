@@ -55,20 +55,20 @@ class TripDetailViewModel with ChangeNotifier {
         final trip = Trip.fromJson(tripResponse);
         
         // Получить все события поездки
-        final eventsResponse = await _tripService.getTripEvents(tripId);
-        final events = eventsResponse.map((eventData) => TripEvent(
-          id: eventData['eventId'].toString(),
-          time: eventData['startTime'] ?? '00:00',
-          title: eventData['title'] ?? 'Без названия',
-          address: eventData['place']?['address'] ?? '',
-          day: DateTime.parse(eventData['day']['date']),
-        )).toList();
+        // final eventsResponse = await _tripService.getTripEvents(tripId);
+        // final events = eventsResponse.map((eventData) => TripEvent(
+        //   id: eventData['eventId'].toString(),
+        //   time: eventData['startTime'] ?? '00:00',
+        //   title: eventData['title'] ?? 'Без названия',
+        //   address: eventData['place']?['address'] ?? '',
+        //   day: DateTime.parse(eventData['day']['date']),
+        // )).toList();
         
-        _tripDetail = TripDetail(trip: trip, events: events);
+        _tripDetail = TripDetail(trip: trip, events: []);
         
         // Select the first day by default
-        if (_tripDetail != null && _tripDetail!.days.isNotEmpty) {
-          _selectedDay = _tripDetail!.days.first;
+        if (_tripDetail != null && _tripDetail!.trip.days.isNotEmpty) {
+          _selectedDay = _tripDetail!.trip.days.first.date;
         }
       } else {
         _errorMessage = 'Поездка не найдена';

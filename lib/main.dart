@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
 import 'package:putevod/model/app_colors.dart';
 import 'package:putevod/view-model/loading_view_model.dart';
@@ -29,6 +30,8 @@ Future<void> main() async {
     // Если .env файл не найден, используем значения по умолчанию
     print('Warning: .env file not found, using default values');
   }
+
+  initializeDateFormatting('ru_ru', null);
   
   runApp(const MyApp());
 }
