@@ -73,7 +73,9 @@ class TodoAICreationViewModel extends ChangeNotifier {
     // We assume completedTasks and totalTasks will be 0 initially.
     _todoListViewModel.updateTodoList(
       newTodoListId,
-      title: title,
+      {
+
+      }
       // completedTasks and totalTasks will default to 0 based on createNewTodoList
       // or can be explicitly set if your updateTodoList handles it.
     );

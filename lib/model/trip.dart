@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:putevod/model/trip_day.dart';
+import 'package:putevod/model/trip_location.dart';
 
 part 'trip.g.dart';
 
@@ -24,7 +26,7 @@ class Trip {
   final TripStatus status;
   
   /// URL of the trip image
-  final String? imageUrl;
+  final String imageUrl;
   
   /// Destination of the trip
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -38,6 +40,10 @@ class Trip {
   
   /// Description of the trip
   final String description;
+
+  final List<TripDay> days;
+
+  final List<TripLocation> locations;
   
   /// Version for conflict resolution
   final int? version;
@@ -51,8 +57,10 @@ class Trip {
     required this.name,
     required this.startDate,
     required this.endDate,
+    required this.days,
+    required this.locations,
     this.status = TripStatus.upcoming,
-    this.imageUrl,
+    required this.imageUrl,
     this.destination = '',
     this.country = '',
     this.city = '',
@@ -75,6 +83,8 @@ class Trip {
     String? description,
     int? version,
     bool? published,
+    List<TripDay>? days,
+    List<TripLocation>? locations,
   }) {
     return Trip(
       id: id ?? this.id,
@@ -89,6 +99,8 @@ class Trip {
       description: description ?? this.description,
       version: version ?? this.version,
       published: published ?? this.published,
+      days: days ?? this.days,
+      locations: locations ?? this.locations,
     );
   }
   
@@ -114,6 +126,8 @@ class Trip {
   
   /// Convert Trip to JSON
   Map<String, dynamic> toJson() => _$TripToJson(this);
+
+  getLocationsForDay(int selectedDayNumber) {}
 }
 
 /// Enum representing the status of a trip

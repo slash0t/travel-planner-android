@@ -196,7 +196,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => TripCreationScreen(
-        tripToEdit: _viewModel.currentTrip,
+        tripToEdit: _viewModel.tripDetail?.trip,
       )),
     );
   }
@@ -206,7 +206,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       context,
       MaterialPageRoute(
         builder: (context) => TripSharingScreen(
-          trip: _viewModel.currentTrip,
+          trip: _viewModel.tripDetail!.trip,
         ),
       ),
     );

@@ -87,7 +87,7 @@ class TripMapViewModel extends ChangeNotifier {
   /// Constructor that creates a mock trip for testing
   TripMapViewModel() {
     _trip = Trip(
-        id: '1',
+        id: 1,
         name: 'Путешествие в Париж',
         startDate: DateTime(2025, 3, 15),
         endDate: DateTime(2025, 3, 22),

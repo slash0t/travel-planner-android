@@ -11,12 +11,14 @@ Trip _$TripFromJson(Map<String, dynamic> json) => Trip(
       name: json['title'] as String,
       startDate: DateTime.parse(json['startDate'] as String),
       endDate: DateTime.parse(json['endDate'] as String),
-      imageUrl: json['imageUrl'] as String?,
+      imageUrl: json['imageUrl'] as String,
       country: json['country'] as String? ?? '',
       city: json['city'] as String? ?? '',
       description: json['description'] as String? ?? '',
       version: (json['version'] as num?)?.toInt(),
       published: json['published'] as bool?,
+      days: [],
+      locations: [],
     );
 
 Map<String, dynamic> _$TripToJson(Trip instance) => <String, dynamic>{

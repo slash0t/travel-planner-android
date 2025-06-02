@@ -187,7 +187,7 @@ class TripPublishingViewModel extends ChangeNotifier {
       
       _trips.addAll([
         Trip(
-          id: '1', 
+          id: 1,
           name: 'Париж 2025', 
           startDate: DateTime(2025, 5, 1), 
           endDate: DateTime(2025, 5, 7), 
@@ -198,7 +198,7 @@ class TripPublishingViewModel extends ChangeNotifier {
           locations: []
         ),
         Trip(
-          id: '2', 
+          id: 2,
           name: 'Бали 2025', 
           startDate: DateTime(2025, 7, 1), 
           endDate: DateTime(2025, 7, 14), 

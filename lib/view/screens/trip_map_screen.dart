@@ -40,7 +40,7 @@ class _TripMapView extends StatelessWidget {
           _buildMap(viewModel),
           
           // Header with back button and trip title
-          _buildHeader(context, trip.formattedTitle),
+          _buildHeader(context, trip.city),
           
           // Day selector tabs
           //_buildDaySelector(context, viewModel),

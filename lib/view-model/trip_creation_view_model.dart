@@ -153,7 +153,7 @@ class TripCreationViewModel extends ChangeNotifier {
         city: cityController.text,
         description: descriptionController.text,
         days: [],
-        locations: []
+        locations: [],
       );
     }
   }
