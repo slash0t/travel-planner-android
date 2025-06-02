@@ -61,6 +61,7 @@ class TripsViewModel extends ChangeNotifier {
       // }
 
       _trips = tripsData.map<Trip>((tripData) => Trip.fromJson(tripData)).toList();
+      _trips.sort((a, b) => Trip.compareTwo(a, b));
     } catch (e) {
       _errorMessage = e.toString();
     } finally {
@@ -79,6 +80,7 @@ class TripsViewModel extends ChangeNotifier {
       final response = await _tripService.getUserTrips(filter: filter, page: page, size: size);
       final List<dynamic> tripsData = response['content'] ?? [];
       _trips = tripsData.map((tripData) => Trip.fromJson(tripData)).toList();
+      _trips.sort((a, b) => Trip.compareTwo(a, b));
     } catch (e) {
       _errorMessage = e.toString();
     } finally {
@@ -177,7 +179,7 @@ class TripsViewModel extends ChangeNotifier {
       case TripStatus.ongoing:
         return const Color(0xFF84BA83); // Green
       case TripStatus.completed:
-        return const Color(0xFF4B5563); // Gray
+        return AppColors.red; // Gray
     }
   }
 

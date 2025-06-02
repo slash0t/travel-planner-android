@@ -147,6 +147,22 @@ class Trip {
   List<TripLocation> getLocationsForDay(int dayNumber) {
     return locations.where((location) => location.dayNumber == dayNumber).toList();
   }
+
+  static int compareTwo(Trip a, Trip b) {
+    if (a.status == b.status) {
+      return a.startDate.compareTo(b.startDate);
+    }
+
+    if (a.status == TripStatus.ongoing) {
+      return -1;
+    } else if (b.status == TripStatus.ongoing) {
+      return 1;
+    } else if (a.status == TripStatus.upcoming) {
+      return -1;
+    } else {
+      return 1;
+    }
+  }
 }
 
 /// Enum representing the status of a trip
