@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 /// ViewModel for the profile screen
 class ProfileViewModel extends ChangeNotifier {
   final ApiClient _plannerClient = ApiClients.planner;
+  final ApiClient _authClient = ApiClients.auth;
 
   String _usernameShown = '';
   String _username = '';
@@ -96,6 +97,7 @@ class ProfileViewModel extends ChangeNotifier {
 
         // Fetch trips count
         await fetchTripsCount();
+        await fetchPlacesCount();
       } else {
         // Handle error
         print('Failed to load profile: ${userResponse.statusCode}');
@@ -111,14 +113,27 @@ class ProfileViewModel extends ChangeNotifier {
   /// Fetches trips count from backend
   Future<void> fetchTripsCount() async {
     try {
-      final tripsResponse = await _plannerClient.get("/trips");
-      // final tripsResponse = await http.get(
-      //   Uri.parse('https://putevod-app.ru/planner/api/v1/trips'),
-      // );
+      final tripsResponse = await _plannerClient.get("/trips/stats/total-count");
       
       if (tripsResponse.statusCode == 200) {
         final tripsData = tripsResponse.data;
-        _tripsCount = tripsData['totalElements'] as int;
+        _tripsCount = tripsData as int;
+        notifyListeners();
+      } else {
+        print('Failed to load trips: ${tripsResponse.statusCode}');
+      }
+    } catch (e) {
+      print('Error fetching trips data: $e');
+    }
+  }
+
+  Future<void> fetchPlacesCount() async {
+    try {
+      final tripsResponse = await _plannerClient.get("/trips/stats/total-places");
+
+      if (tripsResponse.statusCode == 200) {
+        final tripsData = tripsResponse.data;
+        _placesCount = tripsData as int;
         notifyListeners();
       } else {
         print('Failed to load trips: ${tripsResponse.statusCode}');
@@ -167,8 +182,8 @@ class ProfileViewModel extends ChangeNotifier {
         'email': emailController.text,
       };
       
-      final response = await _plannerClient.put(
-        '/users/me',
+      final response = await _authClient.put(
+        '/profile',
         data: updateData,
       );
       
