@@ -28,9 +28,9 @@ class TripsViewModel extends ChangeNotifier {
   List<Trip> get trips => List.unmodifiable(_trips);
   
   /// Get filtered trips based on status
-  List<Trip> get filteredTrips => 
-      _trips.where((trip) => trip.status == _currentFilter).toList();
-      
+  List<Trip> get filteredTrips => _trips;
+      // _trips.where((trip) => trip.status == _currentFilter).toList();
+
   /// Get loading state
   bool get isLoading => _isLoading;
   
@@ -44,22 +44,23 @@ class TripsViewModel extends ChangeNotifier {
     notifyListeners();
     
     try {
-      List<dynamic> tripsData;
+      final response = await _tripService.getUserTrips();
+      final List<dynamic> tripsData = response['content'] ?? [];
       
       // Загружаем разные типы поездок в зависимости от фильтра
-      switch (_currentFilter) {
-        case TripStatus.upcoming:
-          tripsData = await _tripService.getUpcomingTrips();
-          break;
-        case TripStatus.ongoing:
-          tripsData = await _tripService.getOngoingTrips();
-          break;
-        case TripStatus.completed:
-          tripsData = await _tripService.getPastTrips();
-          break;
-      }
-      
-      _trips = tripsData.map((tripData) => Trip.fromJson(tripData)).toList();
+      // switch (_currentFilter) {
+      //   case TripStatus.upcoming:
+      //     tripsData = await _tripService.getUpcomingTrips();
+      //     break;
+      //   case TripStatus.ongoing:
+      //     tripsData = await _tripService.getOngoingTrips();
+      //     break;
+      //   case TripStatus.completed:
+      //     tripsData = await _tripService.getPastTrips();
+      //     break;
+      // }
+
+      _trips = tripsData.map<Trip>((tripData) => Trip.fromJson(tripData)).toList();
     } catch (e) {
       _errorMessage = e.toString();
     } finally {
