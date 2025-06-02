@@ -17,12 +17,19 @@ import 'package:putevod/view/widgets/app_header_view_model.dart';
 import 'package:putevod/view-model/login_view_model.dart';
 import 'package:putevod/view-model/registration_view_model.dart';
 import 'package:putevod/view-model/password_recovery_view_model.dart';
-import 'package:intl/date_symbol_data_local.dart';
+import 'package:putevod/view-model/library_view_model.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await initializeDateFormatting('ru', null);
-  await dotenv.load(fileName: '.env');
+  
+  // Загружаем переменные окружения
+  try {
+    await dotenv.load(fileName: '.env');
+  } catch (e) {
+    // Если .env файл не найден, используем значения по умолчанию
+    print('Warning: .env file not found, using default values');
+  }
+  
   runApp(const MyApp());
 }
 
@@ -46,9 +53,9 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => PasswordRecoveryViewModel()),
         ChangeNotifierProvider(create: (_) => TripCreationViewModel()),
         ChangeNotifierProvider(create: (_) => TripDetailViewModel()),
+        ChangeNotifierProvider(create: (_) => LibraryViewModel()),
       ],
       child: MaterialApp(
-        debugShowCheckedModeBanner: false,
         title: 'Putevod',
         theme: ThemeData(
           primaryColor: AppColors.accent,

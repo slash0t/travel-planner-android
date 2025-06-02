@@ -1,126 +1,19 @@
 import 'package:flutter/foundation.dart';
-import 'package:latlong2/latlong.dart';
 import 'package:putevod/model/trip.dart';
 import 'package:flutter/material.dart';
 import 'package:putevod/model/app_colors.dart';
-import 'package:putevod/model/trip_location.dart';
-
-import '../model/trip_day.dart';
+import 'package:putevod/external/trip_service.dart';
 
 /// ViewModel for the trips screen
 class TripsViewModel extends ChangeNotifier {
+  final TripService _tripService = TripService();
+  
   TripStatus _currentFilter = TripStatus.upcoming;
+  bool _isLoading = false;
+  String? _errorMessage;
   
   /// List of all trips
-  final List<Trip> _trips = [
-    Trip(
-      id: '1',
-      name: 'Путешествие в Париж',
-      startDate: DateTime(2025, 6, 15),
-      endDate: DateTime(2025, 6, 18),
-      status: TripStatus.upcoming,
-      imageUrl: 'assets/images/paris.jpg',
-      destination: 'Париж, Франция',
-      days: [
-        TripDay(
-          id: '1',
-          dayNumber: 1,
-          name: 'day 1',
-          color: AppColors.accent
-        ),
-        TripDay(
-            id: '2',
-            dayNumber: 2,
-            name: 'day 2',
-            color: AppColors.accent
-        )
-      ],
-      locations: [
-        TripLocation(
-            id: '1',
-            name: 'name',
-            coordinates: const LatLng(55.751670, 37.629053),
-            dayNumber: 1,
-            startTime: 'utro',
-            endTime: 'utro tozhe',
-            orderInDay: 1
-        ),
-        TripLocation(
-            id: '2',
-            name: 'name1',
-            coordinates: const LatLng(55.751673, 37.629052),
-            dayNumber: 1,
-            startTime: 'utro',
-            endTime: 'utro tozhe',
-            orderInDay: 2
-        ),
-        TripLocation(
-            id: '3',
-            name: 'name2',
-            coordinates: const LatLng(55.751677, 37.629023),
-            dayNumber: 2,
-            startTime: 'utro',
-            endTime: 'utro tozhe',
-            orderInDay: 1
-        ),
-      ]
-    ),
-    Trip(
-      id: '2',
-      name: 'Выходные в Барселоне',
-      startDate: DateTime(2024, 12, 10),
-      endDate: DateTime(2024, 12, 12),
-      status: TripStatus.completed,
-      imageUrl: 'assets/images/barcelona.jpg',
-      destination: 'Барселона, Испания',
-      days: [],
-      locations: []
-    ),
-    Trip(
-      id: '3',
-      name: 'Поездка в Рим',
-      startDate: DateTime(2023, 6, 10),
-      endDate: DateTime(2023, 6, 20),
-      status: TripStatus.completed,
-      imageUrl: 'assets/images/rome.jpg',
-      destination: 'Рим, Италия',
-      days: [],
-      locations: []
-    ),
-    Trip(
-      id: '4',
-      name: 'Тур по Японии',
-      startDate: DateTime(2023, 7, 5),
-      endDate: DateTime(2023, 7, 20),
-      status: TripStatus.completed,
-      imageUrl: 'assets/images/japan.jpg',
-      destination: 'Токио, Япония',
-      days: [],
-      locations: []
-    ),
-    Trip(
-      id: '5',
-      name: 'Поездка в Грецию',
-      startDate: DateTime(2022, 10, 5),
-      endDate: DateTime(2022, 10, 15),
-      status: TripStatus.completed,
-      imageUrl: 'assets/images/greece.jpg',
-      destination: 'Афины, Греция',
-      days: [],
-      locations: []
-    ),
-    Trip(
-      id: '6',
-      name: 'Отдых в Турции',
-      startDate: DateTime(2022, 8, 10),
-      endDate: DateTime(2022, 8, 20),
-      status: TripStatus.completed,
-      imageUrl: 'assets/images/turkey.jpg',
-      destination: 'Стамбул, Турция',
-      days: [],
-      locations: []
-    ),
-  ];
+  List<Trip> _trips = [];
 
   /// Get the current filter
   TripStatus get currentFilter => _currentFilter;
@@ -137,17 +30,117 @@ class TripsViewModel extends ChangeNotifier {
   /// Get filtered trips based on status
   List<Trip> get filteredTrips => 
       _trips.where((trip) => trip.status == _currentFilter).toList();
+      
+  /// Get loading state
+  bool get isLoading => _isLoading;
+  
+  /// Get error message
+  String? get errorMessage => _errorMessage;
+  
+  /// Load trips from API
+  Future<void> loadTrips({bool forceRefresh = false}) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+    
+    try {
+      List<dynamic> tripsData;
+      
+      // Загружаем разные типы поездок в зависимости от фильтра
+      switch (_currentFilter) {
+        case TripStatus.upcoming:
+          tripsData = await _tripService.getUpcomingTrips();
+          break;
+        case TripStatus.ongoing:
+          tripsData = await _tripService.getOngoingTrips();
+          break;
+        case TripStatus.completed:
+          tripsData = await _tripService.getPastTrips();
+          break;
+      }
+      
+      _trips = tripsData.map((tripData) => Trip.fromJson(tripData)).toList();
+    } catch (e) {
+      _errorMessage = e.toString();
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  /// Load all trips regardless of status
+  Future<void> loadAllTrips({String filter = 'all', int page = 0, int size = 20}) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+    
+    try {
+      final response = await _tripService.getUserTrips(filter: filter, page: page, size: size);
+      final List<dynamic> tripsData = response['content'] ?? [];
+      _trips = tripsData.map((tripData) => Trip.fromJson(tripData)).toList();
+    } catch (e) {
+      _errorMessage = e.toString();
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
 
   /// Creates a new trip
-  void createTrip(Trip trip) {
-    _trips.add(trip);
-    notifyListeners();
+  Future<void> createTrip(Map<String, dynamic> tripData) async {
+    try {
+      await _tripService.createTrip(tripData);
+      await loadTrips();
+    } catch (e) {
+      _errorMessage = e.toString();
+      notifyListeners();
+    }
   }
 
   /// Deletes a trip by id
-  void deleteTrip(String id) {
-    _trips.removeWhere((trip) => trip.id == id);
-    notifyListeners();
+  Future<void> deleteTrip(int id) async {
+    try {
+      await _tripService.deleteTrip(id);
+      _trips.removeWhere((trip) => trip.id == id);
+      notifyListeners();
+    } catch (e) {
+      _errorMessage = e.toString();
+      notifyListeners();
+    }
+  }
+
+  /// Update an existing trip in the list
+  Future<void> updateTrip(int tripId, Map<String, dynamic> tripData) async {
+    try {
+      await _tripService.updateTrip(tripId, tripData);
+      await loadTrips();
+    } catch (e) {
+      _errorMessage = e.toString();
+      notifyListeners();
+    }
+  }
+
+  /// Share a trip
+  Future<void> shareTrip(int tripId, Map<String, dynamic> accessData) async {
+    try {
+      await _tripService.shareTrip(tripId, accessData);
+      // Уведомляем об успешном шеринге
+      notifyListeners();
+    } catch (e) {
+      _errorMessage = e.toString();
+      notifyListeners();
+    }
+  }
+
+  /// Publish a trip
+  Future<void> publishTrip(int tripId, bool publish) async {
+    try {
+      await _tripService.publishTrip(tripId, publish);
+      await loadTrips(); // Перезагружаем список
+    } catch (e) {
+      _errorMessage = e.toString();
+      notifyListeners();
+    }
   }
 
   /// Returns a human-readable date range for a trip
@@ -188,19 +181,13 @@ class TripsViewModel extends ChangeNotifier {
   }
 
   /// Add a new trip to the list
-  void addTrip(Trip trip) {
-    _trips.add(trip);
-    notifyListeners();
-    // TODO: Add trip to database
+  Future<void> addTrip(Map<String, dynamic> tripData) async {
+    await createTrip(tripData);
   }
-
-  /// Update an existing trip in the list
-  void updateTrip(Trip updatedTrip) {
-    final index = _trips.indexWhere((trip) => trip.id == updatedTrip.id);
-    if (index != -1) {
-      _trips[index] = updatedTrip;
-      notifyListeners();
-      // TODO: Update trip in database
-    }
+  
+  /// Clear error message
+  void clearError() {
+    _errorMessage = null;
+    notifyListeners();
   }
 } 

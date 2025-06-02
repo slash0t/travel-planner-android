@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:putevod/model/trip.dart';
-import 'package:uuid/uuid.dart';
+import 'package:putevod/external/trip_service.dart';
 
 /// View model for trip creation and editing
 class TripCreationViewModel extends ChangeNotifier {
+  final TripService _tripService = TripService();
+  
   /// Text controller for trip name input
   final TextEditingController nameController = TextEditingController();
   
@@ -111,14 +113,22 @@ class TripCreationViewModel extends ChangeNotifier {
   /// Saves the trip data
   Future<Trip> saveTrip() async {
     if (_startDate == null || _endDate == null) {
-      throw Exception('Trip dates must be set');
+      throw Exception('Даты поездки должны быть заданы');
     }
 
-    Trip trip;
+    final tripData = {
+      'title': nameController.text,
+      'startDate': _startDate!.toIso8601String(),
+      'endDate': _endDate!.toIso8601String(),
+      'country': countryController.text,
+      'city': cityController.text,
+      'description': descriptionController.text,
+    };
     
     if (isEditingMode && _tripToEdit != null) {
       // Update existing trip
-      trip = _tripToEdit!.copyWith(
+      await _tripService.updateTrip(_tripToEdit!.id, tripData);
+      return _tripToEdit!.copyWith(
         name: nameController.text,
         startDate: _startDate!,
         endDate: _endDate!,
@@ -128,14 +138,16 @@ class TripCreationViewModel extends ChangeNotifier {
       );
     } else {
       // Create new trip
-      final String id = const Uuid().v4();
-      trip = Trip(
-        id: id,
+      final response = await _tripService.createTrip(tripData);
+      
+      // Return a trip object with the real ID from server
+      return Trip(
+        id: response['tripId'] ?? 0,
         name: nameController.text,
         startDate: _startDate!,
         endDate: _endDate!,
         status: TripStatus.upcoming,
-        imageUrl: '', // Default image
+        imageUrl: '',
         destination: '${cityController.text}, ${countryController.text}',
         country: countryController.text,
         city: cityController.text,
@@ -144,10 +156,6 @@ class TripCreationViewModel extends ChangeNotifier {
         locations: []
       );
     }
-    
-    // TODO: Save trip to database or state management
-    
-    return trip;
   }
   
   @override

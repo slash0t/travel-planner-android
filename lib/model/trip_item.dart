@@ -19,9 +19,6 @@ class TripItem {
   
   /// Number of reviews
   final int reviewCount;
-  
-  /// Whether the trip is favorited by the user
-  final bool isFavorite;
 
   /// Creates a trip item
   const TripItem({
@@ -31,7 +28,6 @@ class TripItem {
     required this.imageUrl,
     this.rating = 0,
     this.reviewCount = 0,
-    this.isFavorite = false,
   });
 
   /// Creates a copy of this item with the given fields replaced
@@ -42,7 +38,6 @@ class TripItem {
     String? imageUrl,
     double? rating,
     int? reviewCount,
-    bool? isFavorite,
   }) {
     return TripItem(
       id: id ?? this.id,
@@ -51,7 +46,6 @@ class TripItem {
       imageUrl: imageUrl ?? this.imageUrl,
       rating: rating ?? this.rating,
       reviewCount: reviewCount ?? this.reviewCount,
-      isFavorite: isFavorite ?? this.isFavorite,
     );
   }
 } 

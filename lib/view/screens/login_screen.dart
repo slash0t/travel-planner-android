@@ -128,6 +128,32 @@ class LoginScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 20),
+                // Показываем ошибки если есть
+                if (viewModel.errorMessage != null)
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    margin: const EdgeInsets.only(bottom: 20),
+                    decoration: BoxDecoration(
+                      color: Colors.red.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.red.withOpacity(0.3)),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.error_outline, color: Colors.red, size: 20),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            viewModel.errorMessage!,
+                            style: const TextStyle(
+                              color: Colors.red,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ElevatedButton(
                   onPressed: viewModel.isLoading
                       ? null
@@ -147,14 +173,23 @@ class LoginScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
-                  child: const Text(
-                    'Войти',
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 22,
-                      fontFamily: 'NotoSans',
-                    ),
-                  ),
+                  child: viewModel.isLoading
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            color: Colors.black,
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : const Text(
+                          'Войти',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 22,
+                            fontFamily: 'NotoSans',
+                          ),
+                        ),
                 ),
                 const SizedBox(height: 10),
                 const Row(

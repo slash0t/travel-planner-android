@@ -137,7 +137,7 @@ class PlaceEditingViewModel extends ChangeNotifier {
       
       // Placeholder implementation - replace with actual API call
       _place = Place(
-        id: placeId,
+        id: int.parse(placeId),
         name: 'Sample Place',
         type: PlaceType.place,
         hasTime: true,

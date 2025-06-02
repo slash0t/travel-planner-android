@@ -4,6 +4,8 @@ import 'package:putevod/view/screens/login_screen.dart';
 import 'package:putevod/model/app_colors.dart';
 import 'package:putevod/view-model/password_recovery_view_model.dart';
 
+import '../widgets/password_field.dart';
+
 class PasswordRecoveryScreen extends StatelessWidget {
   const PasswordRecoveryScreen({super.key});
 
@@ -167,70 +169,14 @@ class PasswordRecoveryScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 20),
-                TextField(
-                  onChanged: (value) => viewModel.setNewPassword(value),
-                  obscureText: true,
-                  decoration: InputDecoration(
-                    labelText: 'Новый пароль',
-                    labelStyle: const TextStyle(
-                      color: Color(0xFF9A9A9A),
-                      fontFamily: 'NotoSans',
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(
-                        color: Color(0xFFD9D9D9),
-                      ),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(
-                        color: AppColors.accent,
-                        width: 2.0,
-                      ),
-                    ),
-                    floatingLabelStyle: const TextStyle(
-                      color: AppColors.accent,
-                      fontFamily: 'NotoSans',
-                    ),
-                    suffixIcon: const Icon(
-                      Icons.visibility_off,
-                      color: Color(0xFF9A9A9A),
-                    ),
-                  ),
+                PasswordField(
+                    onChanged: (value) => viewModel.setNewPassword(value),
+                    label: 'Новый пароль'
                 ),
                 const SizedBox(height: 20),
-                TextField(
-                  onChanged: (value) => viewModel.setConfirmPassword(value),
-                  obscureText: true,
-                  decoration: InputDecoration(
-                    labelText: 'Подтвердите новый пароль',
-                    labelStyle: const TextStyle(
-                      color: Color(0xFF9A9A9A),
-                      fontFamily: 'NotoSans',
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(
-                        color: Color(0xFFD9D9D9),
-                      ),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(
-                        color: AppColors.accent,
-                        width: 2.0,
-                      ),
-                    ),
-                    floatingLabelStyle: const TextStyle(
-                      color: AppColors.accent,
-                      fontFamily: 'NotoSans',
-                    ),
-                    suffixIcon: const Icon(
-                      Icons.visibility_off,
-                      color: Color(0xFF9A9A9A),
-                    ),
-                  ),
+                PasswordField(
+                    onChanged: (value) => viewModel.setConfirmPassword(value),
+                    label: 'Подтвердите новый пароль'
                 ),
                 const SizedBox(height: 20),
                 ElevatedButton(
@@ -328,13 +274,7 @@ class PasswordRecoveryScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(height: 12),
-                const Divider(
-                  color: Color(0xFF494949),
-                  thickness: 5,
-                  indent: 130,
-                  endIndent: 130,
-                ),
+                const SizedBox(height: 20),
               ],
             ),
           ),

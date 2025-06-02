@@ -6,6 +6,8 @@ import 'package:putevod/view-model/profile_view_model.dart';
 import 'package:putevod/view/widgets/app_header.dart';
 import 'package:putevod/view/widgets/app_bottom_navigation.dart';
 
+import '../widgets/basic_text_field.dart';
+
 /// Profile screen implementation matching design
 class ProfileScreen extends StatefulWidget {
   /// Creates a profile screen
@@ -16,25 +18,17 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  final TextEditingController _nicknameController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  
   @override
   void initState() {
     super.initState();
-    // Initialize controllers with current values from view model
-    final profileViewModel = Provider.of<ProfileViewModel>(context, listen: false);
-    _nicknameController.text = profileViewModel.nickname;
-    _emailController.text = profileViewModel.email;
-    _passwordController.text = profileViewModel.password;
+    // Ensure profile data is fetched when screen is initialized
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<ProfileViewModel>(context, listen: false).fetchProfileData();
+    });
   }
   
   @override
   void dispose() {
-    _nicknameController.dispose();
-    _emailController.dispose();
-    _passwordController.dispose();
     super.dispose();
   }
 
@@ -52,7 +46,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
               showBackButton: false,
             ),
             Expanded(
-              child: SingleChildScrollView(
+              child: profileViewModel.isLoading 
+              ? const Center(child: CircularProgressIndicator(color: AppColors.accent)) 
+              : SingleChildScrollView(
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
@@ -61,10 +57,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       _buildUserProfile(profileViewModel),
                       const SizedBox(height: 16),
                       _buildStatistics(profileViewModel),
-                      const SizedBox(height: 15),
-                      _buildEditProfileButton(),
-                      const SizedBox(height: 12),
-                      _buildEditableFields(),
+                      const SizedBox(height: 20),
+                      _buildEditableFields(profileViewModel),
                       const SizedBox(height: 20),
                       _buildSaveButton(profileViewModel),
                     ],
@@ -110,7 +104,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  viewModel.name,
+                  viewModel.usernameShown,
                   style: const TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -162,8 +156,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _buildStatItem('Путешествия', viewModel.tripsCount, const Color(0xFF4850D3)),
           const SizedBox(width: 16),
           _buildStatItem('Места', viewModel.placesCount, const Color(0xFF84BA83)),
-          const SizedBox(width: 16),
-          _buildStatItem('Фото', viewModel.photosCount, const Color(0xFFF1C021)),
+          // const SizedBox(width: 16),
+          // _buildStatItem('Фото', viewModel.photosCount, const Color(0xFFF1C021)),
         ],
       ),
     );
@@ -203,37 +197,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
   
-  Widget _buildEditProfileButton() {
-    return Container(
-      width: double.infinity,
-      height: 50,
-      decoration: BoxDecoration(
-        color: AppColors.accent,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: const Center(
-        child: Text(
-          'Редактировать профиль',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.w500,
-            fontFamily: 'NotoSans',
-          ),
-        ),
-      ),
-    );
-  }
-  
-  Widget _buildEditableFields() {
+  Widget _buildEditableFields(ProfileViewModel viewModel) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildInputField('Никнейм', _nicknameController),
+        _buildInputField('Никнейм', viewModel.usernameController),
         const SizedBox(height: 16),
-        _buildInputField('Email', _emailController),
-        const SizedBox(height: 16),
-        _buildInputField('Пароль', _passwordController, isPassword: true),
+        _buildInputField('Email',  viewModel.emailController),
       ],
     );
   }
@@ -242,58 +212,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            fontFamily: 'NotoSans',
-          ),
-        ),
-        const SizedBox(height: 8),
         Container(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 0),
-            /*child: TextField(
-              controller: controller,
-              obscureText: isPassword,
-              decoration: const InputDecoration(
-                border: InputBorder.none,
-                contentPadding: EdgeInsets.symmetric(vertical: 12),
-              ),
-              style: TextStyle(
-                fontSize: 16,
-                color: const Color(0xFF545454).withOpacity(0.9),
-                fontFamily: 'NotoSans',
-              ),
-            ),*/
-            child: TextField(
-              controller: controller,
-              obscureText: isPassword,
-              decoration: InputDecoration(
-                labelStyle: const TextStyle(
-                  color: Color(0xFF9A9A9A),
-                  fontFamily: 'NotoSans',
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: const BorderSide(
-                    color: Color(0xFFD9D9D9),
-                  ),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: const BorderSide(
-                    color: Color(0xFFEA2517),
-                    width: 2.0,
-                  ),
-                ),
-                floatingLabelStyle: const TextStyle(
-                  color: Color(0xFFEA2517),
-                  fontFamily: 'NotoSans',
-                ),
-              ),
-            ),
+            child: BasicTextField(label:label, controller: controller)
           ),
         ),
       ],
@@ -302,11 +224,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   
   Widget _buildSaveButton(ProfileViewModel viewModel) {
     return GestureDetector(
-      onTap: () async {
-        // Update view model with edited values
-        viewModel.updateNickname(_nicknameController.text);
-        viewModel.updateEmail(_emailController.text);
-        viewModel.updatePassword(_passwordController.text);
+      onTap: viewModel.isLoading ? null : () async {
+        // No need to update the view model with edited values as controllers are directly used
         
         // Save changes
         bool success = await viewModel.saveChanges();
@@ -317,25 +236,41 @@ class _ProfileScreenState extends State<ProfileScreen> {
               backgroundColor: Colors.green,
             ),
           );
+        } else if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Ошибка при сохранении профиля'),
+              backgroundColor: Colors.red,
+            ),
+          );
         }
       },
       child: Container(
         width: double.infinity,
         height: 50,
         decoration: BoxDecoration(
-          color: AppColors.accent,
+          color: viewModel.isLoading ? AppColors.accent.withOpacity(0.7) : AppColors.accent,
           borderRadius: BorderRadius.circular(10),
         ),
-        child: const Center(
-          child: Text(
-            'Сохранить изменения',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.w500,
-              fontFamily: 'NotoSans',
-            ),
-          ),
+        child: Center(
+          child: viewModel.isLoading
+            ? const SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(
+                  color: Colors.white,
+                  strokeWidth: 2.0,
+                ),
+              )
+            : const Text(
+                'Сохранить изменения',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w500,
+                  fontFamily: 'NotoSans',
+                ),
+              ),
         ),
       ),
     );

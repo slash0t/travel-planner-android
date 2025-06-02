@@ -1,82 +1,43 @@
 import 'package:flutter/material.dart';
 import 'package:putevod/model/app_colors.dart';
 import 'package:putevod/model/trip_item.dart';
-import 'package:putevod/model/library_trip.dart';
-import 'package:putevod/view/screens/library_trip_detail_screen.dart';
 
 /// A card widget to display a trip in the search results
 class TripCardWidget extends StatelessWidget {
   /// The trip item to display
   final TripItem trip;
   
-  /// Callback when the favorite button is pressed
-  final Function(String) onFavoriteToggle;
+  /// Callback when the copy trip button is pressed
+  final Function(String) onCopyTrip;
 
   /// Creates a trip card widget
   const TripCardWidget({
     super.key,
     required this.trip,
-    required this.onFavoriteToggle,
+    required this.onCopyTrip,
   });
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => _onClick(context),
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              offset: const Offset(0, 1),
-              blurRadius: 2,
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildTripImage(),
-            _buildTripInfo(),
-          ],
-        ),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            offset: const Offset(0, 1),
+            blurRadius: 2,
+          ),
+        ],
       ),
-    );
-  }
-
-  void _onClick(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => TripDetailsScreen(trip: new LibraryTrip(
-          tripName: trip.title,
-          tripDescription: trip.description,
-          authorName: "Иван Иванов",
-          authorTitle: "Путешественник",
-          duration: 2,
-          citiesCount: 1,
-          placesCount: 10,
-          rating: 4.6,
-          imageUrl: trip.imageUrl,
-          dailyPlans: [
-            const DailyPlan(
-              day: 1,
-              city: "Воронеж",
-              details: "Детали"
-            ),
-          ],
-          reviews: [
-            const TripReview(
-              rating: 4,
-              reviewerName: "Иван Иванов",
-              reviewText: "Отличный маршрут! Все достопримечательности подобраны идеально.",
-              avatarUrl: "https://via.placeholder.com/150"
-            )
-          ],
-        )),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildTripImage(),
+          _buildTripInfo(),
+        ],
       ),
     );
   }
@@ -89,8 +50,8 @@ class TripCardWidget extends StatelessWidget {
             topLeft: Radius.circular(12),
             topRight: Radius.circular(12),
           ),
-          child: Image(
-            image: NetworkImage(trip.imageUrl),
+          child: Image.asset(
+            trip.imageUrl,
             height: 192,
             width: double.infinity,
             fit: BoxFit.cover,
@@ -104,24 +65,25 @@ class TripCardWidget extends StatelessWidget {
             },
           ),
         ),
-        // Positioned(
-        //   top: 12,
-        //   right: 12,
-        //   child: InkWell(
-        //     child: Container(
-        //       padding: const EdgeInsets.all(6),
-        //       decoration: const BoxDecoration(
-        //         color: Colors.white,
-        //         shape: BoxShape.circle,
-        //       ),
-        //       child: Icon(
-        //         trip.isFavorite ? Icons.favorite : Icons.favorite_border,
-        //         color: AppColors.accent,
-        //         size: 16,
-        //       ),
-        //     ),
-        //   ),
-        // ),
+        Positioned(
+          top: 12,
+          right: 12,
+          child: InkWell(
+            onTap: () => onCopyTrip(trip.id),
+            child: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.download,
+                color: AppColors.accent,
+                size: 16,
+              ),
+            ),
+          ),
+        ),
       ],
     );
   }

@@ -14,6 +14,9 @@ class AppHeader extends StatelessWidget {
   
   /// Optional title to display when back button is shown
   final String? title;
+  
+  /// Additional action widgets to display
+  final List<Widget>? actions;
 
   /// Creates a header widget that can be used across the app
   const AppHeader({
@@ -22,6 +25,7 @@ class AppHeader extends StatelessWidget {
     this.onBackPressed,
     this.showBackButton = false,
     this.title,
+    this.actions,
   });
 
   @override
@@ -49,9 +53,14 @@ class AppHeader extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           if (showBackButton) _buildBackButton() else _buildLogo(),
-          IconButton(
-            icon: const Icon(Icons.notifications_none_outlined),
-            onPressed: onNotificationPressed,
+          Row(
+            children: [
+              if (actions != null) ...actions!,
+              IconButton(
+                icon: const Icon(Icons.notifications_none_outlined),
+                onPressed: onNotificationPressed,
+              ),
+            ],
           ),
         ],
       ),

@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:putevod/model/trip_category.dart';
 import 'package:putevod/model/trip_item.dart';
+import 'package:putevod/external/library_service.dart';
 
 /// View model for the trip search screen
 class TripSearchViewModel extends ChangeNotifier {
+  final LibraryService _libraryService = LibraryService();
+  
   /// Search query entered by the user
   String _searchQuery = '';
   
@@ -16,32 +19,13 @@ class TripSearchViewModel extends ChangeNotifier {
   ];
   
   /// List of trip items in search results
-  final List<TripItem> _trips = [
-    const TripItem(
-      id: '1',
-      title: 'Отпуск в Сочи',
-      description: 'Прекрасный отдых на черноморском побережье',
-      imageUrl: 'https://cdn.tripster.ru/photos/b212a6d5-a872-4c9b-a7dd-6d8f99f0a9a4.jpg',
-      rating: 4.7,
-      reviewCount: 128,
-    ),
-    const TripItem(
-      id: '2',
-      title: 'Экскурсия по Санкт-Петербургу',
-      description: 'Исторические достопримечательности северной столицы',
-      imageUrl: 'https://etu.ru/assets/cache/images/en/why-us/cultural-capital/1280x854-spb-view-bridges01.0cb.jpg',
-      rating: 4.9,
-      reviewCount: 254,
-    ),
-    const TripItem(
-      id: '3',
-      title: 'Поход на Алтай',
-      description: 'Активный отдых в горах с потрясающими пейзажами',
-      imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/%D0%A1%D0%BA%D0%B0%D0%B7%D0%BA%D0%B0%2C%D0%9C%D0%B5%D1%87%D1%82%D0%B0%2C%D0%9A%D1%80%D0%B0%D1%81%D0%B0%D0%B2%D0%B8%D1%86%D0%B0.jpg/1200px-%D0%A1%D0%BA%D0%B0%D0%B7%D0%BA%D0%B0%2C%D0%9C%D0%B5%D1%87%D1%82%D0%B0%2C%D0%9A%D1%80%D0%B0%D1%81%D0%B0%D0%B2%D0%B8%D1%86%D0%B0.jpg',
-      rating: 4.8,
-      reviewCount: 76,
-    ),
-  ];
+  List<TripItem> _trips = [];
+  
+  /// Loading state
+  bool _isLoading = false;
+  
+  /// Error message
+  String? _errorMessage;
   
   /// Current filter - selected category id
   String _currentFilter = 'all';
@@ -53,19 +37,80 @@ class TripSearchViewModel extends ChangeNotifier {
   List<TripCategory> get categories => List.unmodifiable(_categories);
   
   /// Gets the filtered list of trips
-  List<TripItem> get trips {
-    if (_currentFilter == 'all') {
-      return List.unmodifiable(_trips);
-    }
-    
-    // In a real app, this would filter by category
-    return List.unmodifiable(_trips);
-  }
+  List<TripItem> get trips => List.unmodifiable(_trips);
+  
+  /// Gets the loading state
+  bool get isLoading => _isLoading;
+  
+  /// Gets the error message
+  String? get errorMessage => _errorMessage;
 
   /// Sets the search query and notifies listeners
   void setSearchQuery(String query) {
     _searchQuery = query;
+    if (query.isNotEmpty) {
+      _performSearch(query);
+    } else {
+      _loadPopularTrips();
+    }
     notifyListeners();
+  }
+  
+  /// Load popular trips from library
+  Future<void> _loadPopularTrips() async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+    
+    try {
+      final response = await _libraryService.getPopularRoutes();
+      final routes = response['content'] as List<dynamic>? ?? [];
+      
+      _trips = routes.map((route) => TripItem(
+        id: route['id'].toString(),
+        title: route['title'] ?? 'Без названия',
+        description: route['description'] ?? '',
+        imageUrl: route['imageUrl'],
+        rating: (route['rating'] as num?)?.toDouble() ?? 0.0,
+        reviewCount: route['reviewCount'] ?? 0,
+      )).toList();
+    } catch (e) {
+      _errorMessage = e.toString();
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+  
+  /// Perform search
+  Future<void> _performSearch(String query) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+    
+    try {
+      final response = await _libraryService.searchRoutes(query: query);
+      final routes = response['content'] as List<dynamic>? ?? [];
+      
+      _trips = routes.map((route) => TripItem(
+        id: route['id'].toString(),
+        title: route['title'] ?? 'Без названия',
+        description: route['description'] ?? '',
+        imageUrl: route['imageUrl'],
+        rating: (route['rating'] as num?)?.toDouble() ?? 0.0,
+        reviewCount: route['reviewCount'] ?? 0,
+      )).toList();
+    } catch (e) {
+      _errorMessage = e.toString();
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+  
+  /// Initialize and load data
+  void init() {
+    _loadPopularTrips();
   }
 
   /// Selects a category and notifies listeners
@@ -84,15 +129,22 @@ class TripSearchViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Toggles the favorite status of a trip and notifies listeners
-  void toggleFavorite(String tripId) {
-    for (int i = 0; i < _trips.length; i++) {
-      final trip = _trips[i];
-      if (trip.id == tripId) {
-        _trips[i] = trip.copyWith(isFavorite: !trip.isFavorite);
-        notifyListeners();
-        break;
-      }
+  /// Copy trip to user's trips (instead of favorites)
+  Future<void> copyTripToUser(String tripId) async {
+    // TODO: Реализовать копирование поездки из библиотеки в свои поездки
+    // Это будет заменой избранному - пользователь сможет скопировать понравившийся маршрут
+    try {
+      // Здесь должен быть вызов API для копирования маршрута
+      // await LibraryService.copyRouteToTrips(tripId);
+    } catch (e) {
+      _errorMessage = e.toString();
+      notifyListeners();
     }
+  }
+  
+  /// Clear error message
+  void clearError() {
+    _errorMessage = null;
+    notifyListeners();
   }
 } 

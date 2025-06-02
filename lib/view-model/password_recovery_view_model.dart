@@ -125,14 +125,12 @@ class PasswordRecoveryViewModel extends ChangeNotifier {
     if (!_validatePasswords()) {
       return false;
     }
-    
-    if (_resetToken == null) {
-      final verified = await verifyResetCode();
-      if (!verified) {
-        return false;
-      }
+
+    final verified = await verifyResetCode();
+    if (!verified) {
+      return false;
     }
-    
+
     _setLoading(true);
     _setErrorMessage('');
     

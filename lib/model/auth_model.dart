@@ -1,5 +1,6 @@
 class AuthModel {
   final String email;
+  final String? username;
   final String password;
   final String? deviceId;
   final String? confirmPassword;
@@ -7,6 +8,7 @@ class AuthModel {
   AuthModel({
     required this.email,
     required this.password,
+    this.username,
     this.deviceId,
     this.confirmPassword,
   });
@@ -24,7 +26,7 @@ class AuthModel {
       'email': email,
       'password': password,
       'deviceId': deviceId,
-      'username': email,
+      'username': username ?? email,
       'firstName': '',
       'lastName': '',
     };

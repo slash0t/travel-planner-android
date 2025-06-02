@@ -4,18 +4,25 @@ import 'package:putevod/external/auth_service.dart';
 class RegistrationViewModel extends ChangeNotifier {
   final AuthService _authService = AuthService();
   
+  String _username = '';
   String _email = '';
   String _password = '';
   String _confirmPassword = '';
   String _errorMessage = '';
   bool _isLoading = false;
   
+  String get username => _email;
   String get email => _email;
   String get password => _password;
   String get confirmPassword => _confirmPassword;
   String get errorMessage => _errorMessage;
   bool get isLoading => _isLoading;
-  
+
+  void setUsername(String username) {
+    _username = username;
+    notifyListeners();
+  }
+
   void setEmail(String email) {
     _email = email;
     notifyListeners();
@@ -62,7 +69,7 @@ class RegistrationViewModel extends ChangeNotifier {
     _setLoading(true);
     _setErrorMessage('');
     
-    final response = await _authService.register(_email, _password);
+    final response = await _authService.register(_username, _email, _password);
     _setLoading(false);
     
     if (response.success) {

@@ -126,7 +126,7 @@ class TripSearchScreen extends StatelessWidget {
               final trip = viewModel.trips[index];
               return TripCardWidget(
                 trip: trip,
-                onFavoriteToggle: viewModel.toggleFavorite,
+                onCopyTrip: viewModel.copyTripToUser,
               );
             },
           ),
