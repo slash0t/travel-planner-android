@@ -19,11 +19,11 @@ class Onboarding2Screen extends StatelessWidget {
                 padding: const EdgeInsets.all(24.0),
                 child: Column(
                   children: [
-                    const SizedBox(height: 120),
+                    const SizedBox(height: 40),
                     // Illustration
                     SizedBox(
-                      width: 250,
-                      height: 250,
+                      width: 225,
+                      height: 225,
                       child: Image.asset(
                         'assets/images/onboarding_image_2.png',
                         fit: BoxFit.contain,
