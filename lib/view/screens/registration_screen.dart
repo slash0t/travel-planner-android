@@ -190,12 +190,6 @@ class RegistrationScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 12),
-                const Divider(
-                  color: Color(0xFF494949),
-                  thickness: 5,
-                  indent: 130,
-                  endIndent: 130,
-                ),
               ],
             ),
           ),

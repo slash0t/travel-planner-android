@@ -123,12 +123,6 @@ class MainScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
-            Divider(
-              color: AppColors.text.withOpacity(0.6),
-              thickness: 5,
-              indent: 130,
-              endIndent: 130,
-            ),
           ],
         ),
       ),
