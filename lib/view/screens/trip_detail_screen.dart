@@ -56,20 +56,20 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
               return const Center(child: CircularProgressIndicator());
             }
             
-            if (viewModel.tripDetail == null) {
+            if (viewModel.trip == null) {
               return const Center(child: Text('Trip not found'));
             }
             
-            final tripDetail = viewModel.tripDetail!;
+            final trip = viewModel.trip!;
             
             return Stack(
               children: [
                 Column(
                   children: [
-                    _buildHeader(tripDetail.trip.name, tripDetail.trip.startDate, tripDetail.trip.endDate),
-                    if (tripDetail.days.isNotEmpty && viewModel.selectedDay != null) ...[
+                    _buildHeader(trip.name, trip.startDate, trip.endDate),
+                    if (trip.days.isNotEmpty && viewModel.selectedDay != null) ...[
                       TripDaySelector(
-                        days: tripDetail.days,
+                        days: trip.days,
                         selectedDay: viewModel.selectedDay!,
                         onDaySelected: viewModel.selectDay,
                       ),
@@ -196,7 +196,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => TripCreationScreen(
-        tripToEdit: _viewModel.tripDetail?.trip,
+        tripToEdit: _viewModel.trip,
       )),
     );
   }
@@ -206,7 +206,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       context,
       MaterialPageRoute(
         builder: (context) => TripSharingScreen(
-          trip: _viewModel.tripDetail!.trip,
+          trip: _viewModel.trip!,
         ),
       ),
     );

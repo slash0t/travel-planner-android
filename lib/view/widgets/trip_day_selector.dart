@@ -2,16 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:putevod/model/app_colors.dart';
 
+import '../../model/trip_day.dart';
+
 /// Widget for selecting days of a trip
 class TripDaySelector extends StatelessWidget {
   /// List of days to display
-  final List<DateTime> days;
+  final List<TripDay> days;
   
   /// Currently selected day
-  final DateTime selectedDay;
+  final TripDay selectedDay;
   
   /// Callback when a day is selected
-  final Function(DateTime) onDaySelected;
+  final Function(TripDay) onDaySelected;
   
   /// Creates a trip day selector widget
   const TripDaySelector({
@@ -44,9 +46,9 @@ class TripDaySelector extends StatelessWidget {
   }
   
   /// Builds a single day item
-  Widget _buildDayItem(BuildContext context, DateTime day, bool isSelected) {
-    final dayNumber = day.day.toString();
-    final weekday = _getWeekdayShort(day);
+  Widget _buildDayItem(BuildContext context, TripDay day, bool isSelected) {
+    final dayNumber = day.date.day.toString();
+    final weekday = _getWeekdayShort(day.date);
     
     final Color circleColor = isSelected ? AppColors.accent : Color(0xFFF5F6F8);
     final Color dayTextColor = isSelected ? Colors.white : Colors.black;
@@ -106,7 +108,7 @@ class TripDaySelector extends StatelessWidget {
   }
   
   /// Helper to check if two dates are the same day
-  bool _isSameDay(DateTime a, DateTime b) {
-    return a.year == b.year && a.month == b.month && a.day == b.day;
+  bool _isSameDay(TripDay a, TripDay b) {
+    return a.date.year == b.date.year && a.date.month == b.date.month && a.date.day == b.date.day;
   }
 } 
