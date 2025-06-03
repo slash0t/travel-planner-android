@@ -39,7 +39,6 @@ class Trip {
 
   String get destination => "$country, $city";
 
-  /// Creates a copy of this trip with the given fields replaced
   Trip copyWith({
     int? id,
     String? title,
@@ -70,6 +69,9 @@ class Trip {
 
   static int compareTwo(Trip a, Trip b) {
     if (a.status == b.status) {
+      if (a.status == TripStatus.completed) {
+        return b.startDate.compareTo(a.startDate);
+      }
       return a.startDate.compareTo(b.startDate);
     }
 
@@ -98,34 +100,40 @@ class Trip {
     'days': days.map((day) => day.toJson()).toList(),
   };
 
-  factory Trip.fromJson(Map<String, dynamic> json) => Trip(
-    id: json['id'] as int,
-    title: json['title'] as String,
-    description: json['description'] as String,
-    startDate: DateTime.parse(json['startDate'] as String),
-    endDate: DateTime.parse(json['endDate'] as String),
-    country: json['country'] as String,
-    city: json['city'] as String,
-    status: TripStatus.values.firstWhere(
-      (status) => status.name == json['status'],
-      orElse: () => TripStatus.upcoming,
-    ),
-    published: json['published'] as bool?,
-    previewUrl: json['previewUrl'] as String?,
-    days: (json['days'] as List<dynamic>)
-        .map((e) => TripDay.fromJson(e as Map<String, dynamic>))
-        .toList(),
-  );
+  factory Trip.fromJson(Map<String, dynamic> json) {
+    final startDate = DateTime.parse(json['startDate'] as String);
+    final endDate = DateTime.parse(json['endDate'] as String);
+    final now = DateTime.now();
+
+    TripStatus status;
+    if (now.isBefore(startDate)) {
+      status = TripStatus.upcoming;
+    } else if (now.isAfter(endDate.add(const Duration(hours: 23, minutes: 59)))) {
+      status = TripStatus.completed;
+    } else {
+      status = TripStatus.ongoing;
+    }
+
+    return Trip(
+      id: json['id'] as int,
+      title: json['title'] as String,
+      description: json['description'] as String,
+      startDate: startDate,
+      endDate: endDate,
+      country: json['country'] as String,
+      city: json['city'] as String,
+      status: status,
+      published: json['published'] as bool?,
+      previewUrl: json['previewUrl'] as String?,
+      days: (json['days'] as List<dynamic>)
+          .map((e) => TripDay.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+  }
 }
 
-/// Enum representing the status of a trip
 enum TripStatus {
-  /// Trip that hasn't started yet
   upcoming,
-  
-  /// Trip that is currently in progress
   ongoing,
-  
-  /// Trip that has been completed
   completed
 } 
