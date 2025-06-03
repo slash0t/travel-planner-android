@@ -286,7 +286,7 @@ class TripService {
     try {
       final response = await _plannerClient.get(
         '/todo-lists',
-        queryParameters: {'page': page, 'size': size},
+        // queryParameters: {'page': page, 'size': size},
       );
 
       if (response.statusCode == 200) {

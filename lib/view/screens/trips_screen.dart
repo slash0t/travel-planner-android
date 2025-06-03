@@ -170,7 +170,7 @@ class _TripsScreenState extends State<TripsScreen> {
             ElevatedButton(
               onPressed: () {
                 viewModel.clearError();
-                viewModel.loadTrips(forceRefresh: true);
+                viewModel.loadAllTrips();
               },
               child: const Text('Повторить'),
             ),
@@ -212,7 +212,7 @@ class _TripsScreenState extends State<TripsScreen> {
     
     return RefreshIndicator(
       color: AppColors.accent,
-      onRefresh: () => viewModel.loadTrips(forceRefresh: true),
+      onRefresh: () => viewModel.loadAllTrips(),
       child: ListView.builder(
         padding: const EdgeInsets.all(16),
         itemCount: trips.length,

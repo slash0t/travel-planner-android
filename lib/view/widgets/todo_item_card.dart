@@ -4,10 +4,12 @@ import 'package:putevod/model/app_colors.dart';
 import 'package:putevod/view-model/todo_list_view_model.dart';
 import 'package:putevod/view/screens/todo_item_detail_screen.dart';
 
+import '../../model/todo_item_detail.dart';
+
 /// A card widget that displays a todo item
 class TodoItemCard extends StatelessWidget {
   /// The todo item to display
-  final TodoItem todoItem;
+  final TodoItemDetail todoItem;
 
   /// Creates a todo item card
   const TodoItemCard({
@@ -60,7 +62,7 @@ class TodoItemCard extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    _buildCreatedDateInfo(),
+                    //_buildCreatedDateInfo(),
                     _buildCompletionInfo(),
                   ],
                 ),
@@ -82,14 +84,14 @@ class TodoItemCard extends StatelessWidget {
           color: AppColors.text,
         ),
         const SizedBox(width: 4),
-        Text(
-          'Создан: ${dateFormatter.format(todoItem.createdAt)}',
-          style: const TextStyle(
-            fontSize: 14,
-            fontFamily: 'Noto Sans',
-            color: Color(0xFF4B5562),
-          ),
-        ),
+        // Text(
+        //   'Создан: ${dateFormatter.format(todoItem.createdAt)}',
+        //   style: const TextStyle(
+        //     fontSize: 14,
+        //     fontFamily: 'Noto Sans',
+        //     color: Color(0xFF4B5562),
+        //   ),
+        // ),
       ],
     );
   }

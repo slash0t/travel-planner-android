@@ -25,7 +25,10 @@ class _TodoListScreenState extends State<TodoListScreen> {
   void initState() {
     super.initState();
     _viewModel = Provider.of<TodoListViewModel>(context, listen: false);
-    _loadTodoItems();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadTodoItems();
+    });
   }
   
   Future<void> _loadTodoItems() async {
@@ -158,7 +161,7 @@ class _TodoListScreenState extends State<TodoListScreen> {
                 onTap: () {
                   Navigator.of(context).pop(); // Close the dialog
                   viewModel.createNewTodoList().then((newId) {
-                    if (newId.isNotEmpty) {
+                    if (newId != null) {
                       Navigator.push(
                         context,
                         MaterialPageRoute(

@@ -1,79 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:putevod/external/trip_service.dart';
 
-/// Model for a Todo item
-class TodoItem {
-  /// Unique identifier for the todo item
-  final String id;
-  
-  /// Title of the todo item
-  final String title;
-  
-  /// Date when the todo item was created
-  final DateTime createdAt;
-  
-  /// Number of completed tasks
-  final int completedTasks;
-  
-  /// Total number of tasks
-  final int totalTasks;
+import '../model/todo_item_detail.dart';
 
-  /// Creates a todo item
-  TodoItem({
-    required this.id,
-    required this.title,
-    required this.createdAt,
-    required this.completedTasks,
-    required this.totalTasks,
-  });
-}
-
-/// ViewModel for the Todo List screen
 class TodoListViewModel extends ChangeNotifier {
   final TripService _tripService = TripService();
   
-  /// List of todo items
-  final List<TodoItem> _todoItems = [];
+  final List<TodoItemDetail> _todoItems = [];
   
-  /// Number of active lists
   int _activeListCount = 0;
   
-  /// Loading state
   bool _isLoading = false;
   
-  /// Error message
   String? _errorMessage;
 
-  /// Gets the list of todo items
-  List<TodoItem> get todoItems => _todoItems;
+  List<TodoItemDetail> get todoItems => _todoItems;
   
-  /// Gets the number of active lists
   int get activeListCount => _activeListCount;
   
-  /// Gets loading state
   bool get isLoading => _isLoading;
   
-  /// Gets error message
   String? get errorMessage => _errorMessage;
 
-  /// Loads the todo items
-  Future<void> loadTodoItems({int page = 0, int size = 20}) async {
+  Future<void> loadTodoItems() async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
     
     try {
-      final response = await _tripService.getUserTodoLists(page: page, size: size);
+      final response = await _tripService.getUserTodoLists();
       final List<dynamic> todoLists = response['content'] ?? [];
       
       _todoItems.clear();
-      _todoItems.addAll(todoLists.map((data) => TodoItem(
-        id: data['id'].toString(),
-        title: data['title'] ?? 'Без названия',
-        createdAt: DateTime.tryParse(data['createdAt'] ?? '') ?? DateTime.now(),
-        completedTasks: data['completedCount'] ?? 0,
-        totalTasks: data['itemCount'] ?? 0,
-      )));
+      _todoItems.addAll(todoLists.map((data) => TodoItemDetail.fromJson(data)));
       
       _activeListCount = _todoItems.length;
     } catch (e) {
@@ -95,13 +54,7 @@ class TodoListViewModel extends ChangeNotifier {
       final todoLists = await _tripService.getTripTodoLists(tripId);
       
       _todoItems.clear();
-      _todoItems.addAll(todoLists.map((data) => TodoItem(
-        id: data['id'].toString(),
-        title: data['title'] ?? 'Без названия',
-        createdAt: DateTime.tryParse(data['createdAt'] ?? '') ?? DateTime.now(),
-        completedTasks: data['completedCount'] ?? 0,
-        totalTasks: data['itemCount'] ?? 0,
-      )));
+      _todoItems.addAll(todoLists.map((data) => TodoItemDetail.fromJson(data)));
       
       _activeListCount = _todoItems.length;
     } catch (e) {
@@ -114,26 +67,20 @@ class TodoListViewModel extends ChangeNotifier {
   }
 
   /// Creates a new todo list and returns its ID
-  Future<String> createNewTodoList({String title = 'Новый список', String description = ''}) async {
+  Future<int> createNewTodoList({String title = 'Новый список', String description = ''}) async {
     try {
       final response = await _tripService.createTodoList({
         'title': title,
         'description': description,
       });
       
-      final newTodoItem = TodoItem(
-        id: response['id'].toString(),
-        title: response['title'] ?? title,
-        createdAt: DateTime.tryParse(response['createdAt'] ?? '') ?? DateTime.now(),
-        completedTasks: 0,
-        totalTasks: 0,
-      );
+      final newTodoItem = TodoItemDetail.empty();
       
       _todoItems.add(newTodoItem);
       _activeListCount = _todoItems.length;
       notifyListeners();
       
-      return response['id'].toString();
+      return response['id'] as int;
     } catch (e) {
       _errorMessage = 'Ошибка создания todo-списка: $e';
       notifyListeners();
@@ -149,13 +96,7 @@ class TodoListViewModel extends ChangeNotifier {
         'description': description,
       });
       
-      final newTodoItem = TodoItem(
-        id: response['id'].toString(),
-        title: response['title'] ?? title,
-        createdAt: DateTime.tryParse(response['createdAt'] ?? '') ?? DateTime.now(),
-        completedTasks: 0,
-        totalTasks: 0,
-      );
+      final newTodoItem = TodoItemDetail.empty();
       
       _todoItems.add(newTodoItem);
       _activeListCount = _todoItems.length;
@@ -185,19 +126,13 @@ class TodoListViewModel extends ChangeNotifier {
   }
 
   /// Updates a todo list
-  Future<void> updateTodoList(String id, Map<String, dynamic> data) async {
+  Future<void> updateTodoList(int id, Map<String, dynamic> data) async {
     try {
-      final response = await _tripService.updateTodoList(int.parse(id), data);
+      final response = await _tripService.updateTodoList(id, data);
       
       final index = _todoItems.indexWhere((item) => item.id == id);
       if (index != -1) {
-        final updatedItem = TodoItem(
-          id: id,
-          title: response['title'] ?? _todoItems[index].title,
-          createdAt: _todoItems[index].createdAt,
-          completedTasks: response['completedCount'] ?? _todoItems[index].completedTasks,
-          totalTasks: response['itemCount'] ?? _todoItems[index].totalTasks,
-        );
+        final updatedItem = TodoItemDetail.empty();
         
         _todoItems[index] = updatedItem;
         notifyListeners();
@@ -214,13 +149,7 @@ class TodoListViewModel extends ChangeNotifier {
     final index = _todoItems.indexWhere((item) => item.id == id);
     if (index != -1) {
       final item = _todoItems[index];
-      final updatedItem = TodoItem(
-        id: item.id,
-        title: title ?? item.title,
-        createdAt: item.createdAt,
-        completedTasks: completedTasks ?? item.completedTasks,
-        totalTasks: totalTasks ?? item.totalTasks,
-      );
+      final updatedItem = TodoItemDetail.empty();
       
       _todoItems[index] = updatedItem;
       notifyListeners();
@@ -246,13 +175,7 @@ class TodoListViewModel extends ChangeNotifier {
       final index = _todoItems.indexWhere((item) => item.id == listId);
       if (index != -1) {
         final item = _todoItems[index];
-        final updatedItem = TodoItem(
-          id: item.id,
-          title: item.title,
-          createdAt: item.createdAt,
-          completedTasks: item.completedTasks,
-          totalTasks: item.totalTasks + 1,
-        );
+        final updatedItem = TodoItemDetail.empty();
         _todoItems[index] = updatedItem;
         notifyListeners();
       }
@@ -284,13 +207,7 @@ class TodoListViewModel extends ChangeNotifier {
       final index = _todoItems.indexWhere((item) => item.id == listId);
       if (index != -1) {
         final item = _todoItems[index];
-        final updatedItem = TodoItem(
-          id: item.id,
-          title: item.title,
-          createdAt: item.createdAt,
-          completedTasks: item.completedTasks,
-          totalTasks: item.totalTasks - 1,
-        );
+        final updatedItem = TodoItemDetail.empty();
         _todoItems[index] = updatedItem;
         notifyListeners();
       }

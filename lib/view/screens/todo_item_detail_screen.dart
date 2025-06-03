@@ -12,7 +12,7 @@ import 'package:putevod/view-model/todo_list_view_model.dart';
 /// Screen for viewing and editing a todo list's details
 class TodoItemDetailScreen extends StatefulWidget {
   /// The ID of the todo list to display
-  final String todoItemId;
+  final int todoItemId;
 
   /// Creates a todo item detail screen
   const TodoItemDetailScreen({
@@ -297,7 +297,7 @@ class _TodoItemDetailScreenState extends State<TodoItemDetailScreen> {
       itemBuilder: (context, index) {
         final task = incompleteTasks[index];
         return Dismissible(
-          key: Key(task.id),
+          key: Key(task.id.toString()),
           background: Container(
             color: Colors.red,
             alignment: Alignment.centerRight,
@@ -359,7 +359,7 @@ class _TodoItemDetailScreenState extends State<TodoItemDetailScreen> {
             itemBuilder: (context, index) {
               final task = completedTasks[index];
               return Dismissible(
-                key: Key(task.id),
+                key: Key(task.id.toString()),
                 background: Container(
                   color: Colors.red,
                   alignment: Alignment.centerRight,
@@ -389,7 +389,7 @@ class _TodoItemDetailScreenState extends State<TodoItemDetailScreen> {
     final newId = await _viewModel.copyTodoList();
     if (!mounted) return;
     
-    if (newId.isNotEmpty) {
+    if (newId != null) {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(

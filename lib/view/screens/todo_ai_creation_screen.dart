@@ -337,7 +337,7 @@ class _TodoAICreationScreenState extends State<TodoAICreationScreen> {
                   return;
                 }
                 final newId = await viewModel.generateTodoList();
-                if (mounted && newId.isNotEmpty) {
+                if (mounted && newId != null) {
                   Navigator.of(context).pushReplacement(
                     MaterialPageRoute(
                       builder: (context) => TodoItemDetailScreen(todoItemId: newId),

@@ -58,7 +58,7 @@ class TodoAICreationViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<String> generateTodoList() async {
+  Future<int> generateTodoList() async {
     _isLoading = true;
     notifyListeners();
 

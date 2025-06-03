@@ -43,10 +43,10 @@ class TodoTaskItem extends StatelessWidget {
                 width: 16,
                 height: 16,
                 decoration: BoxDecoration(
-                  color: task.isCompleted ? const Color(0xFF84BA83) : const Color(0xFF9DA3AF),
+                  color: task.completed ? const Color(0xFF84BA83) : const Color(0xFF9DA3AF),
                   borderRadius: BorderRadius.circular(4),
                 ),
-                child: task.isCompleted
+                child: task.completed
                     ? const Icon(
                         Icons.check,
                         size: 12,
@@ -58,12 +58,12 @@ class TodoTaskItem extends StatelessWidget {
             const SizedBox(width: 12),
             Expanded(
               child: Text(
-                task.title,
+                task.content,
                 style: TextStyle(
                   fontSize: 16,
                   fontFamily: 'NotoSans',
-                  color: task.isCompleted ? const Color(0xFF4B5562) : AppColors.text,
-                  decoration: task.isCompleted ? TextDecoration.lineThrough : null,
+                  color: task.completed ? const Color(0xFF4B5562) : AppColors.text,
+                  decoration: task.completed ? TextDecoration.lineThrough : null,
                 ),
               ),
             ),
