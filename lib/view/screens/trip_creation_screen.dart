@@ -48,11 +48,7 @@ class _TripCreationScreenState extends State<TripCreationScreen> {
                       child: Column(
                         children: [
                           _buildNameInput(viewModel),
-                          const SizedBox(height: 14),
-                          _buildStartDateInput(context, viewModel),
-                          const SizedBox(height: 14),
-                          _buildEndDateInput(context, viewModel),
-                          const SizedBox(height: 14),
+                          _buildDateInput(context, viewModel),
                           _buildCountryInput(viewModel),
                           const SizedBox(height: 14),
                           _buildCityInput(viewModel),
@@ -154,6 +150,19 @@ class _TripCreationScreenState extends State<TripCreationScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildDateInput(BuildContext context, TripCreationViewModel viewModel) {
+    if (viewModel.isEditingMode) return const SizedBox(height: 14);
+    return Column(
+      children: [
+        const SizedBox(height: 14),
+        _buildStartDateInput(context, viewModel),
+        const SizedBox(height: 14),
+        _buildEndDateInput(context, viewModel),
+        const SizedBox(height: 14),
+      ],
     );
   }
 
