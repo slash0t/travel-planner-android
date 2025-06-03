@@ -20,6 +20,15 @@ class MainMenuScreen extends StatefulWidget {
 }
 
 class _MainMenuScreenState extends State<MainMenuScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Загружаем поездки при инициализации экрана
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<TripsViewModel>(context, listen: false).loadTrips();
+    });
+  }
+
   void _handleNotificationPressed() {
     // Handle notification button pressed
     ScaffoldMessenger.of(context).showSnackBar(
@@ -72,22 +81,18 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Welcome section
                     _buildWelcomeSection(),
 
                     const SizedBox(height: 24),
 
-                    // Action buttons
                     _buildActionButtons(),
                     
                     const SizedBox(height: 24),
                     
-                    // Trip section
                     _buildTripSection(),
                     
                     const SizedBox(height: 16),
                     
-                    // Trip cards
                     _buildTripCards(tripsViewModel),
                   ],
                 ),
@@ -133,7 +138,6 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
             icon: Icons.add_circle_outline,
             color: AppColors.secondary,
             onPressed: _handleNewTripPressed,
-
           ),
         ),
         const SizedBox(width: 16),
@@ -188,6 +192,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
   }
 
   Widget _buildTripSection() {
+    final tripsViewModel = Provider.of<TripsViewModel>(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -202,48 +207,73 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
         const SizedBox(height: 12),
         Row(
           children: [
-            _buildFilterChip('Все'),
+            _buildFilterChip(
+              'Текущие', 
+              status: TripStatus.ongoing,
+              viewModel: tripsViewModel,
+            ),
             const SizedBox(width: 8),
-            _buildFilterChip('Прошедшие'),
+            _buildFilterChip(
+              'Скоро начнётся', 
+              status: TripStatus.upcoming,
+              viewModel: tripsViewModel,
+            ),
             const SizedBox(width: 8),
-            _buildFilterChip('Скоро начнётся', isSelected: true),
+            _buildFilterChip(
+              'Прошедшие', 
+              status: TripStatus.completed,
+              viewModel: tripsViewModel,
+            ),
           ],
         ),
       ],
     );
   }
 
-  Widget _buildFilterChip(String label, {bool isSelected = false}) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: isSelected ? AppColors.secondary : Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: const Color(0xFFE5E7EB),
-          width: 1,
+  Widget _buildFilterChip(
+    String label, {
+    required TripStatus status,
+    required TripsViewModel viewModel,
+  }) {
+    final isSelected = viewModel.currentFilter == status;
+    
+    return GestureDetector(
+      onTap: () {
+        viewModel.currentFilter = status;
+        viewModel.loadTrips();
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.secondary : Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: const Color(0xFFE5E7EB),
+            width: 1,
+          ),
         ),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontSize: 14,
-          color: isSelected ? Colors.black : Colors.black,
-          fontFamily: 'NotoSans',
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 14,
+            color: Colors.black,
+            fontFamily: 'NotoSans',
+          ),
         ),
       ),
     );
   }
 
   Widget _buildTripCards(TripsViewModel viewModel) {
-    // Filter to show only upcoming trips (default filter for main menu)
-    final upcomingTrips = viewModel.trips.where((trip) => trip.status == TripStatus.upcoming).toList();
+    // Use filtered trips based on the current filter
+    final filteredTrips = viewModel.trips.where((trip) => trip.status == viewModel.currentFilter).toList();
     
-    if (upcomingTrips.isEmpty) {
+    if (filteredTrips.isEmpty) {
       return const Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          children: const [
+          children: [
+            SizedBox(height: 20),
             Text(
               'У вас пока нет путешествий',
               style: TextStyle(
@@ -258,7 +288,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
     }
     
     return Column(
-      children: upcomingTrips.map((trip) => Column(
+      children: filteredTrips.map((trip) => Column(
         children: [
           _buildTripCard(
             trip: trip,
@@ -274,8 +304,6 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
     required Trip trip,
     required TripsViewModel viewModel,
   }) {
-    final isUpcoming = trip.status == TripStatus.upcoming;
-    
     return GestureDetector(
       onTap: () {
         // Navigate to trip detail screen
@@ -346,23 +374,22 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                 ],
               ),
             ),
-            if (isUpcoming)
-              Container(
-                padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-                margin: const EdgeInsets.only(left: 16, bottom: 16),
-                decoration: BoxDecoration(
-                  color: viewModel.getStatusColor(trip.status),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Text(
-                  viewModel.getStatusText(trip.status),
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                    fontFamily: 'NotoSans',
-                  ),
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+              margin: const EdgeInsets.only(left: 16, bottom: 16),
+              decoration: BoxDecoration(
+                color: viewModel.getStatusColor(trip.status),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Text(
+                viewModel.getStatusText(trip.status),
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  fontFamily: 'NotoSans',
                 ),
               ),
+            ),
           ],
         ),
       ),

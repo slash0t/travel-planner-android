@@ -8,7 +8,7 @@ import 'package:putevod/external/trip_service.dart';
 class TripsViewModel extends ChangeNotifier {
   final TripService _tripService = TripService();
   
-  TripStatus _currentFilter = TripStatus.upcoming;
+  TripStatus _currentFilter = TripStatus.ongoing;
   bool _isLoading = false;
   String? _errorMessage;
   
@@ -44,21 +44,20 @@ class TripsViewModel extends ChangeNotifier {
     notifyListeners();
     
     try {
-      final response = await _tripService.getUserTrips();
-      final List<dynamic> tripsData = response['content'] ?? [];
+      // final response = await _tripService.getUserTrips();
+      List<dynamic> tripsData; // = response['content'] ?? [];
       
-      // Загружаем разные типы поездок в зависимости от фильтра
-      // switch (_currentFilter) {
-      //   case TripStatus.upcoming:
-      //     tripsData = await _tripService.getUpcomingTrips();
-      //     break;
-      //   case TripStatus.ongoing:
-      //     tripsData = await _tripService.getOngoingTrips();
-      //     break;
-      //   case TripStatus.completed:
-      //     tripsData = await _tripService.getPastTrips();
-      //     break;
-      // }
+      switch (_currentFilter) {
+        case TripStatus.upcoming:
+          tripsData = await _tripService.getUpcomingTrips();
+          break;
+        case TripStatus.ongoing:
+          tripsData = await _tripService.getOngoingTrips();
+          break;
+        case TripStatus.completed:
+          tripsData = await _tripService.getPastTrips();
+          break;
+      }
 
       _trips = tripsData.map<Trip>((tripData) => Trip.fromJson(tripData)).toList();
       _trips.sort((a, b) => Trip.compareTwo(a, b));
@@ -77,7 +76,7 @@ class TripsViewModel extends ChangeNotifier {
     notifyListeners();
     
     try {
-      final response = await _tripService.getUserTrips(filter: filter, page: page, size: size);
+      final response = await _tripService.getUserTrips();
       final List<dynamic> tripsData = response['content'] ?? [];
       _trips = tripsData.map((tripData) => Trip.fromJson(tripData)).toList();
       _trips.sort((a, b) => Trip.compareTwo(a, b));

@@ -26,7 +26,7 @@ class _TripsScreenState extends State<TripsScreen> {
     super.initState();
     // Загружаем поездки при инициализации экрана
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<TripsViewModel>(context, listen: false).loadTrips();
+      Provider.of<TripsViewModel>(context, listen: false).loadAllTrips();
     });
   }
 
