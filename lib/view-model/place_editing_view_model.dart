@@ -168,7 +168,7 @@ class PlaceEditingViewModel extends ChangeNotifier {
       eventData.remove("orderPosition");
       eventData["place"]?.remove("id");
 
-      if (_tripEvent?.place!.latitude == null) {
+      if (_tripEvent!.place == null || _tripEvent!.place?.latitude == null) {
         eventData.remove("place");
       }
 

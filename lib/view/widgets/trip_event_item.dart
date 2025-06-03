@@ -55,7 +55,7 @@ class TripEventItem extends StatelessWidget {
                       color: AppColors.text,
                     ),
                   ),
-                  _buildPlaceInfo(),
+                  // _buildPlaceInfo(),
                 ],
               ),
             ),

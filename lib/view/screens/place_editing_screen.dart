@@ -154,10 +154,8 @@ class _PlaceEditingScreenState extends State<PlaceEditingScreen> {
                     // _buildPlaceTypeSection(viewModel),
                     // const SizedBox(height: 24),
                     _buildNameSection(viewModel),
-                    const SizedBox(height: 24),
-                    _buildTimeSection(viewModel),
-                    const SizedBox(height: 24),
-                    _buildLocationSection(viewModel),
+                    _buildTimeSpaced(viewModel),
+                    _buildLocationsSpaced(viewModel),
                     const SizedBox(height: 24),
                     _buildNotesSection(viewModel),
                     // const SizedBox(height: 24),
@@ -171,6 +169,32 @@ class _PlaceEditingScreenState extends State<PlaceEditingScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildTimeSpaced(PlaceEditingViewModel viewModel) {
+    if (!_viewModel.isCreateMode && _viewModel.tripEvent?.hasSpecificTime == false) {
+      return const SizedBox();
+    }
+
+    return Column(
+      children: [
+        const SizedBox(height: 24),
+        _buildTimeSection(viewModel),
+      ],
+    );
+  }
+
+  Widget _buildLocationsSpaced(PlaceEditingViewModel viewModel) {
+    if (!_viewModel.isCreateMode && _viewModel.tripEvent?.place == null) {
+      return const SizedBox();
+    }
+
+    return Column(
+      children: [
+        const SizedBox(height: 24),
+        _buildLocationSection(viewModel),
+      ],
     );
   }
   
@@ -353,6 +377,7 @@ class _PlaceEditingScreenState extends State<PlaceEditingScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        if (viewModel.isCreateMode)
         Row(
           children: [
             SizedBox(
@@ -386,6 +411,7 @@ class _PlaceEditingScreenState extends State<PlaceEditingScreen> {
         if (viewModel.tripEvent?.hasSpecificTime ?? false)
           Column(
             children: [
+              if (viewModel.isCreateMode)
               const SizedBox(height: 20),
               Row(
                 children: [
