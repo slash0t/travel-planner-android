@@ -188,9 +188,9 @@ class _AddParticipantsSection extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           _InputField(
-            controller: viewModel.emailController,
-            hintText: 'Email участника',
-            icon: Icons.mail_outline,
+            controller: viewModel.searchController,
+            hintText: 'Ник участника',
+            icon: Icons.person,
           ),
           const SizedBox(height: 16),
           _SendInvitationsButton(viewModel: viewModel),
