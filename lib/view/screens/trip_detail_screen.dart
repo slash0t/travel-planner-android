@@ -304,7 +304,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => PlaceEditingScreen.update(
-                      placeId: event.place?.id,
+                      placeId: event.id,
                       tripId: viewModel.trip!.id,
                       dayId: viewModel.selectedDay!.id,
                     ),

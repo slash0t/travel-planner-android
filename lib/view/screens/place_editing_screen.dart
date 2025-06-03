@@ -46,6 +46,7 @@ class _PlaceEditingScreenState extends State<PlaceEditingScreen> {
       isCreateMode: widget.placeId == null,
       tripId: widget.tripId,
       dayId: widget.dayId,
+      tripEventId: widget.placeId,
     );
     
     // Load place data after the widget is built
@@ -72,7 +73,7 @@ class _PlaceEditingScreenState extends State<PlaceEditingScreen> {
   }
   
   Future<void> _loadPlaceDetail() async {
-    await _viewModel.loadPlace(widget.placeId!);
+    await _viewModel.loadPlace();
     
     // Set values in the controllers once we have the place data
     if (_viewModel.tripEvent != null) {
@@ -83,6 +84,7 @@ class _PlaceEditingScreenState extends State<PlaceEditingScreen> {
       if (_viewModel.tripEvent!.place?.longitude != null) {
         _longitudeController.text = _viewModel.tripEvent!.place!.longitude!.toString();
       }
+      _notesController.text = _viewModel.tripEvent!.description;
     }
   }
   

@@ -19,13 +19,16 @@ class PlaceEditingViewModel extends ChangeNotifier {
   
   int? _tripId;
   int? _dayId;
-  
+  int? _tripEventId;
+
   final List<File> _attachedFiles = [];
 
-  PlaceEditingViewModel({required bool isCreateMode, int? tripId, int? dayId}) :
+  PlaceEditingViewModel({required bool isCreateMode, int? tripId, int? dayId, int? tripEventId}) :
     _isCreateMode = isCreateMode,
     _tripId = tripId,
-    _dayId = dayId {
+    _dayId = dayId,
+    _tripEventId = tripEventId
+  {
     if (isCreateMode) {
       _tripEvent = TripEvent.empty();
     }
@@ -124,7 +127,7 @@ class PlaceEditingViewModel extends ChangeNotifier {
     }
   }
   
-  Future<void> loadPlace(int placeId) async {
+  Future<void> loadPlace() async {
     if (_isCreateMode) return;
     
     _isLoading = true;
@@ -132,11 +135,12 @@ class PlaceEditingViewModel extends ChangeNotifier {
     notifyListeners();
     
     try {
-      if (_tripId == null || _dayId == null) {
+      if (_tripId == null || _dayId == null || _tripEventId == null) {
         throw Exception('Trip ID and Day ID must be set before loading a place');
       }
       
-      final eventId = placeId;
+      final response = await _tripService.getEvent(_tripId!, _dayId!, _tripEventId!);
+      _tripEvent = TripEvent.fromJson(response);
     } catch (e) {
       _errorMessage = 'Failed to load place: ${e.toString()}';
       debugPrint(_errorMessage);
