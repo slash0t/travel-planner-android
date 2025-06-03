@@ -293,6 +293,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
             direction: DismissDirection.endToStart,
             onDismissed: (_) async {
               await viewModel.deleteEvent(event.id);
+              await _loadTripDetail();
             },
             child: GestureDetector(
               onTap: () {

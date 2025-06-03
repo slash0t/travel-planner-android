@@ -116,17 +116,11 @@ class TripDetailViewModel with ChangeNotifier {
     if (_trip == null) return;
     
     try {
-      // Найти событие для получения tripId и dayId
-      // final event = _events.firstWhere((e) => e.id == eventId);
       final tripId = _trip!.id;
+
       
-      // Найти dayId (пока используем простую логику)
-      final dayId = 1; // Placeholder
+      await _tripService.deleteEvent(tripId, _selectedDay!.id, eventId);
       
-      await _tripService.deleteEvent(tripId, dayId, eventId);
-      
-      // Обновить локальный список
-      // _events = _events.where((event) => event.id != eventId).toList();
       notifyListeners();
     } catch (e) {
       _errorMessage = 'Ошибка удаления события: ${e.toString()}';
