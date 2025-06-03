@@ -59,7 +59,7 @@ class TodoItemDetail {
 
   final int userId;
 
-  final int tripId;
+  // final int tripId;
 
   final String title;
 
@@ -74,7 +74,7 @@ class TodoItemDetail {
   TodoItemDetail({
     required this.id,
     required this.userId,
-    required this.tripId,
+    // required this.tripId,
     required this.title,
     required this.description,
     required this.items,
@@ -86,7 +86,7 @@ class TodoItemDetail {
     return TodoItemDetail(
       id: json['id'] as int,
       userId: json['userId'] as int,
-      tripId: json['tripId'] as int,
+      // tripId: json['tripId'] as int,
       title: json['title'] as String,
       description: json['description'] as String,
       items: (json['items'] as List<dynamic>)
@@ -101,7 +101,7 @@ class TodoItemDetail {
     return {
       'id': id,
       'userId': userId,
-      'tripId': tripId,
+      // 'tripId': tripId,
       'title': title,
       'description': description,
       'items': items.map((task) => task.toJson()).toList(),
@@ -114,7 +114,7 @@ class TodoItemDetail {
     return TodoItemDetail(
       id: 0,
       userId: 0,
-      tripId: 0,
+      // tripId: 0,
       title: "Новая поездка",
       description: "Описание",
       items: [],
@@ -142,7 +142,7 @@ class TodoItemDetail {
     return TodoItemDetail(
       id: id ?? this.id,
       userId: userId ?? this.userId,
-      tripId: tripId ?? this.tripId,
+      // tripId: tripId ?? this.tripId,
       title: title ?? this.title,
       description: description ?? this.description,
       items: items ?? this.items,

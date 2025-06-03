@@ -69,7 +69,7 @@ class TodoItemDetailViewModel extends ChangeNotifier {
       _todoItemDetail = TodoItemDetail(
         id: id,
         userId: response['userId'] as int? ?? 0,
-        tripId: response['tripId'] as int? ?? 0,
+        // tripId: response['tripId'] as int? ?? 0,
         title: response['title'] ?? 'Список задач',
         description: response['description'] ?? '',
         items: tasks,
@@ -82,7 +82,7 @@ class TodoItemDetailViewModel extends ChangeNotifier {
       _todoItemDetail = TodoItemDetail(
         id: id,
         userId: 0,
-        tripId: 0,
+        // tripId: 0,
         title: 'Список задач',
         description: '',
         items: [],

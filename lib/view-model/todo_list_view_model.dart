@@ -32,7 +32,8 @@ class TodoListViewModel extends ChangeNotifier {
       final List<dynamic> todoLists = response['content'] ?? [];
       
       _todoItems.clear();
-      _todoItems.addAll(todoLists.map((data) => TodoItemDetail.fromJson(data)));
+      final items = todoLists.map((data) => TodoItemDetail.fromJson(data)).toList();
+      _todoItems.addAll(items);
       
       _activeListCount = _todoItems.length;
     } catch (e) {
@@ -74,7 +75,7 @@ class TodoListViewModel extends ChangeNotifier {
         'description': description,
       });
       
-      final newTodoItem = TodoItemDetail.empty();
+      final newTodoItem = TodoItemDetail.fromJson(response);
       
       _todoItems.add(newTodoItem);
       _activeListCount = _todoItems.length;

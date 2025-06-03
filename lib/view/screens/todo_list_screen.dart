@@ -9,9 +9,7 @@ import 'package:putevod/view/widgets/todo_item_card.dart';
 import 'package:putevod/view/screens/todo_item_detail_screen.dart';
 import 'package:putevod/view/screens/todo_ai_creation_screen.dart';
 
-/// Screen that displays the user's todo lists
 class TodoListScreen extends StatefulWidget {
-  /// Creates a todo list screen
   const TodoListScreen({super.key});
 
   @override
@@ -158,19 +156,10 @@ class _TodoListScreenState extends State<TodoListScreen> {
                   'Создать пустой',
                   style: TextStyle(fontFamily: 'NotoSans'),
                   ),
-                onTap: () {
+                onTap: () async {
                   Navigator.of(context).pop(); // Close the dialog
-                  viewModel.createNewTodoList().then((newId) {
-                    if (newId != null) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => TodoItemDetailScreen(todoItemId: newId),
-                        ),
-                      );
-                    }
-                  });
-                },
+                  await viewModel.createNewTodoList();
+                  },
               ),
               ListTile(
                 title: const Text(
@@ -196,24 +185,24 @@ class _TodoListScreenState extends State<TodoListScreen> {
   }
   
   Widget _buildTodoList(TodoListViewModel viewModel) {
-    return ReorderableListView.builder(
+    return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: viewModel.todoItems.length,
-      onReorder: viewModel.reorderTodoLists,
-      proxyDecorator: (child, index, animation) {
-        return AnimatedBuilder(
-          animation: animation,
-          builder: (BuildContext context, Widget? child) {
-            return Material(
-              elevation: 0,
-              color: Colors.transparent,
-              child: child,
-            );
-          },
-          child: child,
-        );
-      },
+      // onReorder: viewModel.reorderTodoLists,
+      // proxyDecorator: (child, index, animation) {
+      //   return AnimatedBuilder(
+      //     animation: animation,
+      //     builder: (BuildContext context, Widget? child) {
+      //       return Material(
+      //         elevation: 0,
+      //         color: Colors.transparent,
+      //         child: child,
+      //       );
+      //     },
+      //     child: child,
+      //   );
+      // },
       itemBuilder: (context, index) {
         return TodoItemCard(
           key: ValueKey(viewModel.todoItems[index].id),
