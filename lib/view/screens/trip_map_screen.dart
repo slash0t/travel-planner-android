@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart';
 import 'package:putevod/model/app_colors.dart';
 import 'package:putevod/model/trip_day.dart';
-import 'package:putevod/model/trip_location.dart';
 import 'package:putevod/view-model/trip_map_view_model.dart';
 
 /// Trip Map Screen displaying a trip on a map with days and locations
@@ -84,15 +82,15 @@ class _TripMapView extends StatelessWidget {
       
       markers.add(
         Marker(
-          point: location.coordinates,
+          point: location.place.coordinates,
           child: GestureDetector(
             onTap: () => viewModel.selectLocation(location),
             child: Container(
               decoration: BoxDecoration(
-                color: isSelected ? viewModel.selectedDay?.color : Colors.white,
+                color: isSelected ? AppColors.secondary : Colors.white,
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: viewModel.selectedDay?.color ?? AppColors.accent,
+                  color: AppColors.secondary ?? AppColors.accent,
                   width: 2,
                 ),
                 boxShadow: [
@@ -108,7 +106,7 @@ class _TripMapView extends StatelessWidget {
               height: 24,
               alignment: Alignment.center,
               child: Text(
-                '${location.orderInDay}',
+                '${location.orderPosition}',
                 style: TextStyle(
                   color: isSelected ? Colors.white : Colors.black,
                   fontWeight: FontWeight.bold,
@@ -228,12 +226,12 @@ class _TripMapView extends StatelessWidget {
           width: 70.5,
           height: 28,
           decoration: BoxDecoration(
-            color: isSelected ? day.color : Colors.grey.shade200,
+            color: isSelected ? AppColors.secondary : Colors.grey.shade200,
             borderRadius: BorderRadius.circular(9999),
           ),
           alignment: Alignment.center,
           child: Text(
-            day.name,
+            "День ${day.id}",
             style: TextStyle(
               color: Colors.white,
               fontFamily: 'NotoSans',
@@ -339,7 +337,7 @@ class _TripMapView extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    location.name,
+                    location.title,
                     style: const TextStyle(
                       fontFamily: 'NotoSans',
                       fontSize: 20,
@@ -349,14 +347,14 @@ class _TripMapView extends StatelessWidget {
                 ),
                 Container(
                   decoration: BoxDecoration(
-                    color: viewModel.selectedDay?.color ?? AppColors.accent,
+                    color: AppColors.accent,
                     shape: BoxShape.circle,
                   ),
                   width: 24,
                   height: 24,
                   alignment: Alignment.center,
                   child: Text(
-                    '${location.orderInDay}',
+                    '${location.orderPosition}',
                     style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
@@ -375,7 +373,7 @@ class _TripMapView extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  location.timeRange,
+                  location.formatTime,
                   style: TextStyle(
                     fontFamily: 'NotoSans',
                     fontSize: 14,
@@ -391,7 +389,7 @@ class _TripMapView extends StatelessWidget {
                   child: _buildActionButton(
                     label: 'Перейти к событию',
                     icon: Icons.navigation,
-                    color: viewModel.selectedDay?.color ?? AppColors.accent,
+                    color: AppColors.accent,
                     textColor: Colors.white,
                     onPressed: () => viewModel.navigateToLocation(location),
                   ),

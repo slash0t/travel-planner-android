@@ -308,7 +308,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    trip.name,
+                    trip.title,
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -334,7 +334,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        trip.destination,
+                        trip.city,
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,

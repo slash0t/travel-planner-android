@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:putevod/model/trip.dart';
 import 'package:putevod/model/trip_day.dart';
 import 'package:putevod/model/trip_event.dart';
-import 'package:putevod/model/trip_detail.dart';
 import 'package:putevod/external/trip_service.dart';
+
+import '../model/place.dart';
 
 /// ViewModel for the trip detail screen
 class TripDetailViewModel with ChangeNotifier {
@@ -12,9 +13,6 @@ class TripDetailViewModel with ChangeNotifier {
   
   /// Current trip
   Trip? _trip;
-  
-  /// Events for the current trip
-  List<TripEvent> _events = [];
   
   /// Selected day to view events
   TripDay? _selectedDay;
@@ -27,9 +25,6 @@ class TripDetailViewModel with ChangeNotifier {
   
   /// Getter for trip
   Trip? get trip => _trip;
-  
-  /// Getter for events
-  List<TripEvent> get events => _events;
   
   /// Getter for selected day
   TripDay? get selectedDay => _selectedDay;
@@ -45,8 +40,8 @@ class TripDetailViewModel with ChangeNotifier {
     if (_selectedDay == null) {
       return [];
     }
-    
-    return TripEventUtils.getEventsForDay(_events, _selectedDay!);
+
+    return _selectedDay!.events;
   }
   
   /// Loads trip detail data for the provided trip ID
@@ -70,8 +65,6 @@ class TripDetailViewModel with ChangeNotifier {
         //   address: eventData['place']?['address'] ?? '',
         //   day: DateTime.parse(eventData['day']['date']),
         // )).toList();
-        
-        _events = []; // Initialize with empty events list
         
         // Select the first day by default
         if (_trip != null && _trip!.days.isNotEmpty) {
@@ -108,41 +101,32 @@ class TripDetailViewModel with ChangeNotifier {
     
     // Get the event to move
     final TripEvent event = dayEvents[oldIndex];
-    
-    // Create new events list without the current day's events
-    final List<TripEvent> updatedEvents = _events
-        .where((e) => !TripEventUtils.isEventInDay(e, _selectedDay!))
-        .toList();
+
     
     // Create a new day event list with the reordering
     final List<TripEvent> newDayEvents = List.from(dayEvents);
     newDayEvents.removeAt(oldIndex);
     newDayEvents.insert(newIndex, event);
-    
-    // Add the reordered day events back to all events
-    updatedEvents.addAll(newDayEvents);
-    
-    _events = updatedEvents;
+
     notifyListeners();
   }
   
   /// Deletes an event by its ID
-  Future<void> deleteEvent(String eventId) async {
+  Future<void> deleteEvent(int eventId) async {
     if (_trip == null) return;
     
     try {
       // Найти событие для получения tripId и dayId
-      final event = _events.firstWhere((e) => e.id == eventId);
+      // final event = _events.firstWhere((e) => e.id == eventId);
       final tripId = _trip!.id;
       
       // Найти dayId (пока используем простую логику)
-      // TODO: Получить правильный dayId из API
       final dayId = 1; // Placeholder
       
-      await _tripService.deleteEvent(tripId, dayId, int.parse(eventId));
+      await _tripService.deleteEvent(tripId, dayId, eventId);
       
       // Обновить локальный список
-      _events = _events.where((event) => event.id != eventId).toList();
+      // _events = _events.where((event) => event.id != eventId).toList();
       notifyListeners();
     } catch (e) {
       _errorMessage = 'Ошибка удаления события: ${e.toString()}';
@@ -160,14 +144,25 @@ class TripDetailViewModel with ChangeNotifier {
       
       final newEventResponse = await _tripService.createEvent(tripId, dayId, eventData);
       final newEvent = TripEvent(
-        id: newEventResponse['eventId'].toString(),
-        time: newEventResponse['startTime'] ?? '00:00',
-        title: newEventResponse['title'] ?? 'Без названия',
-        address: newEventResponse['place']?['address'] ?? '',
-        day: _selectedDay!.date,
+        id: newEventResponse['event_id'] as int,
+        dayId: newEventResponse['day_id'] as int,
+        startTime: DateTime.parse(newEventResponse['start_time']),
+        endTime: DateTime.parse(newEventResponse['end_time']),
+        hasSpecificTime: newEventResponse['has_specific_time'] as bool,
+        title: newEventResponse['title'],
+        description: newEventResponse['description'],
+        orderPosition: newEventResponse['orderPosition'] as int,
+        place: Place(
+            id: newEventResponse['place']?['id'] as int,
+            name: newEventResponse['place']?['name'] ?? '',
+            address: newEventResponse['place']?['address'] ?? '',
+            placeType: newEventResponse['place']?['placeType'] ?? '',
+            latitude: newEventResponse['place']?['latitude'] as double,
+            longitude: newEventResponse['place']?['longitude'] as double,
+        ),
       );
-      
-      _events = List<TripEvent>.from(_events)..add(newEvent);
+
+      // _events = List<TripEvent>.from(_events)..add(newEvent);
       notifyListeners();
     } catch (e) {
       _errorMessage = 'Ошибка создания события: ${e.toString()}';
@@ -185,16 +180,23 @@ class TripDetailViewModel with ChangeNotifier {
       
       final updatedEventResponse = await _tripService.updateEvent(tripId, dayId, int.parse(eventId), eventData);
       final updatedEvent = TripEvent(
-        id: updatedEventResponse['eventId'].toString(),
-        time: updatedEventResponse['startTime'] ?? '00:00',
-        title: updatedEventResponse['title'] ?? 'Без названия',
-        address: updatedEventResponse['place']?['address'] ?? '',
-        day: _selectedDay!.date,
+        id: updatedEventResponse['event_id'] as int,
+        dayId: updatedEventResponse['day_id'] as int,
+        startTime: DateTime.parse(updatedEventResponse['start_time']),
+        endTime: DateTime.parse(updatedEventResponse['end_time']),
+        hasSpecificTime: updatedEventResponse['has_specific_time'] as bool,
+        title: updatedEventResponse['title'],
+        description: updatedEventResponse['description'],
+        orderPosition: updatedEventResponse['orderPosition'] as int,
+        place: Place(
+          id: updatedEventResponse['place']?['id'] as int,
+          name: updatedEventResponse['place']?['name'] ?? '',
+          address: updatedEventResponse['place']?['address'] ?? '',
+          placeType: updatedEventResponse['place']?['placeType'] ?? '',
+          latitude: updatedEventResponse['place']?['latitude'] as double,
+          longitude: updatedEventResponse['place']?['longitude'] as double,
+        ),
       );
-      
-      _events = _events.map((event) {
-        return event.id == eventId ? updatedEvent : event;
-      }).toList();
       
       notifyListeners();
     } catch (e) {

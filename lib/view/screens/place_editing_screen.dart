@@ -7,25 +7,19 @@ import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:file_picker/file_picker.dart';
 
-/// Screen for creating or editing a place
 class PlaceEditingScreen extends StatefulWidget {
-  /// ID of the place to edit, null for creation mode
-  final String? placeId;
+  final int? placeId;
   
-  /// Trip ID for context
   final int tripId;
   
-  /// Day ID for context
   final int dayId;
 
-  /// Creates a new place editing screen in create mode
   const PlaceEditingScreen.create({
     super.key,
     required this.tripId,
     required this.dayId,
   }) : placeId = null;
 
-  /// Creates a new place editing screen in update mode
   const PlaceEditingScreen.update({
     super.key,
     required this.placeId,
@@ -81,16 +75,13 @@ class _PlaceEditingScreenState extends State<PlaceEditingScreen> {
     await _viewModel.loadPlace(widget.placeId!);
     
     // Set values in the controllers once we have the place data
-    if (_viewModel.place != null) {
-      _nameController.text = _viewModel.place!.name;
-      if (_viewModel.place!.latitude != null) {
-        _latitudeController.text = _viewModel.place!.latitude!.toString();
+    if (_viewModel.tripEvent != null) {
+      _nameController.text = _viewModel.tripEvent!.title;
+      if (_viewModel.tripEvent!.place.latitude != null) {
+        _latitudeController.text = _viewModel.tripEvent!.place.latitude!.toString();
       }
-      if (_viewModel.place!.longitude != null) {
-        _longitudeController.text = _viewModel.place!.longitude!.toString();
-      }
-      if (_viewModel.place!.notes != null) {
-        _notesController.text = _viewModel.place!.notes!;
+      if (_viewModel.tripEvent!.place.longitude != null) {
+        _longitudeController.text = _viewModel.tripEvent!.place.longitude!.toString();
       }
     }
   }
@@ -117,7 +108,7 @@ class _PlaceEditingScreenState extends State<PlaceEditingScreen> {
       return const Center(child: CircularProgressIndicator());
     }
     
-    if (!viewModel.isCreateMode && viewModel.place == null) {
+    if (!viewModel.isCreateMode && viewModel.tripEvent == null) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -229,7 +220,6 @@ class _PlaceEditingScreenState extends State<PlaceEditingScreen> {
             Expanded(
               child: _buildPlaceTypeButton(
                 viewModel,
-                PlaceType.place,
                 'Место',
                 Icons.place,
               ),
@@ -238,7 +228,6 @@ class _PlaceEditingScreenState extends State<PlaceEditingScreen> {
             Expanded(
               child: _buildPlaceTypeButton(
                 viewModel,
-                PlaceType.restaurant,
                 'Ресторан',
                 Icons.restaurant,
               ),
@@ -247,7 +236,6 @@ class _PlaceEditingScreenState extends State<PlaceEditingScreen> {
             Expanded(
               child: _buildPlaceTypeButton(
                 viewModel,
-                PlaceType.event,
                 'Мероприятие',
                 Icons.event,
               ),
@@ -260,14 +248,13 @@ class _PlaceEditingScreenState extends State<PlaceEditingScreen> {
   
   Widget _buildPlaceTypeButton(
     PlaceEditingViewModel viewModel,
-    PlaceType type,
     String label,
     IconData icon,
   ) {
-    final isSelected = viewModel.place?.type == type;
+    final isSelected = viewModel.tripEvent!.place.placeType == label;
     
     return GestureDetector(
-      onTap: () => viewModel.setPlaceType(type),
+      onTap: () => viewModel.setPlaceType(label),
       child: Container(
         height: 52,
         decoration: BoxDecoration(
@@ -370,7 +357,7 @@ class _PlaceEditingScreenState extends State<PlaceEditingScreen> {
               width: 24,
               height: 24,
               child: Checkbox(
-                value: viewModel.place?.hasTime ?? false,
+                value: viewModel.tripEvent?.hasSpecificTime ?? false,
                 onChanged: (value) {
                   if (value != null) {
                     viewModel.setHasTime(value);
@@ -394,7 +381,7 @@ class _PlaceEditingScreenState extends State<PlaceEditingScreen> {
             ),
           ],
         ),
-        if (viewModel.place?.hasTime ?? false)
+        if (viewModel.tripEvent?.hasSpecificTime ?? false)
           Column(
             children: [
               const SizedBox(height: 8),
@@ -426,7 +413,7 @@ class _PlaceEditingScreenState extends State<PlaceEditingScreen> {
                             ),
                             child: Center(
                               child: Text(
-                                viewModel.formatTimeOfDay(viewModel.place?.startTime),
+                                viewModel.formatTimeOfDay(viewModel.tripEvent?.startTime),
                                 style: const TextStyle(
                                   fontFamily: 'NotoSans',
                                   fontSize: 16,
@@ -465,7 +452,7 @@ class _PlaceEditingScreenState extends State<PlaceEditingScreen> {
                             ),
                             child: Center(
                               child: Text(
-                                viewModel.formatTimeOfDay(viewModel.place?.endTime),
+                                viewModel.formatTimeOfDay(viewModel.tripEvent?.endTime),
                                 style: const TextStyle(
                                   fontFamily: 'NotoSans',
                                   fontSize: 16,
@@ -487,8 +474,14 @@ class _PlaceEditingScreenState extends State<PlaceEditingScreen> {
   
   Future<void> _selectTimeOfDay(PlaceEditingViewModel viewModel, bool isStartTime) async {
     final initialTime = isStartTime 
-        ? viewModel.place?.startTime ?? TimeOfDay.now() 
-        : viewModel.place?.endTime ?? TimeOfDay.now();
+        ? TimeOfDay(
+      hour: viewModel.tripEvent!.startTime!.hour,
+      minute: viewModel.tripEvent!.startTime!.minute,
+    ) ?? TimeOfDay.now()
+        : TimeOfDay(
+      hour: viewModel.tripEvent!.endTime!.hour,
+      minute: viewModel.tripEvent!.endTime!.minute,
+    ) ?? TimeOfDay.now();
         
     final TimeOfDay? pickedTime = await showTimePicker(
       context: context,
@@ -792,7 +785,7 @@ class _PlaceEditingScreenState extends State<PlaceEditingScreen> {
           ),
           maxLines: 4,
           onChanged: (value) {
-            viewModel.setNotes(value);
+            viewModel.setDescription(value);
           },
         ),
       ],

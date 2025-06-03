@@ -102,7 +102,7 @@ class _TripCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    trip.name,
+                    trip.title,
                     style: const TextStyle(
                       fontSize: 18,
                       fontFamily: 'NotoSans',

@@ -51,7 +51,7 @@ class TripCard extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        trip.name,
+                        trip.title,
                         style: const TextStyle(
                           fontFamily: 'NotoSans',
                           fontSize: 20,
@@ -98,7 +98,7 @@ class TripCard extends StatelessWidget {
       child: Stack(
         children: [
           Image.asset(
-            trip.imageUrl!,
+            trip.previewUrl!,
             height: 200,
             width: double.infinity,
             fit: BoxFit.cover,

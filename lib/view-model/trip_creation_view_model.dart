@@ -47,7 +47,7 @@ class TripCreationViewModel extends ChangeNotifier {
     _tripToEdit = trip;
     isEditingMode = true;
     
-    nameController.text = trip.name;
+    nameController.text = trip.title;
     countryController.text = trip.country;
     cityController.text = trip.city;
     descriptionController.text = trip.description;
@@ -129,7 +129,7 @@ class TripCreationViewModel extends ChangeNotifier {
       // Update existing trip
       await _tripService.updateTrip(_tripToEdit!.id, tripData);
       return _tripToEdit!.copyWith(
-        name: nameController.text,
+        title: nameController.text,
         startDate: _startDate!,
         endDate: _endDate!,
         country: countryController.text,
@@ -143,17 +143,15 @@ class TripCreationViewModel extends ChangeNotifier {
       // Return a trip object with the real ID from server
       return Trip(
         id: response['tripId'] ?? 0,
-        name: nameController.text,
+        title: nameController.text,
         startDate: _startDate!,
         endDate: _endDate!,
         status: TripStatus.upcoming,
-        imageUrl: '',
-        destination: '${cityController.text}, ${countryController.text}',
+        previewUrl: '',
         country: countryController.text,
         city: cityController.text,
         description: descriptionController.text,
         days: [],
-        locations: [],
       );
     }
   }

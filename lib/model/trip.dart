@@ -1,151 +1,71 @@
-import 'package:flutter/material.dart';
-import 'package:json_annotation/json_annotation.dart';
 import 'package:putevod/model/trip_day.dart';
-import 'package:putevod/model/trip_location.dart';
 
-part 'trip.g.dart';
-
-/// Model representing a trip
-@JsonSerializable()
 class Trip {
-  /// Unique identifier for the trip
   final int id;
   
-  /// Name/title of the trip
-  @JsonKey(name: 'title')
-  final String name;
-  
-  /// Trip start date
-  final DateTime startDate;
-  
-  /// Trip end date
-  final DateTime endDate;
-  
-  /// Trip status (upcoming, ongoing, completed)
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  final TripStatus status;
-  
-  /// URL of the trip image
-  @JsonKey(name: 'previewUrl')
-  final String imageUrl;
-  
-  /// Destination of the trip
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  final String destination;
+  final String title;
 
-  /// Country of the trip
-  final String country;
-  
-  /// City of the trip
-  final String city;
-  
-  /// Description of the trip
   final String description;
 
-  /// When the trip was created
-  final DateTime? createdAt;
+  final DateTime startDate;
   
-  /// When the trip was last updated
-  final DateTime? updatedAt;
+  final DateTime endDate;
 
-  /// Days of the trip
-  final List<TripDay> days;
+  final String country;
 
-  /// Locations in the trip
-  @JsonKey(defaultValue: [])
-  final List<TripLocation> locations;
-  
-  /// Version for conflict resolution
-  final int? version;
-  
-  /// Whether the trip is published
+  final String city;
+
+  final TripStatus status;
+
   final bool? published;
 
-  /// Creates a new trip instance
+  final String? previewUrl;
+
+  final List<TripDay> days;
+
   const Trip({
     required this.id,
-    required this.name,
+    required this.title,
     required this.startDate,
     required this.endDate,
     required this.days,
-    required this.imageUrl,
     required this.country,
     required this.city,
     required this.description,
-    this.locations = const [],
     this.status = TripStatus.upcoming,
-    this.destination = '',
-    this.createdAt,
-    this.updatedAt,
-    this.version,
+    this.previewUrl,
     this.published,
   });
+
+  String get destination => "$country, $city";
 
   /// Creates a copy of this trip with the given fields replaced
   Trip copyWith({
     int? id,
-    String? name,
+    String? title,
     DateTime? startDate,
     DateTime? endDate,
+    List<TripDay>? days,
     TripStatus? status,
-    String? imageUrl,
-    String? destination,
+    String? previewUrl,
     String? country,
     String? city,
     String? description,
-    DateTime? createdAt,
-    DateTime? updatedAt,
-    int? version,
     bool? published,
-    List<TripDay>? days,
-    List<TripLocation>? locations,
   }) {
     return Trip(
       id: id ?? this.id,
-      name: name ?? this.name,
+      title: title ?? this.title,
       startDate: startDate ?? this.startDate,
       endDate: endDate ?? this.endDate,
+      days: days ?? this.days,
       status: status ?? this.status,
-      imageUrl: imageUrl ?? this.imageUrl,
-      destination: destination ?? this.destination,
+      previewUrl: previewUrl ?? this.previewUrl,
       country: country ?? this.country,
       city: city ?? this.city,
       description: description ?? this.description,
-      createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
-      version: version ?? this.version,
       published: published ?? this.published,
-      days: days ?? this.days,
-      locations: locations ?? this.locations,
     );
-  }
-  
-  /// Create a Trip from JSON
-  factory Trip.fromJson(Map<String, dynamic> json) {
-    final trip = _$TripFromJson(json);
-    // Determine status based on dates
-    final now = DateTime.now();
-    TripStatus status;
-    if (trip.startDate.isAfter(now)) {
-      status = TripStatus.upcoming;
-    } else if (trip.endDate.isBefore(now)) {
-      status = TripStatus.completed;
-    } else {
-      status = TripStatus.ongoing;
-    }
-    
-    return trip.copyWith(
-      status: status,
-      destination: '${trip.city}, ${trip.country}',
-    );
-  }
-  
-  /// Convert Trip to JSON
-  Map<String, dynamic> toJson() => _$TripToJson(this);
-
-  /// Get locations for a specific day
-  List<TripLocation> getLocationsForDay(int dayNumber) {
-    return locations.where((location) => location.dayNumber == dayNumber).toList();
   }
 
   static int compareTwo(Trip a, Trip b) {
@@ -163,6 +83,39 @@ class Trip {
       return 1;
     }
   }
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'title': title,
+    'description': description,
+    'startDate': startDate.toIso8601String(),
+    'endDate': endDate.toIso8601String(),
+    'country': country,
+    'city': city,
+    'status': status.name,
+    'published': published,
+    'previewUrl': previewUrl,
+    'days': days.map((day) => day.toJson()).toList(),
+  };
+
+  factory Trip.fromJson(Map<String, dynamic> json) => Trip(
+    id: json['id'] as int,
+    title: json['title'] as String,
+    description: json['description'] as String,
+    startDate: DateTime.parse(json['startDate'] as String),
+    endDate: DateTime.parse(json['endDate'] as String),
+    country: json['country'] as String,
+    city: json['city'] as String,
+    status: TripStatus.values.firstWhere(
+      (status) => status.name == json['status'],
+      orElse: () => TripStatus.upcoming,
+    ),
+    published: json['published'] as bool?,
+    previewUrl: json['previewUrl'] as String?,
+    days: (json['days'] as List<dynamic>)
+        .map((e) => TripDay.fromJson(e as Map<String, dynamic>))
+        .toList(),
+  );
 }
 
 /// Enum representing the status of a trip

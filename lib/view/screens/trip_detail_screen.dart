@@ -66,7 +66,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
               children: [
                 Column(
                   children: [
-                    _buildHeader(trip.name, trip.startDate, trip.endDate),
+                    _buildHeader(trip.title, trip.startDate, trip.endDate),
                     if (trip.days.isNotEmpty && viewModel.selectedDay != null) ...[
                       TripDaySelector(
                         days: trip.days,
@@ -283,7 +283,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
         itemBuilder: (context, index) {
           final event = events[index];
           return Dismissible(
-            key: Key(event.id),
+            key: Key(event.id.toString()),
             background: Container(
               color: AppColors.accent,
               alignment: Alignment.centerRight,
@@ -300,7 +300,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => PlaceEditingScreen.update(
-                      placeId: event.id,
+                      placeId: event.place.id,
                       tripId: viewModel.trip!.id,
                       dayId: viewModel.selectedDay!.id,
                     ),

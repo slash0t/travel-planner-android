@@ -45,7 +45,7 @@ class TripEventItem extends StatelessWidget {
                 children: [
                   // Time
                   Text(
-                    event.time,
+                    event.formatTime,
                     style: const TextStyle(
                       fontFamily: 'NotoSans',
                       fontSize: 16,
@@ -67,7 +67,7 @@ class TripEventItem extends StatelessWidget {
                   const SizedBox(height: 10),
                   // Address
                   Text(
-                    event.address,
+                    event.place.address!,
                     style: const TextStyle(
                       fontFamily: 'NotoSans',
                       fontSize: 14,

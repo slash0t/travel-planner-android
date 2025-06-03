@@ -226,7 +226,7 @@ class TripPublishingViewModel extends ChangeNotifier {
         'includePersonalNotes': _includePersonalNotes,
         'includeDaysAndEvents': _includeDaysAndEvents,
         'coverImageUrl': _coverImageUrl.isEmpty 
-            ? _selectedTrip!.imageUrl 
+            ? _selectedTrip!.previewUrl
             : _coverImageUrl,
         'isPublic': _isPublic,
         'isLinkOnly': _isLinkOnly,

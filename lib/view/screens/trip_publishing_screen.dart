@@ -163,7 +163,7 @@ class _SelectTripSection extends StatelessWidget {
                         ClipRRect(
                           borderRadius: BorderRadius.circular(7),
                           child: Image.network(
-                            trip.imageUrl,
+                            trip.previewUrl!,
                             fit: BoxFit.cover,
                             errorBuilder: (context, error, stackTrace) {
                               return const Center(
@@ -176,7 +176,7 @@ class _SelectTripSection extends StatelessWidget {
                           bottom: 10,
                           left: 10,
                           child: Text(
-                            trip.name,
+                            trip.title,
                             style: const TextStyle(
                               color: Colors.white,
                               fontFamily: 'NotoSans',
@@ -266,7 +266,7 @@ class _TripPreviewSection extends StatelessWidget {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8),
               image: DecorationImage(
-                image: NetworkImage(trip.imageUrl),
+                image: NetworkImage(trip.previewUrl!),
                 fit: BoxFit.cover,
               ),
             ),
@@ -293,7 +293,7 @@ class _TripPreviewSection extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          trip.name,
+                          trip.title,
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 16,

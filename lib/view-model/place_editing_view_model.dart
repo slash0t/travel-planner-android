@@ -1,138 +1,119 @@
 import 'package:flutter/material.dart';
-import 'package:putevod/model/place.dart';
-import 'package:putevod/external/event_service.dart';
 import 'dart:io';
 
-/// View model for place editing screen
+import '../model/trip_event.dart';
+
 class PlaceEditingViewModel extends ChangeNotifier {
-  /// Event service for API calls
-  final EventService _eventService = EventService();
+  TripEvent? _tripEvent;
   
-  /// Current place being edited
-  Place? _place;
-  
-  /// Whether the screen is in create mode (true) or update mode (false)
   final bool _isCreateMode;
   
-  /// Whether the view model is currently loading data
   bool _isLoading = false;
   
-  /// Whether the view model is currently saving data
   bool _isSaving = false;
   
-  /// Error message to display, if any
   String? _errorMessage;
   
-  /// Trip ID and Day ID for API context
   int? _tripId;
   int? _dayId;
   
-  /// Attached files list (local File objects)
   final List<File> _attachedFiles = [];
 
-  /// Creates a new place editing view model
-  PlaceEditingViewModel({required bool isCreateMode, int? tripId, int? dayId}) : 
+  PlaceEditingViewModel({required bool isCreateMode, int? tripId, int? dayId}) :
     _isCreateMode = isCreateMode,
     _tripId = tripId,
     _dayId = dayId {
     if (isCreateMode) {
-      _place = Place.empty();
+      _tripEvent = TripEvent.empty();
     }
   }
 
-  /// Gets the current place being edited
-  Place? get place => _place;
+  TripEvent? get tripEvent => _tripEvent;
   
-  /// Whether the screen is in create mode
   bool get isCreateMode => _isCreateMode;
-  
-  /// Whether the screen is in update mode
+
   bool get isUpdateMode => !_isCreateMode;
   
-  /// Whether the view model is currently loading data
   bool get isLoading => _isLoading;
   
-  /// Whether the view model is currently saving data
   bool get isSaving => _isSaving;
   
-  /// Error message to display, if any
   String? get errorMessage => _errorMessage;
   
-  /// Local attached files
   List<File> get attachedFiles => List.unmodifiable(_attachedFiles);
   
-  /// Sets the trip and day context
   void setContext(int tripId, int dayId) {
     _tripId = tripId;
     _dayId = dayId;
   }
   
-  /// Sets the place type
-  void setPlaceType(PlaceType type) {
-    if (_place == null) return;
+  void setPlaceType(String type) {
+    if (_tripEvent == null) return;
     
-    _place = _place!.copyWith(type: type);
-    notifyListeners();
-  }
-  
-  /// Sets the place name
-  void setName(String name) {
-    if (_place == null) return;
-    
-    _place = _place!.copyWith(name: name);
-    notifyListeners();
-  }
-  
-  /// Sets whether the place has a specified time
-  void setHasTime(bool hasTime) {
-    if (_place == null) return;
-    
-    _place = _place!.copyWith(hasTime: hasTime);
-    notifyListeners();
-  }
-  
-  /// Sets the start time
-  void setStartTime(TimeOfDay time) {
-    if (_place == null) return;
-    
-    _place = _place!.copyWith(startTime: time);
-    notifyListeners();
-  }
-  
-  /// Sets the end time
-  void setEndTime(TimeOfDay time) {
-    if (_place == null) return;
-    
-    _place = _place!.copyWith(endTime: time);
-    notifyListeners();
-  }
-  
-  /// Sets the coordinates
-  void setCoordinates(double latitude, double longitude) {
-    if (_place == null) return;
-    
-    _place = _place!.copyWith(
-      latitude: latitude,
-      longitude: longitude,
+    _tripEvent = _tripEvent!.copyWith(
+        place: _tripEvent!.place.copyWith(
+          placeType: type
+        )
     );
     notifyListeners();
   }
   
-  /// Sets the notes
-  void setNotes(String notes) {
-    if (_place == null) return;
+  void setName(String name) {
+    if (_tripEvent == null) return;
     
-    _place = _place!.copyWith(notes: notes);
+    _tripEvent = _tripEvent!.copyWith(title: name);
     notifyListeners();
   }
-  
-  /// Adds a new attached file
+
+  void setDescription(String name) {
+    if (_tripEvent == null) return;
+
+    _tripEvent = _tripEvent!.copyWith(description: name);
+    notifyListeners();
+  }
+
+  void setHasTime(bool value) {
+    if (_tripEvent == null) return;
+
+    _tripEvent = _tripEvent!.copyWith(hasSpecificTime: value);
+    notifyListeners();
+  }
+
+  void setCoordinates(double latitude, double longitude) {
+    if (_tripEvent == null) return;
+
+    _tripEvent = _tripEvent!.copyWith(
+      place: _tripEvent!.place.copyWith(
+        latitude: latitude,
+        longitude: longitude,
+      )
+    );
+    notifyListeners();
+  }
+
+  void setStartTime(TimeOfDay time) {
+    if (_tripEvent == null) return;
+
+    DateTime dateTime = DateTime(0, 0, 0, time.hour, time.minute);
+
+    _tripEvent = _tripEvent!.copyWith(startTime: dateTime);
+    notifyListeners();
+  }
+
+  void setEndTime(TimeOfDay time) {
+    if (_tripEvent == null) return;
+
+    DateTime dateTime = DateTime(0, 0, 0, time.hour, time.minute);
+
+    _tripEvent = _tripEvent!.copyWith(endTime: dateTime);
+    notifyListeners();
+  }
+
   void addAttachedFile(File file) {
     _attachedFiles.add(file);
     notifyListeners();
   }
   
-  /// Removes an attached file
   void removeAttachedFile(int index) {
     if (index >= 0 && index < _attachedFiles.length) {
       _attachedFiles.removeAt(index);
@@ -140,8 +121,7 @@ class PlaceEditingViewModel extends ChangeNotifier {
     }
   }
   
-  /// Loads a place by ID (for update mode)
-  Future<void> loadPlace(String placeId) async {
+  Future<void> loadPlace(int placeId) async {
     if (_isCreateMode) return;
     
     _isLoading = true;
@@ -149,19 +129,11 @@ class PlaceEditingViewModel extends ChangeNotifier {
     notifyListeners();
     
     try {
-      // Validate context is set
       if (_tripId == null || _dayId == null) {
         throw Exception('Trip ID and Day ID must be set before loading a place');
       }
       
-      // Convert placeId to eventId (same concept in our app)
-      final eventId = int.parse(placeId);
-      
-      // Call API
-      final eventData = await _eventService.getEvent(_tripId!, _dayId!, eventId);
-      
-      // Convert to Place model
-      _place = _eventService.eventDataToPlace(eventData);
+      final eventId = placeId;
     } catch (e) {
       _errorMessage = 'Failed to load place: ${e.toString()}';
       debugPrint(_errorMessage);
@@ -171,30 +143,26 @@ class PlaceEditingViewModel extends ChangeNotifier {
     }
   }
   
-  /// Saves the current place
   Future<bool> savePlaceChanges() async {
-    if (_place == null) return false;
+    if (_tripEvent == null) return false;
     
     _isSaving = true;
     _errorMessage = null;
     notifyListeners();
     
     try {
-      // Validate context is set
       if (_tripId == null || _dayId == null) {
         throw Exception('Trip ID and Day ID must be set before saving a place');
       }
       
-      // Convert Place to API format
-      final eventData = _eventService.placeToEventData(_place!);
-      
+      // final eventData = _eventService.placeToEventData(_tripEvent!);
+
       if (_isCreateMode) {
-        // Create new event
-        await _eventService.createEvent(_tripId!, _dayId!, eventData);
+        // await _eventService.createEvent(_tripId!, _dayId!, eventData);
       } else {
         // Update existing event
-        final eventId = _place!.id!;
-        await _eventService.updateEvent(_tripId!, _dayId!, eventId, eventData);
+        final eventId = _tripEvent!.id!;
+        // await _eventService.updateEvent(_tripId!, _dayId!, eventId, eventData);
       }
       
       return true;
@@ -209,12 +177,13 @@ class PlaceEditingViewModel extends ChangeNotifier {
   }
   
   /// Format time of day in 12-hour format (with AM/PM)
-  String formatTimeOfDay(TimeOfDay? timeOfDay) {
+  String formatTimeOfDay(DateTime? timeOfDay) {
     if (timeOfDay == null) return '--:-- --';
-    
-    final hour = timeOfDay.hourOfPeriod == 0 ? 12 : timeOfDay.hourOfPeriod;
-    final minute = timeOfDay.minute.toString().padLeft(2, '0');
-    final period = timeOfDay.period == DayPeriod.am ? 'AM' : 'PM';
+
+    TimeOfDay time = TimeOfDay(hour: timeOfDay.hour, minute: timeOfDay.minute);
+    final hour = time.hourOfPeriod == 0 ? 12 : time.hourOfPeriod;
+    final minute = time.minute.toString().padLeft(2, '0');
+    final period = time.period == DayPeriod.am ? 'AM' : 'PM';
     
     return '$hour:$minute $period';
   }
