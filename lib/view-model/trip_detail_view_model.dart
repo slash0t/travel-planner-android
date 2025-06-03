@@ -94,19 +94,35 @@ class TripDetailViewModel with ChangeNotifier {
   }
   
   /// Reorders events within the same day
-  void reorderEvents(int oldIndex, int newIndex) {
-    if (_selectedDay == null) return;
-    
+  Future<void> reorderEvents(int oldIndex, int newIndex) async {
+    if (_selectedDay == null || _trip == null) return;
+
     if (oldIndex < newIndex) {
       newIndex -= 1;
     }
-    
-    final List<TripEvent> dayEvents = eventsForSelectedDay;
 
-    final List<TripEvent> newDayEvents = List.from(dayEvents);
-    final TripEvent event = dayEvents[oldIndex];
-    newDayEvents.removeAt(oldIndex);
-    newDayEvents.insert(newIndex, event);
+    final selectedEvent = eventsForSelectedDay[oldIndex];
+
+    try {
+      await _tripService.reorderEvent(
+          _trip!.id,
+          _selectedDay!.id,
+          selectedEvent.id,
+          { "newPosition": newIndex + 1 }
+      );
+
+      await loadTripDetail(_trip!.id);
+    } catch (e) {
+      _errorMessage = 'Ошибка удаления события: ${e.toString()}';
+      notifyListeners();
+    }
+
+    // final List<TripEvent> dayEvents = eventsForSelectedDay;
+    //
+    // final List<TripEvent> newDayEvents = List.from(dayEvents);
+    // final TripEvent event = dayEvents[oldIndex];
+    // newDayEvents.removeAt(oldIndex);
+    // newDayEvents.insert(newIndex, event);
 
     notifyListeners();
   }

@@ -92,6 +92,23 @@ class TripService {
     }
   }
 
+  Future<dynamic> reorderEvent(int tripId, int dayId, int eventId, Map<String, dynamic> data) async {
+    try {
+      final response = await _plannerClient.patch(
+        '/trips/$tripId/days/$dayId/events/$eventId/reorder',
+        data: data,
+      );
+
+      if (response.statusCode == 200) {
+        return response.data;
+      } else {
+        throw Exception('Failed to get trip details: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      throw Exception(_handleDioError(e));
+    }
+  }
+
   /// Создать новую поездку
   Future<dynamic> createTrip(Map<String, dynamic> tripData) async {
     try {
