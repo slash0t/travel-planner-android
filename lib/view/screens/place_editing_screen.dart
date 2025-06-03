@@ -149,8 +149,8 @@ class _PlaceEditingScreenState extends State<PlaceEditingScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildPlaceTypeSection(viewModel),
-                    const SizedBox(height: 24),
+                    // _buildPlaceTypeSection(viewModel),
+                    // const SizedBox(height: 24),
                     _buildNameSection(viewModel),
                     const SizedBox(height: 24),
                     _buildTimeSection(viewModel),
@@ -370,13 +370,13 @@ class _PlaceEditingScreenState extends State<PlaceEditingScreen> {
               ),
             ),
             const SizedBox(width: 16),
-            const Icon(Icons.access_time, size: 16),
+            const Icon(Icons.access_time, size: 20),
             const SizedBox(width: 8),
             const Text(
               'Указать время посещения',
               style: TextStyle(
                 fontFamily: 'NotoSans',
-                fontSize: 14,
+                fontSize: 16,
               ),
             ),
           ],
@@ -384,7 +384,7 @@ class _PlaceEditingScreenState extends State<PlaceEditingScreen> {
         if (viewModel.tripEvent?.hasSpecificTime ?? false)
           Column(
             children: [
-              const SizedBox(height: 8),
+              const SizedBox(height: 20),
               Row(
                 children: [
                   Expanded(

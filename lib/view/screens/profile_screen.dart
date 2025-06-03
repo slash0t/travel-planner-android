@@ -22,9 +22,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void initState() {
     super.initState();
     // Ensure profile data is fetched when screen is initialized
-    // WidgetsBinding.instance.addPostFrameCallback((_) {
-    //   Provider.of<ProfileViewModel>(context, listen: false).fetchProfileData();
-    // });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<ProfileViewModel>(context, listen: false).fetchProfileData();
+    });
   }
   
   @override
