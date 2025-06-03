@@ -60,7 +60,7 @@ class TripEventItem extends StatelessWidget {
               ),
             ),
           ),
-          // Arrow icon
+          if (!event.hasSpecificTime)
           Padding(
             padding: const EdgeInsets.all(16),
             child: ReorderableDragStartListener(

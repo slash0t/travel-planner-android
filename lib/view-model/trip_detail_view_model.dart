@@ -96,15 +96,9 @@ class TripDetailViewModel with ChangeNotifier {
     }
     
     final List<TripEvent> dayEvents = eventsForSelectedDay;
-    
-    if (oldIndex >= dayEvents.length || newIndex >= dayEvents.length) return;
-    
-    // Get the event to move
-    final TripEvent event = dayEvents[oldIndex];
 
-    
-    // Create a new day event list with the reordering
     final List<TripEvent> newDayEvents = List.from(dayEvents);
+    final TripEvent event = dayEvents[oldIndex];
     newDayEvents.removeAt(oldIndex);
     newDayEvents.insert(newIndex, event);
 
