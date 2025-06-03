@@ -448,6 +448,20 @@ class TripService {
     }
   }
 
+  Future<List<dynamic>> getTripDay(int tripId) async {
+    try {
+      final response = await _plannerClient.get('/trips/$tripId/days');
+
+      if (response.statusCode == 200) {
+        return response.data;
+      } else {
+        throw Exception('Failed to get trip days: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      throw Exception(_handleDioError(e));
+    }
+  }
+
   /// Создать день поездки
   Future<dynamic> createTripDay(int tripId, Map<String, dynamic> dayData) async {
     try {

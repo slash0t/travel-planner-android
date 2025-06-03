@@ -35,7 +35,6 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     super.initState();
     _viewModel = Provider.of<TripDetailViewModel>(context, listen: false);
     
-    // Load trip data after the widget is built
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadTripDetail();
     });
@@ -43,6 +42,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   
   Future<void> _loadTripDetail() async {
     await _viewModel.loadTripDetail(widget.tripId);
+    await _viewModel.getEventsForSelectedDay();
   }
   
   @override
@@ -248,9 +248,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   }
   
   Widget _buildEventsList(TripDetailViewModel viewModel) {
-    final events = viewModel.eventsForSelectedDay;
-    
-    if (events.isEmpty) {
+    if (viewModel.selectedEvents == null || viewModel.selectedEvents!.isEmpty) {
       return const Center(
         child: Text(
           'Нет событий на этот день',
@@ -262,13 +260,13 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
         ),
       );
     }
-    
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
       child: ReorderableListView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
-        itemCount: events.length,
+        itemCount: viewModel.selectedEvents!.length,
         onReorder: viewModel.reorderEvents,
         proxyDecorator: (child, index, animation) {
           return AnimatedBuilder(
@@ -284,7 +282,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
           );
         },
         itemBuilder: (context, index) {
-          final event = events[index];
+          final event = viewModel.selectedEvents![index];
           return Dismissible(
             key: Key(event.id.toString()),
             background: Container(

@@ -22,13 +22,17 @@ class TripDetailViewModel with ChangeNotifier {
   
   /// Error message
   String? _errorMessage;
-  
+
+  List<TripEvent>? _selectedEvents;
+
   /// Getter for trip
   Trip? get trip => _trip;
   
   /// Getter for selected day
   TripDay? get selectedDay => _selectedDay;
-  
+
+  List<TripEvent>? get selectedEvents => _selectedEvents;
+
   /// Getter for loading state
   bool get isLoading => _isLoading;
   
@@ -36,12 +40,31 @@ class TripDetailViewModel with ChangeNotifier {
   String? get errorMessage => _errorMessage;
   
   /// Getter for events of the selected day
-  List<TripEvent> get eventsForSelectedDay {
+  Future<void> getEventsForSelectedDay() async {
     if (_selectedDay == null) {
-      return [];
+      return ;
     }
 
-    return _selectedDay!.events;
+    // _isLoading = true;
+    // _errorMessage = null;
+    // notifyListeners();
+
+    try {
+      final response = await _tripService.getDayEvents(_trip!.id, _selectedDay!.id);
+
+      final events = response
+          .map((e) => TripEvent.fromJson(e as Map<String, dynamic>))
+          .toList();
+
+      events.sort((a, b) => a.orderPosition.compareTo(b.orderPosition));
+
+      _selectedEvents = events;
+    } catch (e) {
+      _errorMessage = 'Ошибка загрузки поездки: ${e.toString()}';
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
   Future<void> deleteCurrentTrip() async {
@@ -49,8 +72,7 @@ class TripDetailViewModel with ChangeNotifier {
 
     await _tripService.deleteTrip(_trip!.id);
   }
-  
-  /// Loads trip detail data for the provided trip ID
+
   Future<void> loadTripDetail(int tripId) async {
     _isLoading = true;
     _errorMessage = null;
@@ -88,20 +110,30 @@ class TripDetailViewModel with ChangeNotifier {
   }
   
   /// Selects a specific day to view events
-  void selectDay(TripDay day) {
+  Future<void> selectDay(TripDay day) async {
     _selectedDay = day;
+    await getEventsForSelectedDay();
     notifyListeners();
   }
   
   /// Reorders events within the same day
   Future<void> reorderEvents(int oldIndex, int newIndex) async {
-    if (_selectedDay == null || _trip == null) return;
+    if (_selectedDay == null || _trip == null || selectedEvents == null) return;
 
     if (oldIndex < newIndex) {
       newIndex -= 1;
     }
 
-    final selectedEvent = eventsForSelectedDay[oldIndex];
+    final selectedEvent = selectedEvents![oldIndex];
+
+    final List<TripEvent> dayEvents = selectedEvents!;
+
+    final List<TripEvent> newDayEvents = List.from(dayEvents);
+    final TripEvent event = dayEvents[oldIndex];
+    newDayEvents.removeAt(oldIndex);
+    newDayEvents.insert(newIndex, event);
+
+    _selectedEvents = newDayEvents;
 
     try {
       await _tripService.reorderEvent(
@@ -111,18 +143,12 @@ class TripDetailViewModel with ChangeNotifier {
           { "newPosition": newIndex + 1 }
       );
 
-      await loadTripDetail(_trip!.id);
+      await getEventsForSelectedDay();
+      //await loadTripDetail(_trip!.id);
     } catch (e) {
       _errorMessage = 'Ошибка удаления события: ${e.toString()}';
       notifyListeners();
     }
-
-    // final List<TripEvent> dayEvents = eventsForSelectedDay;
-    //
-    // final List<TripEvent> newDayEvents = List.from(dayEvents);
-    // final TripEvent event = dayEvents[oldIndex];
-    // newDayEvents.removeAt(oldIndex);
-    // newDayEvents.insert(newIndex, event);
 
     notifyListeners();
   }
