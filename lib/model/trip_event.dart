@@ -1,5 +1,4 @@
 import 'package:intl/intl.dart';
-import 'package:latlong2/latlong.dart';
 import 'package:putevod/model/place.dart';
 
 class TripEvent {

@@ -520,47 +520,47 @@ class _PlaceEditingScreenState extends State<PlaceEditingScreen> {
           ),
         ),
         const SizedBox(height: 8),
-        TextField(
-          decoration: InputDecoration(
-            hintText: 'Поиск на карте',
-            hintStyle: const TextStyle(
-              fontFamily: 'NotoSans',
-              fontSize: 16,
-              color: Color(0xFFADB0BC),
-            ),
-            filled: true,
-            fillColor: const Color(0xFFF9FAFB),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(
-                color: Color(0xFFE5E7EB),
-              ),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(
-                color: Color(0xFFE5E7EB),
-              ),
-            ),
-            prefixIcon: const Icon(
-              Icons.search,
-              color: Color(0xFF9CA3AF),
-            ),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 16,
-            ),
-          ),
-          style: const TextStyle(
-            fontFamily: 'NotoSans',
-            fontSize: 16,
-          ),
-          onTap: () {
-            // TODO: Open map search
-          },
-          readOnly: true,
-        ),
-        const SizedBox(height: 12),
+        // TextField(
+        //   decoration: InputDecoration(
+        //     hintText: 'Поиск на карте',
+        //     hintStyle: const TextStyle(
+        //       fontFamily: 'NotoSans',
+        //       fontSize: 16,
+        //       color: Color(0xFFADB0BC),
+        //     ),
+        //     filled: true,
+        //     fillColor: const Color(0xFFF9FAFB),
+        //     border: OutlineInputBorder(
+        //       borderRadius: BorderRadius.circular(8),
+        //       borderSide: const BorderSide(
+        //         color: Color(0xFFE5E7EB),
+        //       ),
+        //     ),
+        //     enabledBorder: OutlineInputBorder(
+        //       borderRadius: BorderRadius.circular(8),
+        //       borderSide: const BorderSide(
+        //         color: Color(0xFFE5E7EB),
+        //       ),
+        //     ),
+        //     prefixIcon: const Icon(
+        //       Icons.search,
+        //       color: Color(0xFF9CA3AF),
+        //     ),
+        //     contentPadding: const EdgeInsets.symmetric(
+        //       horizontal: 16,
+        //       vertical: 16,
+        //     ),
+        //   ),
+        //   style: const TextStyle(
+        //     fontFamily: 'NotoSans',
+        //     fontSize: 16,
+        //   ),
+        //   onTap: () {
+        //     // TODO: Open map search
+        //   },
+        //   readOnly: true,
+        // ),
+        // const SizedBox(height: 12),
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(

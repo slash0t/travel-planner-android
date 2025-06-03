@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
 
+import '../external/trip_service.dart';
 import '../model/trip_event.dart';
 
 class PlaceEditingViewModel extends ChangeNotifier {
+  final TripService _tripService = TripService();
+
   TripEvent? _tripEvent;
   
   final bool _isCreateMode;
@@ -151,18 +154,25 @@ class PlaceEditingViewModel extends ChangeNotifier {
     notifyListeners();
     
     try {
-      if (_tripId == null || _dayId == null) {
+      if (_tripId == null || _dayId == null || _tripEvent == null) {
         throw Exception('Trip ID and Day ID must be set before saving a place');
       }
-      
-      // final eventData = _eventService.placeToEventData(_tripEvent!);
+
+      final eventData = _tripEvent!.toJson();
+      eventData.remove("id");
+      eventData.remove("dayId");
+      eventData.remove("orderPosition");
+      eventData["place"]?.remove("id");
+
+      if (_tripEvent?.place.latitude == null) {
+        eventData.remove("place");
+      }
 
       if (_isCreateMode) {
-        // await _eventService.createEvent(_tripId!, _dayId!, eventData);
+        await _tripService.createEvent(_tripId!, _dayId!, eventData);
       } else {
-        // Update existing event
-        final eventId = _tripEvent!.id!;
-        // await _eventService.updateEvent(_tripId!, _dayId!, eventId, eventData);
+        final eventId = _tripEvent!.id;
+        await _tripService.updateEvent(_tripId!, _dayId!, eventId, eventData);
       }
       
       return true;
