@@ -82,7 +82,7 @@ class _TripMapView extends StatelessWidget {
       
       markers.add(
         Marker(
-          point: location.place.coordinates,
+          point: location.place!.coordinates,
           child: GestureDetector(
             onTap: () => viewModel.selectLocation(location),
             child: Container(

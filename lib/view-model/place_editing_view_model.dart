@@ -54,7 +54,7 @@ class PlaceEditingViewModel extends ChangeNotifier {
     if (_tripEvent == null) return;
     
     _tripEvent = _tripEvent!.copyWith(
-        place: _tripEvent!.place.copyWith(
+        place: _tripEvent!.place?.copyWith(
           placeType: type
         )
     );
@@ -86,7 +86,7 @@ class PlaceEditingViewModel extends ChangeNotifier {
     if (_tripEvent == null) return;
 
     _tripEvent = _tripEvent!.copyWith(
-      place: _tripEvent!.place.copyWith(
+      place: _tripEvent!.place?.copyWith(
         latitude: latitude,
         longitude: longitude,
       )
@@ -164,8 +164,13 @@ class PlaceEditingViewModel extends ChangeNotifier {
       eventData.remove("orderPosition");
       eventData["place"]?.remove("id");
 
-      if (_tripEvent?.place.latitude == null) {
+      if (_tripEvent?.place!.latitude == null) {
         eventData.remove("place");
+      }
+
+      if (!_tripEvent!.hasSpecificTime) {
+        eventData.remove("startTime");
+        eventData.remove("endTime");
       }
 
       if (_isCreateMode) {

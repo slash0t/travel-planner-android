@@ -44,16 +44,7 @@ class TripEventItem extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Time
-                  Text(
-                    event.formatTime,
-                    style: const TextStyle(
-                      fontFamily: 'NotoSans',
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.accent,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
+                  _buildEventTimeInfo(),
                   // Title
                   Text(
                     event.title,
@@ -64,16 +55,7 @@ class TripEventItem extends StatelessWidget {
                       color: AppColors.text,
                     ),
                   ),
-                  const SizedBox(height: 10),
-                  // Address
-                  Text(
-                    event.place.address!,
-                    style: const TextStyle(
-                      fontFamily: 'NotoSans',
-                      fontSize: 14,
-                      color: Color(0xFF4B5562),
-                    ),
-                  ),
+                  _buildPlaceInfo(),
                 ],
               ),
             ),
@@ -94,8 +76,45 @@ class TripEventItem extends StatelessWidget {
       ),
     );
   }
-  
-  /// Builds the red circle and vertical line for timeline
+
+  Widget _buildPlaceInfo() {
+    if (event.place == null) return const SizedBox(height: 1);
+
+    return Column(
+      children: [
+        const SizedBox(height: 10),
+        // Address
+        Text(
+          event.place!.address!,
+          style: const TextStyle(
+            fontFamily: 'NotoSans',
+            fontSize: 14,
+            color: Color(0xFF4B5562),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildEventTimeInfo() {
+    if (!event.hasSpecificTime) return const SizedBox(height: 1);
+
+    return Column(
+      children: [
+        Text(
+          event.formatTime,
+          style: const TextStyle(
+            fontFamily: 'NotoSans',
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+            color: AppColors.accent,
+          ),
+        ),
+        const SizedBox(height: 10),
+      ],
+    );
+  }
+
   Widget _buildTimelineIndicator() {
     return Stack(
       alignment: Alignment.center,

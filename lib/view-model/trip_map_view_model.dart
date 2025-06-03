@@ -70,7 +70,7 @@ class TripMapViewModel extends ChangeNotifier {
   /// Select a location
   void selectLocation(TripEvent location) {
     _selectedLocation = location;
-    _mapCenter = LatLng(location.place.latitude!, location.place.longitude!);
+    _mapCenter = LatLng(location.place!.latitude!, location.place!.longitude!);
     notifyListeners();
   }
 

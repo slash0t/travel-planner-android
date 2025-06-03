@@ -77,11 +77,11 @@ class _PlaceEditingScreenState extends State<PlaceEditingScreen> {
     // Set values in the controllers once we have the place data
     if (_viewModel.tripEvent != null) {
       _nameController.text = _viewModel.tripEvent!.title;
-      if (_viewModel.tripEvent!.place.latitude != null) {
-        _latitudeController.text = _viewModel.tripEvent!.place.latitude!.toString();
+      if (_viewModel.tripEvent!.place?.latitude != null) {
+        _latitudeController.text = _viewModel.tripEvent!.place!.latitude!.toString();
       }
-      if (_viewModel.tripEvent!.place.longitude != null) {
-        _longitudeController.text = _viewModel.tripEvent!.place.longitude!.toString();
+      if (_viewModel.tripEvent!.place?.longitude != null) {
+        _longitudeController.text = _viewModel.tripEvent!.place!.longitude!.toString();
       }
     }
   }
@@ -251,7 +251,7 @@ class _PlaceEditingScreenState extends State<PlaceEditingScreen> {
     String label,
     IconData icon,
   ) {
-    final isSelected = viewModel.tripEvent!.place.placeType == label;
+    final isSelected = viewModel.tripEvent!.place?.placeType == label;
     
     return GestureDetector(
       onTap: () => viewModel.setPlaceType(label),
@@ -473,16 +473,27 @@ class _PlaceEditingScreenState extends State<PlaceEditingScreen> {
   }
   
   Future<void> _selectTimeOfDay(PlaceEditingViewModel viewModel, bool isStartTime) async {
-    final initialTime = isStartTime 
-        ? TimeOfDay(
-      hour: viewModel.tripEvent!.startTime!.hour,
-      minute: viewModel.tripEvent!.startTime!.minute,
-    ) ?? TimeOfDay.now()
-        : TimeOfDay(
-      hour: viewModel.tripEvent!.endTime!.hour,
-      minute: viewModel.tripEvent!.endTime!.minute,
-    ) ?? TimeOfDay.now();
-        
+    dynamic initialTime;
+    if (isStartTime) {
+      if (viewModel.isCreateMode) {
+        initialTime = TimeOfDay.now();
+      } else {
+        initialTime = TimeOfDay(
+          hour: viewModel.tripEvent!.startTime!.hour,
+          minute: viewModel.tripEvent!.startTime!.minute,
+        );
+      }
+    } else {
+      if (viewModel.isCreateMode) {
+        initialTime = TimeOfDay.now();
+      } else {
+        initialTime = TimeOfDay(
+          hour: viewModel.tripEvent!.endTime!.hour,
+          minute: viewModel.tripEvent!.endTime!.minute,
+        );
+      }
+    }
+
     final TimeOfDay? pickedTime = await showTimePicker(
       context: context,
       initialTime: initialTime,

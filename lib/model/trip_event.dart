@@ -6,7 +6,7 @@ class TripEvent {
 
   final int dayId;
 
-  final Place place;
+  final Place? place;
 
   final String title;
 
@@ -23,7 +23,7 @@ class TripEvent {
   const TripEvent({
     required this.id,
     required this.dayId,
-    required this.place,
+    this.place,
     required this.title,
     required this.description,
     this.startTime,
@@ -78,7 +78,7 @@ class TripEvent {
   Map<String, dynamic> toJson() => {
     'id': id,
     'dayId': dayId,
-    'place': place.toJson(),
+    'place': place?.toJson(),
     'title': title,
     'description': description,
     'startTime': startTime?.toIso8601String(),
@@ -87,14 +87,19 @@ class TripEvent {
     'orderPosition': orderPosition,
   };
 
+  static DateTime parseDuration(String timeString) {
+    final parts = timeString.split(':').map(int.parse).toList();
+    return DateTime(0, 0, 0, parts[0], parts[1], parts[2]);
+  }
+
   factory TripEvent.fromJson(Map<String, dynamic> json) => TripEvent(
     id: json['id'] as int,
     dayId: json['dayId'] as int,
-    place: Place.fromJson(json['place'] as Map<String, dynamic>),
+    place: json['place'] != null ? Place.fromJson(json['place'] as Map<String, dynamic>) : null,
     title: json['title'] as String,
     description: json['description'] as String,
-    startTime: json['startTime'] != null ? DateTime.parse(json['startTime'] as String) : null,
-    endTime: json['endTime'] != null ? DateTime.parse(json['endTime'] as String) : null,
+    startTime: json['startTime'] != null ? parseDuration(json['startTime'] as String) : null,
+    endTime: json['endTime'] != null ? parseDuration(json['endTime'] as String) : null,
     hasSpecificTime: json['hasSpecificTime'] as bool,
     orderPosition: json['orderPosition'] as int,
   );
