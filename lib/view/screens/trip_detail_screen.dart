@@ -229,11 +229,14 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
         content: const Text('Это действие нельзя отменить.'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () {
+              Navigator.pop(context);
+            },
             child: const Text('Отмена'),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
+              await _viewModel.deleteCurrentTrip();
               Navigator.pop(context);
               Navigator.pop(context); // Return to previous screen after deletion
             },

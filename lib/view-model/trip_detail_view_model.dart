@@ -43,6 +43,12 @@ class TripDetailViewModel with ChangeNotifier {
 
     return _selectedDay!.events;
   }
+
+  Future<void> deleteCurrentTrip() async {
+    if (trip == null) return;
+
+    await _tripService.deleteTrip(_trip!.id);
+  }
   
   /// Loads trip detail data for the provided trip ID
   Future<void> loadTripDetail(int tripId) async {
