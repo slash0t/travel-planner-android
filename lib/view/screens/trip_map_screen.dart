@@ -55,6 +55,7 @@ class _TripMapView extends StatelessWidget {
 
   Widget _buildMap(TripMapViewModel viewModel) {
     return FlutterMap(
+      mapController: viewModel.mapController,
       options: MapOptions(
         initialCenter: viewModel.mapCenter,
         initialZoom: viewModel.mapZoom,
@@ -208,29 +209,38 @@ class _TripMapView extends StatelessWidget {
     required VoidCallback onPressed,
     Color? color,
   }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 15,
-            offset: const Offset(0, 10),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onPressed,
+        borderRadius: BorderRadius.circular(20),
+        child: Ink(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 15,
+                offset: const Offset(0, 10),
+              ),
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 6,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 6,
-            offset: const Offset(0, 4),
+          width: 40,
+          height: 40,
+          child: Center(
+            child: Icon(
+              icon,
+              color: color ?? Colors.black,
+              size: 24,
+            ),
           ),
-        ],
-      ),
-      width: 40,
-      height: 40,
-      child: IconButton(
-        icon: Icon(icon, color: color ?? Colors.black),
-        onPressed: onPressed,
-        padding: EdgeInsets.zero,
+        ),
       ),
     );
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:putevod/model/app_colors.dart';
 import 'package:putevod/model/trip.dart';
@@ -20,6 +21,9 @@ class TripMapViewModel extends ChangeNotifier {
 
   /// Current map center coordinates
   late LatLng _mapCenter;
+  
+  /// Map controller to programmatically control the map
+  final MapController mapController = MapController();
 
   /// Constructor that takes a single day
   TripMapViewModel({required this.day}) {
@@ -66,6 +70,10 @@ class TripMapViewModel extends ChangeNotifier {
         location.place!.longitude != null) {
       _selectedLocation = location;
       _mapCenter = LatLng(location.place!.latitude!, location.place!.longitude!);
+      
+      // Move map to the selected location
+      mapController.move(_mapCenter, _mapZoom);
+      
       notifyListeners();
     }
   }
@@ -91,6 +99,10 @@ class TripMapViewModel extends ChangeNotifier {
   void setMapZoom(double zoom) {
     if (zoom >= 3 && zoom <= 18) {
       _mapZoom = zoom;
+      
+      // Update the map zoom using the controller
+      mapController.move(_mapCenter, _mapZoom);
+      
       notifyListeners();
     }
   }
