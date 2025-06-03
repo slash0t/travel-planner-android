@@ -3,17 +3,24 @@ import 'package:provider/provider.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:putevod/model/app_colors.dart';
 import 'package:putevod/model/trip_day.dart';
+import 'package:putevod/model/trip_event.dart';
 import 'package:putevod/view-model/trip_map_view_model.dart';
 
-/// Trip Map Screen displaying a trip on a map with days and locations
+/// Trip Map Screen displaying a single day's events on a map
 class TripMapScreen extends StatelessWidget {
+  /// The day to display on the map
+  final TripDay day;
+
   /// Constructor for TripMapScreen
-  const TripMapScreen({Key? key}) : super(key: key);
+  const TripMapScreen({
+    Key? key,
+    required this.day,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => TripMapViewModel(),
+      create: (_) => TripMapViewModel(day: day),
       child: const _TripMapView(),
     );
   }
@@ -25,11 +32,6 @@ class _TripMapView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final viewModel = context.watch<TripMapViewModel>();
-    final trip = viewModel.trip;
-
-    if (trip == null) {
-      return const Center(child: CircularProgressIndicator());
-    }
 
     return Scaffold(
       body: Stack(
@@ -37,11 +39,8 @@ class _TripMapView extends StatelessWidget {
           // Map covering the entire screen
           _buildMap(viewModel),
           
-          // Header with back button and trip title
-          _buildHeader(context, trip.city),
-          
-          // Day selector tabs
-          //_buildDaySelector(context, viewModel),
+          // Header with back button and day title
+          _buildHeader(context, viewModel.day),
           
           // Location details at the bottom
           if (viewModel.selectedLocation != null) 
@@ -60,6 +59,9 @@ class _TripMapView extends StatelessWidget {
         initialCenter: viewModel.mapCenter,
         initialZoom: viewModel.mapZoom,
         onTap: (_, __) => viewModel.clearSelectedLocation(),
+        interactionOptions: const InteractionOptions(
+          flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
+        ),
       ),
       children: [
         TileLayer(
@@ -76,15 +78,22 @@ class _TripMapView extends StatelessWidget {
   List<Marker> _buildMarkers(TripMapViewModel viewModel) {
     final List<Marker> markers = [];
     
-    // Add markers for the selected day only
-    for (final location in viewModel.locationsForSelectedDay) {
-      final isSelected = viewModel.selectedLocation?.id == location.id;
+    // Add markers for all events with places
+    for (final event in viewModel.events) {
+      // Skip events without place or coordinates
+      if (event.place == null || 
+          event.place!.latitude == null || 
+          event.place!.longitude == null) {
+        continue;
+      }
+      
+      final isSelected = viewModel.selectedLocation?.id == event.id;
       
       markers.add(
         Marker(
-          point: location.place!.coordinates,
+          point: event.place!.coordinates,
           child: GestureDetector(
-            onTap: () => viewModel.selectLocation(location),
+            onTap: () => viewModel.selectLocation(event),
             child: Container(
               decoration: BoxDecoration(
                 color: isSelected ? AppColors.secondary : Colors.white,
@@ -106,7 +115,7 @@ class _TripMapView extends StatelessWidget {
               height: 24,
               alignment: Alignment.center,
               child: Text(
-                '${location.orderPosition}',
+                '${event.orderPosition}',
                 style: TextStyle(
                   color: isSelected ? Colors.white : Colors.black,
                   fontWeight: FontWeight.bold,
@@ -122,7 +131,9 @@ class _TripMapView extends StatelessWidget {
     return markers;
   }
 
-  Widget _buildHeader(BuildContext context, String title) {
+  Widget _buildHeader(BuildContext context, TripDay day) {
+    final String formattedDate = _formatDate(day.date);
+    
     return Positioned(
       top: 0,
       left: 0,
@@ -150,7 +161,7 @@ class _TripMapView extends StatelessWidget {
               Expanded(
                 child: Center(
                   child: Text(
-                    title,
+                    'День ${day.dayNumber}',
                     style: const TextStyle(
                       fontFamily: 'NotoSans',
                       fontSize: 22,
@@ -159,12 +170,7 @@ class _TripMapView extends StatelessWidget {
                   ),
                 ),
               ),
-              // IconButton(
-              //   icon: const Icon(Icons.more_vert),
-              //   onPressed: () {
-              //     // Show more options menu
-              //   },
-              // ),
+              const SizedBox(width: 48), // Balance for back button
             ],
           ),
         ),
@@ -172,76 +178,9 @@ class _TripMapView extends StatelessWidget {
     );
   }
 
-  Widget _buildDaySelector(BuildContext context, TripMapViewModel viewModel) {
-    // Calculate container width based on number of days
-    final days = viewModel.days;
-    final double containerWidth = days.length <= 3 
-        ? 243.5 
-        : days.length * 80.0; // Adjust width based on number of days
-    
-    return Positioned(
-      top: 72,
-      left: 16,
-      child: Container(
-        width: containerWidth,
-        height: 44,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(8),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 15,
-              offset: const Offset(0, 10),
-            ),
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 6,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: days.map((day) => _buildDayTab(day, viewModel)).toList(),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDayTab(TripDay day, TripMapViewModel viewModel) {
-    final isSelected = viewModel.selectedDayNumber == day.dayNumber;
-    
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4.0),
-      child: GestureDetector(
-        onTap: () => viewModel.selectDay(day.dayNumber),
-        child: Container(
-          width: 70.5,
-          height: 28,
-          decoration: BoxDecoration(
-            color: isSelected ? AppColors.secondary : Colors.grey.shade200,
-            borderRadius: BorderRadius.circular(9999),
-          ),
-          alignment: Alignment.center,
-          child: Text(
-            "День ${day.id}",
-            style: TextStyle(
-              color: Colors.white,
-              fontFamily: 'NotoSans',
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-      ),
-    );
+  String _formatDate(DateTime date) {
+    // Format date as day.month
+    return '${date.day}.${date.month}';
   }
 
   Widget _buildMapControls(BuildContext context, TripMapViewModel viewModel) {
@@ -259,15 +198,6 @@ class _TripMapView extends StatelessWidget {
             icon: Icons.remove,
             onPressed: () => viewModel.setMapZoom(viewModel.mapZoom - 1),
           ),
-          // const SizedBox(height: 8),
-          // _buildMapControlButton(
-          //   icon: Icons.location_on,
-          //   onPressed: () {
-          //     // Center map on selected location or default center
-          //     // Implementation would go here
-          //   },
-          //   color: AppColors.accent,
-          // ),
         ],
       ),
     );
@@ -364,25 +294,27 @@ class _TripMapView extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
-            Row(
-              children: [
-                Icon(
-                  Icons.access_time,
-                  size: 16,
-                  color: AppColors.darkGrey,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  location.formatTime,
-                  style: TextStyle(
-                    fontFamily: 'NotoSans',
-                    fontSize: 14,
-                    color: Colors.black,
+            if (location.hasSpecificTime) ...[
+              Row(
+                children: [
+                  Icon(
+                    Icons.access_time,
+                    size: 16,
+                    color: AppColors.darkGrey,
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
+                  const SizedBox(width: 8),
+                  Text(
+                    location.formatTime,
+                    style: const TextStyle(
+                      fontFamily: 'NotoSans',
+                      fontSize: 14,
+                      color: Colors.black,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+            ],
             Row(
               children: [
                 Expanded(
@@ -394,17 +326,6 @@ class _TripMapView extends StatelessWidget {
                     onPressed: () => viewModel.navigateToLocation(location),
                   ),
                 ),
-                // const SizedBox(width: 16),
-                // Expanded(
-                //   child: _buildActionButton(
-                //     label: 'Напоминание',
-                //     icon: Icons.notifications_none,
-                //     color: Colors.white,
-                //     textColor: Colors.black,
-                //     borderColor: Colors.black,
-                //     onPressed: () => viewModel.setReminder(location),
-                //   ),
-                // ),
               ],
             ),
           ],

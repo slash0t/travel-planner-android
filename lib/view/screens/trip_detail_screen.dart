@@ -76,7 +76,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                       Expanded(
                         child: _buildEventsList(viewModel),
                       ),
-                      _buildMapButton(),
+                      _buildMapButton(viewModel),
                     ],
                   ],
                 ),
@@ -319,7 +319,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     );
   }
   
-  Widget _buildMapButton() {
+  Widget _buildMapButton(TripDetailViewModel viewModel) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
@@ -329,7 +329,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => const TripMapScreen(),
+              builder: (context) => TripMapScreen(day: viewModel.selectedDay!),
             ),
           );
         },

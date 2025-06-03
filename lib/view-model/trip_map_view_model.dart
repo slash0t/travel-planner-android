@@ -7,71 +7,67 @@ import 'package:putevod/model/trip_event.dart';
 
 import '../model/place.dart';
 
+/// View model for the trip map screen
 class TripMapViewModel extends ChangeNotifier {
-  Trip? _trip;
+  /// The day to display on the map
+  final TripDay day;
   
-  int _selectedDayNumber = 1;
-
+  /// Currently selected event location
   TripEvent? _selectedLocation;
 
+  /// Current map zoom level
   double _mapZoom = 13.0;
 
-  LatLng _mapCenter = LatLng(48.859939001968996, 2.31719161871743); // Default to Moscow coordinates
+  /// Current map center coordinates
+  late LatLng _mapCenter;
 
-  List<TripDay> get mockDays => [];
-
-  List<TripEvent> get mockLocations => [];
-
-  TripMapViewModel() {
-    _trip = null;
-    
-    _mapCenter = LatLng(48.859939001968996, 2.31719161871743);
-    _mapZoom = 13.0;
+  /// Constructor that takes a single day
+  TripMapViewModel({required this.day}) {
+    _initializeMapCenter();
   }
 
-  Trip? get trip => _trip;
-  
-  int get selectedDayNumber => _selectedDayNumber;
+  /// Initialize map center based on the first event with coordinates
+  void _initializeMapCenter() {
+    // Find the first event with a place that has coordinates
+    final eventWithPlace = day.events.firstWhere(
+      (event) => event.place != null && 
+                 event.place!.latitude != null && 
+                 event.place!.longitude != null,
+      orElse: () => TripEvent.empty(),
+    );
 
+    // Set map center to the coordinates of the first event or default to Paris if none found
+    if (eventWithPlace.place != null && 
+        eventWithPlace.place!.latitude != null && 
+        eventWithPlace.place!.longitude != null) {
+      _mapCenter = LatLng(eventWithPlace.place!.latitude!, eventWithPlace.place!.longitude!);
+    } else {
+      // Default coordinates (Paris)
+      _mapCenter = LatLng(48.859939001968996, 2.31719161871743);
+    }
+  }
+
+  /// Currently selected event location
   TripEvent? get selectedLocation => _selectedLocation;
 
+  /// Current map zoom level
   double get mapZoom => _mapZoom;
 
+  /// Current map center coordinates
   LatLng get mapCenter => _mapCenter;
 
-  List<TripDay> get days => _trip?.days ?? [];
-  
-  TripDay? get selectedDay {
-    return days.firstWhere(
-      (day) => day.dayNumber == _selectedDayNumber,
-      orElse: () => days.first,
-    );
-  }
-
-  /// Getter for the locations of the selected day
-  List<TripEvent> get locationsForSelectedDay {
-    for (final day in _trip!.days) {
-      if (day.dayNumber == _selectedDayNumber) {
-        return day.events;
-      }
-    }
-    return [];
-  }
-
-  /// Select a day by its day number
-  void selectDay(int dayNumber) {
-    if (_selectedDayNumber != dayNumber) {
-      _selectedDayNumber = dayNumber;
-      _selectedLocation = null;
-      notifyListeners();
-    }
-  }
+  /// Get all events for the day
+  List<TripEvent> get events => day.events;
 
   /// Select a location
   void selectLocation(TripEvent location) {
-    _selectedLocation = location;
-    _mapCenter = LatLng(location.place!.latitude!, location.place!.longitude!);
-    notifyListeners();
+    if (location.place != null && 
+        location.place!.latitude != null && 
+        location.place!.longitude != null) {
+      _selectedLocation = location;
+      _mapCenter = LatLng(location.place!.latitude!, location.place!.longitude!);
+      notifyListeners();
+    }
   }
 
   /// Clear the selected location
@@ -80,7 +76,7 @@ class TripMapViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Navigate to a location (like centering the map on it)
+  /// Navigate to a location (center the map on it)
   void navigateToLocation(TripEvent location) {
     selectLocation(location);
   }
@@ -93,7 +89,9 @@ class TripMapViewModel extends ChangeNotifier {
 
   /// Change the map zoom level
   void setMapZoom(double zoom) {
-    _mapZoom = zoom;
-    notifyListeners();
+    if (zoom >= 3 && zoom <= 18) {
+      _mapZoom = zoom;
+      notifyListeners();
+    }
   }
 } 
