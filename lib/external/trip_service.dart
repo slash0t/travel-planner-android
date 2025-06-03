@@ -448,9 +448,9 @@ class TripService {
     }
   }
 
-  Future<List<dynamic>> getTripDay(int tripId) async {
+  Future<dynamic> getTripDay(int tripId, int dayNumber) async {
     try {
-      final response = await _plannerClient.get('/trips/$tripId/days');
+      final response = await _plannerClient.get('/trips/${tripId}/days/number/${dayNumber}');
 
       if (response.statusCode == 200) {
         return response.data;

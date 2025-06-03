@@ -67,6 +67,11 @@ class TripDetailViewModel with ChangeNotifier {
     }
   }
 
+  Future<TripDay> getCurrentDay() async {
+    final response = await _tripService.getTripDay(_selectedDay!.tripId, _selectedDay!.dayNumber);
+    return TripDay.fromJson(response);
+}
+
   Future<void> deleteCurrentTrip() async {
     if (trip == null) return;
 

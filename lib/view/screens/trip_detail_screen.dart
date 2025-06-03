@@ -322,12 +322,12 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       child: ElevatedButton(
-        onPressed: () {
-          // Navigate to map view
+        onPressed: () async {
+          final day = await viewModel.getCurrentDay();
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => TripMapScreen(day: viewModel.selectedDay!),
+              builder: (context) => TripMapScreen(day: day),
             ),
           );
         },

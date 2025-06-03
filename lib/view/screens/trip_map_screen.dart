@@ -5,6 +5,7 @@ import 'package:putevod/model/app_colors.dart';
 import 'package:putevod/model/trip_day.dart';
 import 'package:putevod/model/trip_event.dart';
 import 'package:putevod/view-model/trip_map_view_model.dart';
+import 'package:putevod/view/screens/place_editing_screen.dart';
 
 /// Trip Map Screen displaying a single day's events on a map
 class TripMapScreen extends StatelessWidget {
@@ -97,10 +98,10 @@ class _TripMapView extends StatelessWidget {
             onTap: () => viewModel.selectLocation(event),
             child: Container(
               decoration: BoxDecoration(
-                color: isSelected ? AppColors.secondary : Colors.white,
+                color: isSelected ? AppColors.accent : Colors.white,
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: AppColors.secondary ?? AppColors.accent,
+                  color: AppColors.accent ?? AppColors.accent,
                   width: 2,
                 ),
                 boxShadow: [
@@ -333,7 +334,18 @@ class _TripMapView extends StatelessWidget {
                     icon: Icons.navigation,
                     color: AppColors.accent,
                     textColor: Colors.white,
-                    onPressed: () => viewModel.navigateToLocation(location),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => PlaceEditingScreen.update(
+                            placeId: viewModel.selectedLocation!.id,
+                            tripId: viewModel.day.tripId,
+                            dayId: viewModel.day.id,
+                          ),
+                        ),
+                      );
+                    }
                   ),
                 ),
               ],

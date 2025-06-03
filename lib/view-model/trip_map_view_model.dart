@@ -6,31 +6,32 @@ import 'package:putevod/model/trip.dart';
 import 'package:putevod/model/trip_day.dart';
 import 'package:putevod/model/trip_event.dart';
 
+import '../external/trip_service.dart';
 import '../model/place.dart';
 
-/// View model for the trip map screen
 class TripMapViewModel extends ChangeNotifier {
-  /// The day to display on the map
-  final TripDay day;
+  final TripService _tripService = TripService();
+
+  TripDay day;
   
-  /// Currently selected event location
   TripEvent? _selectedLocation;
 
-  /// Current map zoom level
   double _mapZoom = 13.0;
 
-  /// Current map center coordinates
   late LatLng _mapCenter;
   
-  /// Map controller to programmatically control the map
   final MapController mapController = MapController();
 
-  /// Constructor that takes a single day
   TripMapViewModel({required this.day}) {
     _initializeMapCenter();
   }
 
-  /// Initialize map center based on the first event with coordinates
+  Future<void> _load() async {
+    final response = await _tripService.getTripDay(day.tripId, day.dayNumber);
+    day = TripDay.fromJson(response);
+    notifyListeners();
+  }
+
   void _initializeMapCenter() {
     // Find the first event with a place that has coordinates
     final eventWithPlace = day.events.firstWhere(
