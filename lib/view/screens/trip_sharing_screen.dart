@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:putevod/model/trip.dart';
 import 'package:putevod/model/app_colors.dart';
+import 'package:putevod/model/shared_user.dart';
 import 'package:putevod/view-model/trip_sharing_view_model.dart';
 import 'package:provider/provider.dart';
 
@@ -18,8 +19,45 @@ class TripSharingScreen extends StatelessWidget {
   }
 }
 
-class TripSharingView extends StatelessWidget {
+class TripSharingView extends StatefulWidget {
   const TripSharingView({super.key});
+
+  @override
+  State<TripSharingView> createState() => _TripSharingViewState();
+}
+
+class _TripSharingViewState extends State<TripSharingView> {
+  late TripSharingViewModel _viewModel;
+  bool _isLoading = true;
+  String? _error;
+  
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _viewModel = Provider.of<TripSharingViewModel>(context, listen: false);
+      _loadData();
+    });
+  }
+  
+  Future<void> _loadData() async {
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+    
+    try {
+      await _viewModel.loadParticipants();
+    } catch (e) {
+      setState(() {
+        _error = 'Не удалось загрузить участников: ${e.toString()}';
+      });
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +83,62 @@ class TripSharingView extends StatelessWidget {
           ),
         ),
       ),
-      body: SingleChildScrollView(
+      body: _isLoading 
+          ? const Center(child: CircularProgressIndicator(color: AppColors.accent))
+          : _error != null
+              ? _buildErrorView()
+              : _buildContentView(viewModel, trip),
+    );
+  }
+  
+  Widget _buildErrorView() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(
+            Icons.error_outline,
+            color: AppColors.accent,
+            size: 48,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            _error!,
+            style: const TextStyle(
+              color: AppColors.text,
+              fontSize: 16,
+              fontFamily: 'NotoSans',
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 24),
+          ElevatedButton(
+            onPressed: _loadData,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.accent,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: const Text(
+              'Повторить',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontFamily: 'NotoSans',
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  Widget _buildContentView(TripSharingViewModel viewModel, Trip trip) {
+    return RefreshIndicator(
+      onRefresh: _loadData,
+      color: AppColors.accent,
+      child: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -55,8 +148,6 @@ class TripSharingView extends StatelessWidget {
             _AddParticipantsSection(viewModel: viewModel),
             const SizedBox(height: 24),
             _CurrentParticipantsSection(viewModel: viewModel),
-            //const SizedBox(height: 24),
-            //_SendInvitationsButton(viewModel: viewModel),
           ],
         ),
       ),
@@ -87,16 +178,6 @@ class _TripCard extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            // ClipRRect(
-            //   borderRadius: BorderRadius.circular(8),
-            //   child: Image(
-            //     image: NetworkImage(trip.imageUrl),
-            //     width: 94,
-            //     height: 94,
-            //     //fit: BoxFit.cover,
-            //   ),
-            // ),
-            // const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -127,7 +208,7 @@ class _TripCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        '${context.watch<TripSharingViewModel>().participants.length} участника',
+                        '${context.watch<TripSharingViewModel>().sharedUsers.length} участника',
                         style: const TextStyle(
                           fontSize: 14,
                           fontFamily: 'NotoSans',
@@ -191,39 +272,10 @@ class _AddParticipantsSection extends StatelessWidget {
             controller: viewModel.searchController,
             hintText: 'Ник участника',
             icon: Icons.person,
+            enabled: !viewModel.isAddingParticipant,
           ),
           const SizedBox(height: 16),
           _SendInvitationsButton(viewModel: viewModel),
-          // _InputField(
-          //   controller: viewModel.searchController,
-          //   hintText: 'Поиск по имени',
-          //   icon: Icons.person_outline,
-          // ),
-          // const SizedBox(height: 16),
-          // TextField(
-          //   controller: viewModel.messageController,
-          //   decoration: const InputDecoration(
-          //     hintText: 'Добавить сообщение (необязательно)',
-          //     hintStyle: TextStyle(
-          //       color: AppColors.text,
-          //       fontSize: 14,
-          //       fontFamily: 'NotoSans',
-          //     ),
-          //     border: OutlineInputBorder(
-          //       borderRadius: BorderRadius.all(Radius.circular(8)),
-          //       borderSide: BorderSide(color: AppColors.text),
-          //     ),
-          //     enabledBorder: OutlineInputBorder(
-          //       borderRadius: BorderRadius.all(Radius.circular(8)),
-          //       borderSide: BorderSide(color: AppColors.text),
-          //     ),
-          //     focusedBorder: OutlineInputBorder(
-          //       borderRadius: BorderRadius.all(Radius.circular(8)),
-          //       borderSide: BorderSide(color: AppColors.accent),
-          //     ),
-          //   ),
-          //   maxLines: 4,
-          // ),
         ],
       ),
     );
@@ -234,33 +286,36 @@ class _InputField extends StatelessWidget {
   final TextEditingController controller;
   final String hintText;
   final IconData icon;
+  final bool enabled;
 
   const _InputField({
     required this.controller,
     required this.hintText,
     required this.icon,
+    this.enabled = true,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        border: Border.all(color: AppColors.text),
+        border: Border.all(color: enabled ? AppColors.text : Colors.grey.shade300),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
         children: [
           Padding(
             padding: const EdgeInsets.all(9),
-            child: Icon(icon, color: AppColors.text),
+            child: Icon(icon, color: enabled ? AppColors.text : Colors.grey.shade400),
           ),
           Expanded(
             child: TextField(
               controller: controller,
+              enabled: enabled,
               decoration: InputDecoration(
                 hintText: hintText,
-                hintStyle: const TextStyle(
-                  color: AppColors.text,
+                hintStyle: TextStyle(
+                  color: enabled ? AppColors.text : Colors.grey.shade400,
                   fontSize: 14,
                   fontFamily: 'NotoSans',
                 ),
@@ -308,10 +363,27 @@ class _CurrentParticipantsSection extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          ...viewModel.participants.map((participant) => _ParticipantTile(
-            participant: participant,
-            onRemove: () => viewModel.removeParticipant(participant),
-          )),
+          if (viewModel.sharedUsers.isEmpty)
+            const Center(
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 24),
+                child: Text(
+                  'Нет участников',
+                  style: TextStyle(
+                    color: AppColors.text,
+                    fontSize: 16,
+                    fontFamily: 'NotoSans',
+                  ),
+                ),
+              ),
+            )
+          else
+            ...viewModel.sharedUsers.map((sharedUser) => _ParticipantTile(
+              sharedUser: sharedUser,
+              canRemove: viewModel.canRemoveUser(sharedUser),
+              onRemove: () => viewModel.removeParticipant(sharedUser),
+              isRemoving: viewModel.isRemovingParticipant,
+            )),
         ],
       ),
     );
@@ -319,12 +391,16 @@ class _CurrentParticipantsSection extends StatelessWidget {
 }
 
 class _ParticipantTile extends StatelessWidget {
-  final TripParticipant participant;
+  final SharedUser sharedUser;
+  final bool canRemove;
   final VoidCallback onRemove;
+  final bool isRemoving;
 
   const _ParticipantTile({
-    required this.participant,
+    required this.sharedUser,
+    required this.canRemove,
     required this.onRemove,
+    required this.isRemoving,
   });
 
   @override
@@ -342,12 +418,18 @@ class _ParticipantTile extends StatelessWidget {
                 color: AppColors.accent,
                 width: 3,
               ),
-              color: AppColors.accent.withOpacity(0.3),
+              color: AppColors.accent.withOpacity(0),
             ),
             child: ClipOval(
-              child: Image.asset(
-                participant.avatarUrl,
-                fit: BoxFit.cover,
+              child: Center(
+                child: Text(
+                  sharedUser.user.username.substring(0, 1).toUpperCase(),
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.accent,
+                  ),
+                ),
               ),
             ),
           ),
@@ -357,7 +439,7 @@ class _ParticipantTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  participant.name,
+                  sharedUser.user.username,
                   style: const TextStyle(
                     fontSize: 16,
                     fontFamily: 'NotoSans',
@@ -365,30 +447,48 @@ class _ParticipantTile extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  participant.role == ParticipantRole.owner 
-                    ? 'Владелец' 
-                    : 'Участник',
-                  style: const TextStyle(
+                  _getRoleText(sharedUser),
+                  style: TextStyle(
                     fontSize: 14,
                     fontFamily: 'NotoSans',
-                    color: AppColors.text,
+                    color: sharedUser.invitationStatus == 'pending' 
+                        ? AppColors.accent 
+                        : AppColors.text,
                   ),
                 ),
               ],
             ),
           ),
-          if (participant.role != ParticipantRole.owner)
-            IconButton(
-              icon: const Icon(
-                Icons.close,
-                size: 16,
-                color: AppColors.accent,
-              ),
-              onPressed: onRemove,
-            ),
+          if (canRemove)
+            isRemoving
+                ? const SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: AppColors.accent,
+                    ),
+                  )
+                : IconButton(
+                    icon: const Icon(
+                      Icons.close,
+                      size: 16,
+                      color: AppColors.accent,
+                    ),
+                    onPressed: onRemove,
+                    tooltip: 'Удалить участника',
+                  ),
         ],
       ),
     );
+  }
+  
+  String _getRoleText(SharedUser sharedUser) {
+    if (sharedUser.invitationStatus == 'pending') {
+      return 'Ожидает подтверждения';
+    }
+    
+    return sharedUser.accessLevel == 'admin' ? 'Администратор' : 'Участник';
   }
 }
 
@@ -403,30 +503,53 @@ class _SendInvitationsButton extends StatelessWidget {
       width: double.infinity,
       height: 56,
       child: ElevatedButton(
-        onPressed: viewModel.sendInvitations,
+        onPressed: viewModel.isAddingParticipant ? null : () => _handleSendInvitations(context),
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.accent,
+          disabledBackgroundColor: AppColors.accent.withOpacity(0.5),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
-            Icon(Icons.send, color: AppColors.background),
-            SizedBox(width: 8),
-            Text(
-              'Отправить приглашения',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontFamily: 'NotoSans',
-                fontWeight: FontWeight.w500,
+        child: viewModel.isAddingParticipant
+            ? const SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(
+                  color: Colors.white,
+                  strokeWidth: 2,
+                ),
+              )
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const [
+                  Icon(Icons.send, color: AppColors.background),
+                  SizedBox(width: 8),
+                  Text(
+                    'Отправить приглашения',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontFamily: 'NotoSans',
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
               ),
-            ),
-          ],
-        ),
       ),
     );
+  }
+  
+  Future<void> _handleSendInvitations(BuildContext context) async {
+    try {
+      await viewModel.sendInvitations();
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Ошибка: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 } 
