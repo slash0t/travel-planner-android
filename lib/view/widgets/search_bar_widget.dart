@@ -66,18 +66,18 @@ class SearchBarWidget extends StatelessWidget {
               ),
             ),
           ),
-          IconButton(
-            icon: Icon(
-              Icons.filter_list,
-              color: AppColors.accent,
-              size: 16,
-            ),
-            constraints: const BoxConstraints(
-              minWidth: 40,
-              minHeight: 40,
-            ),
-            onPressed: onFilterPressed,
-          ),
+          // IconButton(
+          //   icon: Icon(
+          //     Icons.filter_list,
+          //     color: AppColors.accent,
+          //     size: 16,
+          //   ),
+          //   constraints: const BoxConstraints(
+          //     minWidth: 40,
+          //     minHeight: 40,
+          //   ),
+          //   onPressed: onFilterPressed,
+          // ),
         ],
       ),
     );

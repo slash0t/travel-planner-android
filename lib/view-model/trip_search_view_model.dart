@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:putevod/model/trip_category.dart';
-import 'package:putevod/model/trip_item.dart';
+import 'package:putevod/model/library_trip.dart';
 import 'package:putevod/external/library_service.dart';
 
 /// View model for the trip search screen
@@ -18,8 +18,8 @@ class TripSearchViewModel extends ChangeNotifier {
     const TripCategory(id: 'adventure', name: 'Приключения'),
   ];
   
-  /// List of trip items in search results
-  List<TripItem> _trips = [];
+  /// List of library trips in search results
+  List<LibraryTrip> _trips = [];
   
   /// Loading state
   bool _isLoading = false;
@@ -37,13 +37,18 @@ class TripSearchViewModel extends ChangeNotifier {
   List<TripCategory> get categories => List.unmodifiable(_categories);
   
   /// Gets the filtered list of trips
-  List<TripItem> get trips => List.unmodifiable(_trips);
+  List<LibraryTrip> get trips => List.unmodifiable(_trips);
   
   /// Gets the loading state
   bool get isLoading => _isLoading;
   
   /// Gets the error message
   String? get errorMessage => _errorMessage;
+
+  /// Constructor that initializes the view model
+  TripSearchViewModel() {
+    init();
+  }
 
   /// Sets the search query and notifies listeners
   void setSearchQuery(String query) {
@@ -66,14 +71,7 @@ class TripSearchViewModel extends ChangeNotifier {
       final response = await _libraryService.getPopularRoutes();
       final routes = response['content'] as List<dynamic>? ?? [];
       
-      _trips = routes.map((route) => TripItem(
-        id: route['id'].toString(),
-        title: route['title'] ?? 'Без названия',
-        description: route['description'] ?? '',
-        imageUrl: route['imageUrl'],
-        rating: (route['rating'] as num?)?.toDouble() ?? 0.0,
-        reviewCount: route['reviewCount'] ?? 0,
-      )).toList();
+      _trips = _parseTripsFromResponse(routes);
     } catch (e) {
       _errorMessage = e.toString();
     } finally {
@@ -92,20 +90,27 @@ class TripSearchViewModel extends ChangeNotifier {
       final response = await _libraryService.searchRoutes(query: query);
       final routes = response['content'] as List<dynamic>? ?? [];
       
-      _trips = routes.map((route) => TripItem(
-        id: route['id'].toString(),
-        title: route['title'] ?? 'Без названия',
-        description: route['description'] ?? '',
-        imageUrl: route['imageUrl'],
-        rating: (route['rating'] as num?)?.toDouble() ?? 0.0,
-        reviewCount: route['reviewCount'] ?? 0,
-      )).toList();
+      _trips =  _parseTripsFromResponse(routes);
     } catch (e) {
       _errorMessage = e.toString();
     } finally {
       _isLoading = false;
       notifyListeners();
     }
+  }
+  
+  /// Parse trips from API response
+  List<LibraryTrip> _parseTripsFromResponse(List<dynamic> routes) {
+    return routes.map((route) => LibraryTrip.fromJson(route)).toList();
+  }
+  
+  /// Parse a list of strings from dynamic data
+  List<String> _parseStringList(dynamic data) {
+    if (data == null) return [];
+    if (data is List) {
+      return data.map((item) => item.toString()).toList();
+    }
+    return [];
   }
   
   /// Initialize and load data
@@ -130,7 +135,7 @@ class TripSearchViewModel extends ChangeNotifier {
   }
 
   /// Copy trip to user's trips (instead of favorites)
-  Future<void> copyTripToUser(String tripId) async {
+  Future<void> copyTripToUser(int tripId) async {
     // TODO: Реализовать копирование поездки из библиотеки в свои поездки
     // Это будет заменой избранному - пользователь сможет скопировать понравившийся маршрут
     try {

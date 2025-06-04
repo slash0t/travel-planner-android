@@ -5,10 +5,14 @@ class LibraryTripViewModel extends ChangeNotifier {
   LibraryTrip? _trip;
   bool _isLoading = false;
   String? _error;
+  List<DailyPlan>? _dailyPlans;
+  List<TripReview>? _reviews;
 
   LibraryTrip? get trip => _trip;
   bool get isLoading => _isLoading;
   String? get error => _error;
+  List<DailyPlan>? get dailyPlans => _dailyPlans;
+  List<TripReview>? get reviews => _reviews;
 
   // Mock data for demonstration
   Future<void> loadTripDetails() async {
@@ -20,33 +24,60 @@ class LibraryTripViewModel extends ChangeNotifier {
       // Simulate API call
       await Future.delayed(const Duration(seconds: 1));
 
-      _trip = LibraryTrip(
-        tripName: "Путешествие по Европе",
-        tripDescription: "Незабываемое путешествие по историческим городам Европы с посещением главных достопримечательностей",
-        authorName: "Александр Петров",
-        authorTitle: "Опытный путешественник",
-        duration: 14,
-        citiesCount: 6,
-        placesCount: 42,
-        rating: 4.8,
-        imageUrl: "https://via.placeholder.com/390x200",
-        dailyPlans: [
-          DailyPlan(
-            day: 1,
-            city: "Париж",
-            details: "5 мест • 8 часов",
-          ),
-          // Add more daily plans as needed
-        ],
-        reviews: [
-          TripReview(
-            reviewerName: "Мария К.",
-            rating: 5,
-            reviewText: "Отличный маршрут! Все достопримечательности подобраны идеально.",
-          ),
-          // Add more reviews as needed
-        ],
+      // Create author
+      final author = Author(
+        id: 1,
+        username: "Александр Петров",
+        // avatarUrl: "https://via.placeholder.com/100",
       );
+
+      // Create trip
+      _trip = LibraryTrip(
+        id: 1,
+        title: "Путешествие по Европе",
+        description: "Незабываемое путешествие по историческим городам Европы с посещением главных достопримечательностей",
+        author: author,
+        countries: ["Франция", "Италия", "Испания"],
+        cities: ["Париж", "Рим", "Барселона", "Венеция", "Мадрид", "Флоренция"],
+        duration: 14,
+        rating: 4.8,
+        reviewsCount: 42,
+        previewImageUrl: "https://via.placeholder.com/390x200",
+        tags: ["Европа", "Культура", "История", "Архитектура"],
+      );
+
+      // Create daily plans
+      _dailyPlans = [
+        DailyPlan(
+          day: 1,
+          city: "Париж",
+          details: "5 мест • 8 часов",
+        ),
+        DailyPlan(
+          day: 2,
+          city: "Париж",
+          details: "3 места • 6 часов",
+        ),
+        DailyPlan(
+          day: 3,
+          city: "Рим",
+          details: "4 места • 7 часов",
+        ),
+      ];
+
+      // Create reviews
+      _reviews = [
+        TripReview(
+          reviewerName: "Мария К.",
+          rating: 5,
+          reviewText: "Отличный маршрут! Все достопримечательности подобраны идеально.",
+        ),
+        TripReview(
+          reviewerName: "Иван С.",
+          rating: 4,
+          reviewText: "Хороший маршрут, но немного утомительный. Рекомендую добавить больше времени на отдых.",
+        ),
+      ];
 
       _isLoading = false;
       notifyListeners();

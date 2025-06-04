@@ -79,12 +79,15 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
               return Center(child: Text(viewModel.error!));
             }
 
+            // Use either the viewModel trip or widget.trip as fallback
+            final trip = viewModel.trip ?? widget.trip;
+
             return SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Image.network(
-                    widget.trip.imageUrl,
+                    trip.previewImageUrl,
                     width: double.infinity,
                     height: 200,
                     fit: BoxFit.cover,
@@ -103,17 +106,15 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _buildTripHeader(),
+                            _buildTripHeader(trip),
                             const SizedBox(height: 24),
-                            _buildAuthorSection(),
+                            _buildAuthorSection(trip.author),
                             const SizedBox(height: 24),
-                            _buildStatsSection(),
+                            _buildStatsSection(trip),
                             const SizedBox(height: 24),
-                            _buildDailyPlanSection(),
+                            _buildDailyPlanSection(viewModel.dailyPlans ?? []),
                             const SizedBox(height: 24),
-                            //_buildRouteMapSection(),
-                            //const SizedBox(height: 24),
-                            _buildReviewsSection(),
+                            _buildReviewsSection(trip.reviewsCount, viewModel.reviews ?? []),
                           ],
                         ),
                       ),
@@ -129,12 +130,12 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
     );
   }
 
-  Widget _buildTripHeader() {
+  Widget _buildTripHeader(LibraryTrip trip) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          widget.trip.tripName,
+          trip.title,
           style: const TextStyle(
             fontFamily: "NotoSans",
             fontSize: 24,
@@ -144,7 +145,7 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
         ),
         const SizedBox(height: 16),
         Text(
-          widget.trip.tripDescription,
+          trip.description,
           style: const TextStyle(
             fontFamily: "NotoSans",
             fontSize: 14,
@@ -155,19 +156,19 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
     );
   }
 
-  Widget _buildAuthorSection() {
+  Widget _buildAuthorSection(Author author) {
     return Row(
       children: [
-        const CircleAvatar(
-          radius: 24,
-          backgroundImage: AssetImage('assets/images/profile_avatar.png'),
-        ),
+        // CircleAvatar(
+        //   radius: 24,
+        //   backgroundImage: NetworkImage(author.avatarUrl),
+        // ),
         const SizedBox(width: 12),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              widget.trip.authorName,
+              author.username,
               style: const TextStyle(
                 fontFamily: "NotoSans",
                 fontSize: 16,
@@ -175,9 +176,9 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
                 color: Color(0xFF000000),
               ),
             ),
-            Text(
-              widget.trip.authorTitle,
-              style: const TextStyle(
+            const Text(
+              "Путешественник",
+              style: TextStyle(
                 fontFamily: "NotoSans",
                 fontSize: 12,
                 color: Color(0xFF6B7280),
@@ -189,24 +190,22 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
     );
   }
 
-  Widget _buildStatsSection() {
+  Widget _buildStatsSection(LibraryTrip trip) {
     return Column(
       children: [
         Row(
-          spacing: 16,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            _buildStatItem(Icons.access_time, "Длительность", widget.trip.duration.toString(), AppColors.red),
-            _buildStatItem(Icons.location_city, "Города", widget.trip.citiesCount.toString(), AppColors.red),
+            _buildStatItem(Icons.access_time, "Длительность", "${trip.duration} дней", AppColors.red),
+            _buildStatItem(Icons.location_city, "Города", trip.cities.length.toString(), AppColors.red),
           ],
         ),
         const SizedBox(height: 16),
         Row(
-          spacing: 16,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            _buildStatItem(Icons.place, "Места", widget.trip.placesCount.toString(), AppColors.red),
-            _buildStatItem(Icons.star, "Рейтинг", widget.trip.rating.toString(), AppColors.yellow),
+            _buildStatItem(Icons.public, "Страны", trip.countries.length.toString(), AppColors.red),
+            _buildStatItem(Icons.star, "Рейтинг", trip.rating.toString(), AppColors.yellow),
           ],
         ),
       ],
@@ -217,6 +216,7 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
     return Expanded(
       child: Container(
         padding: const EdgeInsets.all(12),
+        margin: const EdgeInsets.symmetric(horizontal: 4),
         decoration: BoxDecoration(
           color: AppColors.grey,
           borderRadius: BorderRadius.circular(8),
@@ -254,7 +254,7 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
     );
   }
 
-  Widget _buildDailyPlanSection() {
+  Widget _buildDailyPlanSection(List<DailyPlan> dailyPlans) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -268,7 +268,7 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
           ),
         ),
         const SizedBox(height: 16),
-        ...widget.trip.dailyPlans.map((plan) => _buildDailyPlanItem(plan)),
+        ...dailyPlans.map((plan) => _buildDailyPlanItem(plan)),
       ],
     );
   }
@@ -327,7 +327,6 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
               ],
             ),
           ),
-          // Icon(Icons.chevron_right, color: AppColors.darkGrey),
         ],
       ),
     );
@@ -362,7 +361,7 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
     );
   }
 
-  Widget _buildReviewsSection() {
+  Widget _buildReviewsSection(int reviewsCount, List<TripReview> reviews) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -378,19 +377,19 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
                 color: Color(0xFF000000),
               ),
             ),
-            // Text(
-            //   "Все (${widget.trip.reviews.length})",
-            //   style: TextStyle(
-            //     fontFamily: "NotoSans",
-            //     fontSize: 14,
-            //     color: AppColors.red,
-            //     fontWeight: FontWeight.bold,
-            //   ),
-            // ),
+            Text(
+              "Всего: $reviewsCount",
+              style: TextStyle(
+                fontFamily: "NotoSans",
+                fontSize: 14,
+                color: AppColors.red,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 16),
-        ...widget.trip.reviews.map((review) => _buildReviewItem(review)),
+        ...reviews.map((review) => _buildReviewItem(review)),
       ],
     );
   }
@@ -410,7 +409,9 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
             children: [
               CircleAvatar(
                 radius: 16,
-                backgroundImage: const AssetImage('assets/images/profile_avatar.png'),
+                backgroundImage: review.avatarUrl != null 
+                  ? NetworkImage(review.avatarUrl!) 
+                  : const AssetImage('assets/images/profile_avatar.png') as ImageProvider,
               ),
               const SizedBox(width: 8),
               Column(

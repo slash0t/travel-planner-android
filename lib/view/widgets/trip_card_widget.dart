@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:putevod/model/app_colors.dart';
-import 'package:putevod/model/trip_item.dart';
+import 'package:putevod/model/library_trip.dart';
 
 /// A card widget to display a trip in the search results
 class TripCardWidget extends StatelessWidget {
   /// The trip item to display
-  final TripItem trip;
+  final LibraryTrip trip;
   
   /// Callback when the copy trip button is pressed
-  final Function(String) onCopyTrip;
+  final Function(int) onCopyTrip;
 
   /// Creates a trip card widget
   const TripCardWidget({
@@ -50,8 +50,8 @@ class TripCardWidget extends StatelessWidget {
             topLeft: Radius.circular(12),
             topRight: Radius.circular(12),
           ),
-          child: Image.asset(
-            trip.imageUrl,
+          child: Image.network(
+            trip.previewImageUrl,
             height: 192,
             width: double.infinity,
             fit: BoxFit.cover,
@@ -65,25 +65,25 @@ class TripCardWidget extends StatelessWidget {
             },
           ),
         ),
-        Positioned(
-          top: 12,
-          right: 12,
-          child: InkWell(
-            onTap: () => onCopyTrip(trip.id),
-            child: Container(
-              padding: const EdgeInsets.all(6),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.download,
-                color: AppColors.accent,
-                size: 16,
-              ),
-            ),
-          ),
-        ),
+        // Positioned(
+        //   top: 12,
+        //   right: 12,
+        //   child: InkWell(
+        //     onTap: () => onCopyTrip(trip.id),
+        //     child: Container(
+        //       padding: const EdgeInsets.all(6),
+        //       decoration: const BoxDecoration(
+        //         color: Colors.white,
+        //         shape: BoxShape.circle,
+        //       ),
+        //       child: const Icon(
+        //         Icons.download,
+        //         color: AppColors.accent,
+        //         size: 16,
+        //       ),
+        //     ),
+        //   ),
+        // ),
       ],
     );
   }
@@ -116,29 +116,52 @@ class TripCardWidget extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Icon(
-                Icons.star,
-                color: AppColors.secondary,
-                size: 16,
+              Row(
+                children: [
+                  const Icon(
+                    Icons.star,
+                    color: AppColors.secondary,
+                    size: 16,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    trip.rating.toString(),
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      fontFamily: 'NotoSans',
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    '(${trip.reviewsCount})',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontFamily: 'NotoSans',
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(width: 4),
-              Text(
-                trip.rating.toString(),
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  fontFamily: 'NotoSans',
-                ),
-              ),
-              const SizedBox(width: 4),
-              Text(
-                '(${trip.reviewCount})',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontFamily: 'NotoSans',
-                  color: Colors.grey[600],
-                ),
+              Row(
+                children: [
+                  const Icon(
+                    Icons.person,
+                    color: AppColors.accent,
+                    size: 16,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    trip.author.username,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontFamily: 'NotoSans',
+                      color: Colors.grey[700],
+                    ),
+                  ),
+                ],
               ),
             ],
           ),

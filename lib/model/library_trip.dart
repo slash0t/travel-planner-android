@@ -103,37 +103,31 @@ class LibraryTrip {
 class Author {
   final int id;
   final String username;
-  final String avatarUrl;
 
   const Author({
     required this.id,
     required this.username,
-    required this.avatarUrl,
   });
 
   Author copyWith({
     int? id,
     String? username,
-    String? avatarUrl,
   }) {
     return Author(
       id: id ?? this.id,
       username: username ?? this.username,
-      avatarUrl: avatarUrl ?? this.avatarUrl,
     );
   }
 
   Map<String, dynamic> toJson() => {
     'id': id,
     'username': username,
-    'avatarUrl': avatarUrl,
   };
 
   factory Author.fromJson(Map<String, dynamic> json) {
     return Author(
       id: json['id'] as int,
       username: json['username'] as String,
-      avatarUrl: json['avatarUrl'] as String,
     );
   }
 
@@ -141,7 +135,6 @@ class Author {
     return const Author(
       id: 0,
       username: '',
-      avatarUrl: '',
     );
   }
 }

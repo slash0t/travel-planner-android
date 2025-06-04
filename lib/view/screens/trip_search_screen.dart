@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:putevod/model/app_colors.dart';
+import 'package:putevod/model/library_trip.dart';
 import 'package:putevod/view-model/navigation_view_model.dart';
+import 'package:putevod/view/screens/library_trip_detail_screen.dart';
 import 'package:putevod/view/widgets/app_bottom_navigation.dart';
 import 'package:putevod/view/widgets/app_header.dart';
 import 'package:putevod/view/widgets/categories_widget.dart';
@@ -67,12 +69,12 @@ class TripSearchScreen extends StatelessWidget {
                 // Handle filter button press
               },
             ),
-            CategoriesWidget(
-              categories: viewModel.categories,
-              onCategorySelected: viewModel.selectCategory,
-            ),
+            // CategoriesWidget(
+            //   categories: viewModel.categories,
+            //   onCategorySelected: viewModel.selectCategory,
+            // ),
             Expanded(
-              child: _buildTripList(viewModel),
+              child: _buildTripList(context, viewModel),
             ),
           ],
         );
@@ -80,7 +82,70 @@ class TripSearchScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTripList(TripSearchViewModel viewModel) {
+  Widget _buildTripList(BuildContext context, TripSearchViewModel viewModel) {
+    if (viewModel.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    
+    if (viewModel.errorMessage != null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'Произошла ошибка',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: AppColors.text,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              viewModel.errorMessage!,
+              style: TextStyle(
+                fontSize: 14,
+                color: AppColors.text.withOpacity(0.7),
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                viewModel.clearError();
+                viewModel.init();
+              },
+              child: const Text('Повторить'),
+            ),
+          ],
+        ),
+      );
+    }
+    
+    if (viewModel.trips.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.search_off,
+              size: 48,
+              color: AppColors.text.withOpacity(0.5),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Поездки не найдены',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: AppColors.text,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+    
     return Column(
       children: [
         Padding(
@@ -97,24 +162,14 @@ class TripSearchScreen extends StatelessWidget {
                   color: AppColors.text,
                 ),
               ),
-              // Row(
-              //   children: [
-              //     Icon(
-              //       Icons.sort,
-              //       size: 16,
-              //       color: AppColors.accent,
-              //     ),
-              //     const SizedBox(width: 8),
-              //     Text(
-              //       'Популярные',
-              //       style: TextStyle(
-              //         fontSize: 14,
-              //         fontFamily: 'NotoSans',
-              //         color: AppColors.text,
-              //       ),
-              //     ),
-              //   ],
-              // ),
+              Text(
+                'Найдено: ${viewModel.trips.length}',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontFamily: 'NotoSans',
+                  color: AppColors.text.withOpacity(0.7),
+                ),
+              ),
             ],
           ),
         ),
@@ -124,14 +179,26 @@ class TripSearchScreen extends StatelessWidget {
             itemCount: viewModel.trips.length,
             itemBuilder: (context, index) {
               final trip = viewModel.trips[index];
-              return TripCardWidget(
-                trip: trip,
-                onCopyTrip: viewModel.copyTripToUser,
+              return GestureDetector(
+                onTap: () => _navigateToTripDetails(context, trip),
+                child: TripCardWidget(
+                  trip: trip,
+                  onCopyTrip: viewModel.copyTripToUser,
+                ),
               );
             },
           ),
         ),
       ],
+    );
+  }
+  
+  void _navigateToTripDetails(BuildContext context, LibraryTrip trip) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => TripDetailsScreen(trip: trip),
+      ),
     );
   }
 } 
