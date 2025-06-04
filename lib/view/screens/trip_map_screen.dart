@@ -34,22 +34,24 @@ class _TripMapView extends StatelessWidget {
   Widget build(BuildContext context) {
     final viewModel = context.watch<TripMapViewModel>();
 
-    return Scaffold(
-      body: Stack(
-        children: [
-          // Map covering the entire screen
-          _buildMap(viewModel),
-          
-          // Header with back button and day title
-          _buildHeader(context, viewModel.day),
-          
-          // Location details at the bottom
-          if (viewModel.selectedLocation != null) 
-            _buildLocationDetails(context, viewModel),
-            
-          // Map controls on the right side
-          _buildMapControls(context, viewModel),
-        ],
+    return SafeArea(
+      child: Scaffold(
+        body: Stack(
+          children: [
+            // Map covering the entire screen
+            _buildMap(viewModel),
+
+            // Header with back button and day title
+            _buildHeader(context, viewModel.day),
+
+            // Location details at the bottom
+            if (viewModel.selectedLocation != null)
+              _buildLocationDetails(context, viewModel),
+
+            // Map controls on the right side
+            _buildMapControls(context, viewModel),
+          ],
+        ),
       ),
     );
   }
