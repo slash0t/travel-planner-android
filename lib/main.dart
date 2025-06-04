@@ -19,10 +19,16 @@ import 'package:putevod/view-model/login_view_model.dart';
 import 'package:putevod/view-model/registration_view_model.dart';
 import 'package:putevod/view-model/password_recovery_view_model.dart';
 import 'package:putevod/view-model/library_view_model.dart';
+import 'package:flutter/services.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    // DeviceOrientation.portraitDown, // if you want upside-down too
+  ]);
+
   // Загружаем переменные окружения
   try {
     await dotenv.load(fileName: '.env');
