@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:putevod/external/api_client.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:putevod/external/auth_service.dart';
 
 /// ViewModel for the profile screen
 class ProfileViewModel extends ChangeNotifier {
   final ApiClient _plannerClient = ApiClients.planner;
   final ApiClient _authClient = ApiClients.auth;
+  final AuthService _authService = AuthService();
 
   String _usernameShown = '';
   String _username = '';
@@ -169,6 +171,10 @@ class ProfileViewModel extends ChangeNotifier {
   void updatePassword(String value) {
     _password = value;
     notifyListeners();
+  }
+
+  Future<void> logout() async {
+    await _authService.logout();
   }
   
   /// Saves the user profile changes

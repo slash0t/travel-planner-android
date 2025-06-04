@@ -8,7 +8,38 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
   final ApiClient _authClient = ApiClients.auth;
-  
+
+  Future<AuthResponse> anonymousLogin() async {
+    try {
+      final deviceId = await DeviceInfoUtil.getDeviceId();
+
+      final response = await _authClient.post(
+        '/anonymous/recover',
+        queryParameters: { "userAgent": deviceId },
+      );
+
+      final token = response.data["anonymousToken"];
+
+      if (response.statusCode == 200) {
+        final authResponse = AuthResponse(
+            success: true,
+            accessToken: token,
+            refreshToken: token,
+        );
+        await _saveTokens(authResponse.accessToken!, authResponse.refreshToken!);
+        return authResponse;
+      } else {
+        return AuthResponse.error(
+          'Login failed: ${response.statusCode} ${response.statusMessage}',
+        );
+      }
+    } on DioException catch (e) {
+      return AuthResponse.error(_handleDioError(e));
+    } catch (e) {
+      return AuthResponse.error('Login failed: $e');
+    }
+  }
+
   Future<AuthResponse> login(String email, String password) async {
     try {
       final deviceId = await DeviceInfoUtil.getDeviceId();
@@ -36,6 +67,22 @@ class AuthService {
       return AuthResponse.error(_handleDioError(e));
     } catch (e) {
       return AuthResponse.error('Login failed: $e');
+    }
+  }
+
+  Future<bool> isAnonymous() async {
+    try {
+      final response = await _authClient.post(
+        '/api/v1/check-anonymous',
+      );
+
+      if (response.statusCode == 200) {
+        return response.data['isAnonymous'] as bool;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      return false;
     }
   }
   

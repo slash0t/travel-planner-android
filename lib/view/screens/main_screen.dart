@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:putevod/external/auth_service.dart';
 import 'package:putevod/model/app_colors.dart';
 import 'package:putevod/view/screens/login_screen.dart';
 import 'package:putevod/view/screens/main_menu_screen.dart';
 import 'package:putevod/view/screens/registration_screen.dart';
+
+import '../../external/api_client.dart';
+import '../../external/device_info.dart';
 
 /// The original main screen of the application displaying welcome content
 class MainScreen extends StatelessWidget {
@@ -96,12 +100,14 @@ class MainScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 10),
                   ElevatedButton(
-                    onPressed: () {
-                      // Navigate to main navigation screen as guest
-                      Navigator.push(
-                        context, 
-                        MaterialPageRoute(builder: (context) => const MainMenuScreen()),
-                      );
+                    onPressed: () async {
+                      // final response = await AuthService().anonymousLogin();
+                      // if (response.success) {
+                      //   Navigator.of(context).pushAndRemoveUntil(
+                      //     MaterialPageRoute(builder: (context) => const MainMenuScreen()),
+                      //       (Route<dynamic> route) => false,
+                      //   );
+                      // }
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.white,

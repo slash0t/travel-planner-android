@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:putevod/model/app_colors.dart';
 import 'package:putevod/view-model/loading_view_model.dart';
+import 'package:putevod/view/screens/main_menu_screen.dart';
 import 'package:putevod/view/widgets/spinning_loader.dart';
 import 'package:putevod/view/screens/main_screen.dart';
 import 'package:putevod/view/screens/onboarding1_screen.dart';
@@ -26,14 +27,20 @@ class _LoadingScreenState extends State<LoadingScreen> {
   Future<void> _initializeApp() async {
     final viewModel = Provider.of<LoadingViewModel>(context, listen: false);
     await viewModel.initializeApp();
-    
+
+    Widget page = const MainScreen();
+
+    final isAuthenticated = await viewModel.isAuthenticated();
+    if (isAuthenticated) {
+      page = const MainMenuScreen();
+    } else if (viewModel.isFirstLaunch) {
+      page = const Onboarding1Screen();
+    }
+
     if (mounted) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (context) => viewModel.isFirstLaunch
-              ? const Onboarding1Screen()
-              : const MainScreen(),
-        ),
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => page),
+        (Route<dynamic> route) => false,
       );
     }
   }

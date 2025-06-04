@@ -7,6 +7,7 @@ import 'package:putevod/view/widgets/app_header.dart';
 import 'package:putevod/view/widgets/app_bottom_navigation.dart';
 
 import '../widgets/basic_text_field.dart';
+import 'main_screen.dart';
 
 /// Profile screen implementation matching design
 class ProfileScreen extends StatefulWidget {
@@ -280,14 +281,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _buildLogoutButton(ProfileViewModel viewModel) {
     return GestureDetector(
-      onTap: () {
-        // TODO: Implement logout functionality
+      onTap: () async {
+        await viewModel.logout();
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const MainScreen()),
+          (Route<dynamic> route) => false,
+        );
       },
       child: Container(
         width: double.infinity,
         height: 50,
         decoration: BoxDecoration(
-          color: Colors.red,
+          color: AppColors.accent,
           borderRadius: BorderRadius.circular(10),
         ),
         child: const Center(
