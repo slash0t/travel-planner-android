@@ -54,17 +54,23 @@ class TodoItemDetailViewModel extends ChangeNotifier {
     _completedTasks = todoList.items.where((a) => a.completed).toList();
     _completedTasks.sort((a, b) => a.orderPosition.compareTo(b.orderPosition));
 
-    _progress = completedTasks.length / (completedTasks.length + incompleteTasks.length);
+    final allCount = completedTasks.length + incompleteTasks.length;
+    if (allCount == 0) {
+      _progress = 0;
+    } else {
+      _progress = completedTasks.length / allCount;
+    }
 
     notifyListeners();
   }
 
-  Future<void> loadTodoItem(int idString) async {
-    _isLoading = true;
-    notifyListeners();
-    
+  Future<void> loadTodoItem(int id, {bool setLoading = true}) async {
+    if (setLoading) {
+      _isLoading = true;
+      notifyListeners();
+    }
+
     try {
-      final id = idString;
       final response = await _tripService.getTodoListById(id);
       
       _todoItemDetail = TodoItemDetail.fromJson(response);
@@ -73,7 +79,9 @@ class TodoItemDetailViewModel extends ChangeNotifier {
       debugPrint('Ошибка загрузки todo-списка: $e');
       _todoItemDetail = TodoItemDetail.empty();
     } finally {
-      _isLoading = false;
+      if (setLoading) {
+        _isLoading = false;
+      }
       notifyListeners();
     }
   }
@@ -195,17 +203,27 @@ class TodoItemDetailViewModel extends ChangeNotifier {
     }
     
     if (_todoListViewModel != null && _todoItemDetail != null) {
-      await _todoListViewModel!.deleteTodoList(_todoItemDetail!.id.toString());
+      await _todoListViewModel!.deleteTodoList(_todoItemDetail!.id);
     }
-    
-    // The view will handle navigation
   }
 
-  /// Updates the title of the todo list
-  void updateTitle(String newTitle) {
+  Future<void> updateTitle(String newTitle) async {
     if (_todoItemDetail == null || newTitle.trim().isEmpty) return;
-    
+
     _todoItemDetail = _todoItemDetail!.copyWith(title: newTitle.trim());
+
+    try {
+      await _tripService.updateTodoList(
+        _todoItemDetail!.id,
+        { "title": newTitle.trim() }
+      );
+
+      await loadTodoItem(_todoItemDetail!.id, setLoading: false);
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Ошибка удаления задачи: $e');
+    }
+
     notifyListeners();
   }
 } 

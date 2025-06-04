@@ -175,7 +175,7 @@ class _TodoItemDetailScreenState extends State<TodoItemDetailScreen> {
           ),
         ],
       ),
-    ).then((_) => titleController.dispose());
+    );
   }
   
   Widget _buildProgressBar(TodoItemDetail todoItem) {

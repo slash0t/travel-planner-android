@@ -112,9 +112,9 @@ class TodoListViewModel extends ChangeNotifier {
   }
   
   /// Deletes a todo list by ID
-  Future<void> deleteTodoList(String id) async {
+  Future<void> deleteTodoList(int id) async {
     try {
-      await _tripService.deleteTodoList(int.parse(id));
+      await _tripService.deleteTodoList(id);
       
       _todoItems.removeWhere((item) => item.id == id);
       _activeListCount = _todoItems.length;
