@@ -93,7 +93,7 @@ class TripSharingViewModel extends ChangeNotifier {
       notifyListeners();
 
       final response = await _plannerClient.delete(
-          '/trips/${trip.id}/shares/${sharedUser.id}'
+          '/trips/${trip.id}/shares/${sharedUser.user.id}'
       );
       
       _sharedUsers.remove(sharedUser);
