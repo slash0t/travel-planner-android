@@ -114,7 +114,6 @@ class _PlaceSearchScreenState extends State<PlaceSearchScreen> {
             AppHeader(
               showBackButton: true,
               title: 'Поиск мест',
-              onBackPressed: () => Navigator.of(context).pop(),
             ),
             _buildSearchBar(),
             Expanded(

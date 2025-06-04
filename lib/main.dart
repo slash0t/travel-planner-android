@@ -3,8 +3,10 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
 import 'package:putevod/model/app_colors.dart';
+import 'package:putevod/model/notification_service.dart';
 import 'package:putevod/view-model/loading_view_model.dart';
 import 'package:putevod/view-model/navigation_view_model.dart';
+import 'package:putevod/view-model/notifications_view_model.dart';
 import 'package:putevod/view-model/profile_view_model.dart';
 import 'package:putevod/view-model/todo_item_detail_view_model.dart';
 import 'package:putevod/view-model/todo_list_view_model.dart';
@@ -14,7 +16,7 @@ import 'package:putevod/view-model/trip_search_view_model.dart';
 import 'package:putevod/view-model/trips_view_model.dart';
 import 'package:putevod/view/screens/loading_screen.dart';
 import 'package:putevod/view/screens/login_screen.dart';
-import 'package:putevod/view/widgets/app_header_view_model.dart';
+import 'package:putevod/view-model/app_header_view_model.dart';
 import 'package:putevod/view-model/login_view_model.dart';
 import 'package:putevod/view-model/registration_view_model.dart';
 import 'package:putevod/view-model/password_recovery_view_model.dart';
@@ -63,6 +65,12 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => TripCreationViewModel()),
         ChangeNotifierProvider(create: (_) => TripDetailViewModel()),
         ChangeNotifierProvider(create: (_) => LibraryViewModel()),
+        ChangeNotifierProvider(create: (_) => NotificationService()),
+        ChangeNotifierProxyProvider<NotificationService, NotificationsViewModel>(
+          create: (_) => NotificationsViewModel(NotificationService()),
+          update: (_, notificationService, previousViewModel) => 
+              previousViewModel ?? NotificationsViewModel(notificationService),
+        ),
       ],
       child: MaterialApp(
         title: 'Putevod',

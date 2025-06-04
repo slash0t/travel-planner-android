@@ -29,12 +29,6 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
     });
   }
 
-  void _handleNotificationPressed() {
-    // Handle notification button pressed
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Notifications pressed')),
-    );
-  }
 
   void _handleCreatePressed() {
     // Handle create new journey button pressed
@@ -69,12 +63,8 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // App header
-            AppHeader(
-              onNotificationPressed: _handleNotificationPressed,
-            ),
-            
-            // Main content
+            AppHeader(),
+
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(16),
