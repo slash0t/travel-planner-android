@@ -5,6 +5,7 @@ import 'package:putevod/model/app_colors.dart';
 import 'package:putevod/model/trip.dart';
 import 'package:putevod/view-model/trip_creation_view_model.dart';
 import 'package:putevod/view-model/trips_view_model.dart';
+import 'package:putevod/view/screens/trips_screen.dart';
 
 /// Screen for creating or editing a trip
 class TripCreationScreen extends StatefulWidget {
@@ -522,13 +523,20 @@ class _TripCreationScreenState extends State<TripCreationScreen> {
           try {
             await viewModel.saveTrip();
             
-            // Update trip list
             final tripsViewModel = context.read<TripsViewModel>();
             await tripsViewModel.loadAllTrips();
             
             if (mounted) {
-              // Navigate back to trips list
-              Navigator.pop(context);
+              if (viewModel.isEditingMode) {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const TripsScreen(),
+                  ),
+                );
+              } else {
+                Navigator.pop(context);
+              }
             }
           } catch (e) {
             // Show error message

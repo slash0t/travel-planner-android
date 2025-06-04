@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:putevod/external/api_client.dart';
+import 'package:putevod/external/trip_service.dart';
 
 class ExternalService {
   final ApiClient _externalClient = ApiClients.external;
@@ -134,15 +135,29 @@ class ExternalService {
   // === AI API ===
   
   /// Генерация списка вещей для поездки
-  Future<Map<String, dynamic>> generatePackingList(Map<String, dynamic> request) async {
+  Future<void> generatePackingList(Map<String, dynamic> request) async {
     try {
       final response = await _externalClient.post(
-        '/ai/packing-list',
+        '/ai/trip-lists/generate',
         queryParameters: request,
       );
-      
+
       if (response.statusCode == 200) {
-        return response.data;
+        TripService service = TripService();
+
+        final responseList = await service.createTodoList({
+          "title": "ИИ список",
+          "description": "Описание ии списка",
+        });
+
+        final id = responseList['id'] as int;
+
+        for (dynamic value in response.data) {
+          service.addTodoItem(id, {
+            "content": value.toString(),
+            "completed": false,
+          });
+        }
       } else {
         throw Exception('Failed to generate packing list: ${response.statusCode}');
       }

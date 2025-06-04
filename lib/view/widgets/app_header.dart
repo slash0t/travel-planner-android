@@ -51,7 +51,7 @@ class AppHeader extends StatelessWidget {
                 Row(
                   children: [
                     if (actions != null) ...actions!,
-                    _buildNotificationButton(context, headerViewModel),
+                    // _buildNotificationButton(context, headerViewModel),
                   ],
                 ),
               ],

@@ -6,6 +6,8 @@ import 'package:putevod/view-model/place_editing_view_model.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:putevod/view/screens/todo_item_detail_screen.dart';
+import 'package:putevod/view/screens/trip_detail_screen.dart';
 
 class PlaceEditingScreen extends StatefulWidget {
   final int? placeId;
@@ -941,7 +943,12 @@ class _PlaceEditingScreenState extends State<PlaceEditingScreen> {
                 final success = await viewModel.savePlaceChanges();
                 if (success) {
                   if (mounted) {
-                    Navigator.pop(context);
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => TripDetailScreen(tripId: viewModel.tripEvent!.id),
+                      ),
+                    );
                   }
                 } else {
                   if (mounted) {

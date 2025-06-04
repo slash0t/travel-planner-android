@@ -4,7 +4,8 @@ import 'package:putevod/model/app_colors.dart';
 import 'package:putevod/model/trip.dart';
 import 'package:putevod/view-model/todo_ai_creation_view_model.dart';
 import 'package:putevod/view/screens/todo_item_detail_screen.dart';
-import 'package:putevod/view-model/todo_list_view_model.dart'; // Required for provider
+import 'package:putevod/view-model/todo_list_view_model.dart';
+import 'package:putevod/view/screens/todo_list_screen.dart'; // Required for provider
 
 class TodoAICreationScreen extends StatefulWidget {
   const TodoAICreationScreen({super.key});
@@ -320,7 +321,10 @@ class _TodoAICreationScreenState extends State<TodoAICreationScreen> {
                   return;
                 }
                 await viewModel.generateTodoList();
-                Navigator.pop(context);
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const TodoListScreen()),
+                );
               }
             },
     );
