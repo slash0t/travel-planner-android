@@ -138,7 +138,7 @@ class ExternalService {
     try {
       final response = await _externalClient.post(
         '/ai/packing-list',
-        data: request,
+        queryParameters: request,
       );
       
       if (response.statusCode == 200) {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:putevod/model/app_colors.dart';
+import 'package:putevod/model/trip.dart';
 import 'package:putevod/view-model/todo_ai_creation_view_model.dart';
 import 'package:putevod/view/screens/todo_item_detail_screen.dart';
 import 'package:putevod/view-model/todo_list_view_model.dart'; // Required for provider
@@ -54,9 +55,9 @@ class _TodoAICreationScreenState extends State<TodoAICreationScreen> {
                     child: ListView(
                       children: <Widget>[
                         // _buildDataSourceButtons(viewModel),
+                        //const SizedBox(height: 16),
+                        //_buildTripTypeDropdown(viewModel),
                         // const SizedBox(height: 16),
-                        _buildTripTypeDropdown(viewModel),
-                        const SizedBox(height: 16),
                         _buildDirectionInput(viewModel),
                         const SizedBox(height: 16),
                         _buildSeasonSelector(viewModel),
@@ -86,56 +87,35 @@ class _TodoAICreationScreenState extends State<TodoAICreationScreen> {
   }
 
   Widget _buildDataSourceButtons(TodoAICreationViewModel viewModel) {
-    // For now, only "New Trip" is active
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Выберите источник данных',
-          style: TextStyle(
-              fontSize: 18, fontWeight: FontWeight.w500, fontFamily: 'NotoSans'),
-        ),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            Expanded(
-              child: OutlinedButton(
-                onPressed: () {
-                  // TODO: Implement existing trip selection
-                },
-                style: OutlinedButton.styleFrom(
-                  backgroundColor: Colors.white, // AppColors.cardBackground,
-                  side: const BorderSide(color: AppColors.accent, width: 2),
-                  padding: const EdgeInsets.symmetric(vertical: 24),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+    return _buildFormSection(
+      label: 'Выберите источник данных',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          DropdownButtonFormField<Trip>(
+            decoration: _inputDecoration(hintText: 'Выберите существующую поездку'),
+            value: viewModel.selectedTrip,
+            onChanged: (Trip? value) {
+              viewModel.setSelectedTrip(value);
+            },
+            items: viewModel.availableTrips.map((Trip trip) {
+              return DropdownMenuItem<Trip>(
+                value: trip,
+                child: SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.7, // Set maximum width to 70% of screen width
+                  child: Text(
+                    "${trip.title} (${trip.destination})",
+                    style: const TextStyle(fontFamily: 'NotoSans', color: AppColors.text),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                child: const Column(
-                  children: [
-                    Text('Существующая', style: TextStyle(color: AppColors.accent, fontFamily: 'NotoSans', fontSize: 16)),
-                    Text('поездка', style: TextStyle(color: AppColors.accent, fontFamily: 'NotoSans', fontSize: 16)),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: ElevatedButton(
-                onPressed: () {},
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.accent,
-                  padding: const EdgeInsets.symmetric(vertical: 24),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                child: const Text('Новая поездка', style: TextStyle(color: Colors.white, fontFamily: 'NotoSans', fontSize: 16), textAlign: TextAlign.center,),
-              ),
-            ),
-          ],
-        ),
-      ],
+              );
+            }).toList(),
+            style: const TextStyle(fontFamily: 'NotoSans', color: AppColors.text, fontSize: 16),
+            isExpanded: true, // Make sure the dropdown uses the full width available
+          ),
+        ],
+      ),
     );
   }
 
@@ -169,6 +149,7 @@ class _TodoAICreationScreenState extends State<TodoAICreationScreen> {
         onChanged: (value) => viewModel.setDirection(value),
         validator: (value) => (value == null || value.isEmpty) ? 'Пожалуйста, введите направление' : null,
         style: const TextStyle(fontFamily: 'NotoSans', color: AppColors.text, fontSize: 16),
+        enabled: viewModel.selectedTrip == null,
       ),
     );
   }
@@ -202,7 +183,7 @@ class _TodoAICreationScreenState extends State<TodoAICreationScreen> {
   Widget _buildSeasonButton(TodoAICreationViewModel viewModel, MapEntry<String, String> entry) {
     final isSelected = viewModel.season == entry.key;
     return ElevatedButton(
-      onPressed: () => viewModel.setSeason(entry.key),
+      onPressed: viewModel.selectedTrip == null ? () => viewModel.setSeason(entry.key) : null,
       style: ElevatedButton.styleFrom(
         backgroundColor: isSelected ? AppColors.secondary : Colors.white,
         foregroundColor: AppColors.text,
@@ -247,6 +228,7 @@ class _TodoAICreationScreenState extends State<TodoAICreationScreen> {
                 return null;
               },
               style: const TextStyle(fontFamily: 'NotoSans', color: AppColors.text, fontSize: 16),
+              enabled: viewModel.selectedTrip == null,
             ),
           ),
           const SizedBox(width: 16),
@@ -265,6 +247,7 @@ class _TodoAICreationScreenState extends State<TodoAICreationScreen> {
         onChanged: (value) => viewModel.setAdditionalInfo(value),
         maxLines: 3,
         style: const TextStyle(fontFamily: 'NotoSans', color: AppColors.text, fontSize: 16),
+        enabled: viewModel.selectedTrip == null,
       ),
     );
   }
@@ -336,14 +319,8 @@ class _TodoAICreationScreenState extends State<TodoAICreationScreen> {
                   );
                   return;
                 }
-                final newId = await viewModel.generateTodoList();
-                if (mounted && newId != null) {
-                  Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(
-                      builder: (context) => TodoItemDetailScreen(todoItemId: newId),
-                    ),
-                  );
-                }
+                await viewModel.generateTodoList();
+                Navigator.pop(context);
               }
             },
     );
