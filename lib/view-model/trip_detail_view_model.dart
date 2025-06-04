@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:putevod/external/library_service.dart';
 import 'package:putevod/model/trip.dart';
 import 'package:putevod/model/trip_day.dart';
 import 'package:putevod/model/trip_event.dart';
@@ -10,7 +11,8 @@ import '../model/place.dart';
 /// ViewModel for the trip detail screen
 class TripDetailViewModel with ChangeNotifier {
   final TripService _tripService = TripService();
-  
+  final LibraryService _libraryService = LibraryService();
+
   /// Current trip
   Trip? _trip;
   
@@ -67,10 +69,19 @@ class TripDetailViewModel with ChangeNotifier {
     }
   }
 
+  Future<void> publishToLibrary() async {
+    if (trip == null) return;
+    try {
+      await _libraryService.publishRoute(trip!.id);
+    } catch (e) {
+      _errorMessage = 'Ошибка публикации поездки: ${e.toString()}';
+    }
+  }
+
   Future<TripDay> getCurrentDay() async {
     final response = await _tripService.getTripDay(_selectedDay!.tripId, _selectedDay!.dayNumber);
     return TripDay.fromJson(response);
-}
+  }
 
   Future<void> deleteCurrentTrip() async {
     if (trip == null) return;
@@ -88,18 +99,7 @@ class TripDetailViewModel with ChangeNotifier {
       
       if (tripResponse != null) {
         _trip = Trip.fromJson(tripResponse);
-        
-        // Получить все события поездки
-        // final eventsResponse = await _tripService.getTripEvents(tripId);
-        // _events = eventsResponse.map((eventData) => TripEvent(
-        //   id: eventData['eventId'].toString(),
-        //   time: eventData['startTime'] ?? '00:00',
-        //   title: eventData['title'] ?? 'Без названия',
-        //   address: eventData['place']?['address'] ?? '',
-        //   day: DateTime.parse(eventData['day']['date']),
-        // )).toList();
-        
-        // Select the first day by default
+
         if (_trip != null && _trip!.days.isNotEmpty) {
           _selectedDay = _trip!.days.first;
         }

@@ -213,10 +213,26 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   }
 
   void _showPublishTripScreen() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const TripPublishingScreen(),
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Опубликовать поездку в библиотеку?'),
+        content: const Text('Это действие нельзя отменить.'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: const Text('Отмена'),
+          ),
+          TextButton(
+            onPressed: () async {
+              await _viewModel.publishToLibrary();
+              Navigator.pop(context);
+            },
+            child: const Text('Опубликовать'),
+          ),
+        ],
       ),
     );
   }

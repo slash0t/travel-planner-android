@@ -174,14 +174,14 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
           Icon(
             icon,
             color: AppColors.text,
-            size: 32,
+            size: 28,
           ),
           const SizedBox(width: 3),
           Text(
             title,
             style: const TextStyle(
               color: AppColors.text,
-              fontSize: 14,
+              fontSize: 13,
               fontWeight: FontWeight.w500,
               fontFamily: 'NotoSans',
             ),
@@ -214,7 +214,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
             ),
             const SizedBox(width: 8),
             _buildFilterChip(
-              'Скоро начнётся', 
+              'Скоро начнутся',
               status: TripStatus.upcoming,
               viewModel: tripsViewModel,
             ),

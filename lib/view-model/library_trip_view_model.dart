@@ -137,8 +137,7 @@ class LibraryTripViewModel extends ChangeNotifier {
   }
 
   Future<void> copyRoute() async {
-    // Implement copy route logic
-    // This would typically involve creating a copy of the trip for the current user
+
   }
 
   @override

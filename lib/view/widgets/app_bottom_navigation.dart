@@ -108,7 +108,7 @@ class AppBottomNavigation extends StatelessWidget {
 
   Widget _buildNavItem(BuildContext context, NavigationTab tab, String label, IconData icon, {VoidCallback? onTap}) {
     final isSelected = selectedTab == tab;
-    final color = isSelected ? AppColors.secondary : Colors.black;
+    final color = isSelected ? AppColors.secondary : AppColors.accent;
 
     return InkWell(
       onTap: isSelected ? null : (onTap ?? () => _handleNavigation(context, tab)),

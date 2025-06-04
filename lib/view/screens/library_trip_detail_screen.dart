@@ -655,7 +655,7 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
                 ),
               ),
               onPressed: () {
-                Provider.of<LibraryTripViewModel>(context, listen: false).copyRoute();
+                viewModel.copyRoute();
               },
               child: Text(
                 "Копировать маршрут",
