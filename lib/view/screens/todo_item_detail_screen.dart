@@ -102,11 +102,11 @@ class _TodoItemDetailScreenState extends State<TodoItemDetailScreen> {
                     onTap: _handleDeleteTodoList,
                     child: const Icon(Icons.delete_outline, size: 24),
                   ),
-                  const SizedBox(width: 15),
-                  GestureDetector(
-                    onTap: _handleCopyTodoList,
-                    child: const Icon(Icons.copy, size: 20),
-                  ),
+                  // const SizedBox(width: 15),
+                  // GestureDetector(
+                  //   onTap: _handleCopyTodoList,
+                  //   child: const Icon(Icons.copy, size: 20),
+                  // ),
                 ],
               ),
             ],
@@ -128,7 +128,7 @@ class _TodoItemDetailScreenState extends State<TodoItemDetailScreen> {
           _buildProgressBar(todoItem),
           const SizedBox(height: 10),
           Text(
-            '${todoItem.completedTasks} из ${todoItem.totalTasks} выполнено',
+            '${_viewModel.completedTasks.length} из ${_viewModel.completedTasks.length + _viewModel.incompleteTasks.length} выполнено',
             style: const TextStyle(
               fontSize: 16,
               fontFamily: 'Noto Sans',
@@ -189,7 +189,7 @@ class _TodoItemDetailScreenState extends State<TodoItemDetailScreen> {
       child: Row(
         children: [
           Container(
-            width: max(0, todoItem.progress * MediaQuery.of(context).size.width - 32),
+            width: max(0, _viewModel.progress * MediaQuery.of(context).size.width - 32),
             height: 8,
             decoration: BoxDecoration(
               color: AppColors.accent,

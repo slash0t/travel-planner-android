@@ -28,6 +28,10 @@ class TodoItemDetailViewModel extends ChangeNotifier {
   List<Task> _completedTasks = [];
 
   List<Task> get completedTasks => _completedTasks;
+
+  double _progress = 0;
+
+  double get progress => _progress;
   
   void setCompletedExpanded(bool value) {
     _isCompletedExpanded = value;
@@ -50,6 +54,8 @@ class TodoItemDetailViewModel extends ChangeNotifier {
     _completedTasks = todoList.items.where((a) => a.completed).toList();
     _completedTasks.sort((a, b) => a.orderPosition.compareTo(b.orderPosition));
 
+    _progress = completedTasks.length / (completedTasks.length + incompleteTasks.length);
+
     notifyListeners();
   }
 
@@ -68,7 +74,6 @@ class TodoItemDetailViewModel extends ChangeNotifier {
       _todoItemDetail = TodoItemDetail.empty();
     } finally {
       _isLoading = false;
-      _updateTodoListViewModel();
       notifyListeners();
     }
   }
@@ -82,23 +87,12 @@ class TodoItemDetailViewModel extends ChangeNotifier {
         {'content': content.trim(), 'completed': false},
       );
       
-      final newTask = Task(
-        id: response['id'] as int,
-        listId: response['listId'] as int,
-        content: response['content'],
-        completed: response['completed'] as bool,
-        orderPosition: response['listId'] as int,
-      );
-      
-      final items = List<Task>.from(_todoItemDetail!.items);
-      items.add(newTask);
-      
-      _todoItemDetail = _todoItemDetail!.copyWith(
-        items: items,
-        itemCount: items.length,
-        completedCount: items.where((task) => task.completed).length,
-      );
-      _updateTodoListViewModel();
+      final newTask = Task.fromJson(response);
+
+      _incompleteTasks.add(newTask);
+      notifyListeners();
+
+      await loadTasks();
       notifyListeners();
     } catch (e) {
       debugPrint('Ошибка добавления задачи: $e');
@@ -114,22 +108,9 @@ class TodoItemDetailViewModel extends ChangeNotifier {
         _todoItemDetail!.id,
         taskId,
       );
-      
-      final items = List<Task>.from(_todoItemDetail!.items);
-      final taskIndex = items.indexWhere((task) => task.id == taskId);
-      
-      if (taskIndex != -1) {
-        items[taskIndex] = items[taskIndex].copyWith(
-          completed: response['completed'] ?? !items[taskIndex].completed,
-        );
-        
-        _todoItemDetail = _todoItemDetail!.copyWith(
-          items: items,
-          completedCount: items.where((task) => task.completed).length,
-        );
-        _updateTodoListViewModel();
-        notifyListeners();
-      }
+
+      await loadTasks();
+      notifyListeners();
     } catch (e) {
       debugPrint('Ошибка переключения статуса задачи: $e');
     }
@@ -157,11 +138,18 @@ class TodoItemDetailViewModel extends ChangeNotifier {
 
     notifyListeners();
 
+    var added = 0;
+    for (final task in _completedTasks) {
+      if (newIndex >= task.orderPosition) {
+        added++;
+      }
+    }
+
     try {
       await _tripService.reorderTodoTask(
           _todoItemDetail!.id,
           chosenTask.id,
-          { "newPosition": newIndex + 1 }
+          { "newPosition": newIndex + 1 + added }
       );
       await loadTasks();
     } catch (e) {
@@ -180,14 +168,8 @@ class TodoItemDetailViewModel extends ChangeNotifier {
         _todoItemDetail!.id,
         taskId,
       );
-      
-      final items = _todoItemDetail!.items.where((task) => task.id != taskId).toList();
-      _todoItemDetail = _todoItemDetail!.copyWith(
-        items: items,
-        itemCount: items.length,
-        completedCount: items.where((task) => task.completed).length,
-      );
-      _updateTodoListViewModel();
+
+      await loadTasks();
       notifyListeners();
     } catch (e) {
       debugPrint('Ошибка удаления задачи: $e');
@@ -218,25 +200,12 @@ class TodoItemDetailViewModel extends ChangeNotifier {
     
     // The view will handle navigation
   }
-  
-  /// Updates the TodoListViewModel with the current state
-  void _updateTodoListViewModel() {
-    if (_todoListViewModel != null && _todoItemDetail != null) {
-      _todoListViewModel!.updateTodoListLocal(
-        _todoItemDetail!.id.toString(), 
-        completedTasks: _todoItemDetail!.completedTasks, 
-        totalTasks: _todoItemDetail!.totalTasks,
-        title: _todoItemDetail!.title,
-      );
-    }
-  }
 
   /// Updates the title of the todo list
   void updateTitle(String newTitle) {
     if (_todoItemDetail == null || newTitle.trim().isEmpty) return;
     
     _todoItemDetail = _todoItemDetail!.copyWith(title: newTitle.trim());
-    _updateTodoListViewModel();
     notifyListeners();
   }
 } 
