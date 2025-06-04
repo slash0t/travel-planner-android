@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:putevod/model/app_colors.dart';
 import 'package:putevod/model/library_trip.dart';
+import 'package:putevod/model/trip_event.dart';
 import 'package:putevod/view-model/library_trip_view_model.dart';
+
+import '../../model/trip_day.dart';
 // We'll need to create this model later
 // import 'package:putevod/model/trip_model.dart'; 
 
@@ -276,7 +279,7 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
     );
   }
 
-  Widget _buildDailyPlanSection(List<DailyPlan> dailyPlans) {
+  Widget _buildDailyPlanSection(List<TripDay> dailyPlans) {
     if (dailyPlans.isEmpty) {
       return const Center(
         child: Text(
@@ -308,7 +311,77 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
     );
   }
 
-  Widget _buildDailyPlanItem(DailyPlan plan) {
+  Widget _buildDailyPlanItem(TripDay plan) {
+
+    return Column(
+      children: [
+        Container(
+          margin: const EdgeInsets.only(bottom: 8),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: AppColors.grey,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: AppColors.red,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Center(
+                  child: Text(
+                    "${plan.dayNumber}",
+                    style: TextStyle(
+                      fontFamily: "NotoSans",
+                      fontSize: 16,
+                      color: AppColors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Количество событий: ${plan.events.length}",
+                      style: const TextStyle(
+                        fontFamily: "NotoSans",
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF000000),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        _buildEventsInfo(plan),
+      ],
+    );
+  }
+
+  Widget _buildEventsInfo(TripDay day) {
+    if (day.events.length == 0) return SizedBox(height: 0);
+
+    var events = day.events;
+    events.sort((a, b) => a.orderPosition.compareTo(b.orderPosition));
+
+    return Column(
+      children: [
+        ...events.map((event) => _buildEventInfo(event)),
+      ],
+    );
+  }
+
+  Widget _buildEventInfo(TripEvent event) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
@@ -322,12 +395,12 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: AppColors.red,
+              color: AppColors.secondary,
               borderRadius: BorderRadius.circular(8),
             ),
             child: Center(
               child: Text(
-                plan.day.toString(),
+                "${event.orderPosition}",
                 style: TextStyle(
                   fontFamily: "NotoSans",
                   fontSize: 16,
@@ -343,20 +416,12 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  plan.city,
+                  event.title,
                   style: const TextStyle(
                     fontFamily: "NotoSans",
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                     color: Color(0xFF000000),
-                  ),
-                ),
-                Text(
-                  plan.details,
-                  style: const TextStyle(
-                    fontFamily: "NotoSans",
-                    fontSize: 12,
-                    color: Color(0xFF6B7280),
                   ),
                 ),
               ],

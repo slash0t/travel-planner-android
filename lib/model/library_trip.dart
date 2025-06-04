@@ -1,5 +1,6 @@
 class LibraryTrip {
   final int id;
+  final int? originalRouteId;
   final String title;
   final String description;
   final Author author;
@@ -13,6 +14,7 @@ class LibraryTrip {
 
   const LibraryTrip({
     required this.id,
+    this.originalRouteId,
     required this.title,
     required this.description,
     required this.author,
@@ -27,6 +29,7 @@ class LibraryTrip {
 
   LibraryTrip copyWith({
     int? id,
+    int? originalRouteId,
     String? title,
     String? description,
     Author? author,
@@ -40,6 +43,7 @@ class LibraryTrip {
   }) {
     return LibraryTrip(
       id: id ?? this.id,
+      originalRouteId: originalRouteId ?? this.originalRouteId,
       title: title ?? this.title,
       description: description ?? this.description,
       author: author ?? this.author,
@@ -55,6 +59,7 @@ class LibraryTrip {
 
   Map<String, dynamic> toJson() => {
     'id': id,
+    'originalRouteId': originalRouteId,
     'title': title,
     'description': description,
     'author': author.toJson(),
@@ -70,6 +75,7 @@ class LibraryTrip {
   factory LibraryTrip.fromJson(Map<String, dynamic> json) {
     return LibraryTrip(
       id: json['id'] as int,
+      originalRouteId: json['originalRouteId'] != null ? json['originalRouteId'] as int : null,
       title: json['title'] as String,
       description: json['description'] as String,
       author: Author.fromJson(json['author'] as Map<String, dynamic>),

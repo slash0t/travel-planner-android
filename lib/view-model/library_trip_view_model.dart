@@ -3,15 +3,17 @@ import 'package:putevod/external/library_service.dart';
 import 'package:putevod/model/library_trip.dart';
 
 import '../external/api_client.dart';
+import '../external/trip_service.dart';
 import '../model/trip_day.dart';
 
 class LibraryTripViewModel extends ChangeNotifier {
+  final TripService _tripService = TripService();
   final ApiClient _plannerClient = ApiClients.planner;
   final LibraryService _libraryService = LibraryService();
   LibraryTrip? _trip;
   bool _isLoading = false;
   String? _error;
-  List<DailyPlan>? _dailyPlans;
+  List<TripDay>? _dailyPlans;
   List<TripReview>? _reviews;
   bool _isOwner = false;
   double _newReviewRating = 5.0;
@@ -20,7 +22,7 @@ class LibraryTripViewModel extends ChangeNotifier {
   LibraryTrip? get trip => _trip;
   bool get isLoading => _isLoading;
   String? get error => _error;
-  List<DailyPlan>? get dailyPlans => _dailyPlans;
+  List<TripDay>? get dailyPlans => _dailyPlans;
   List<TripReview>? get reviews => _reviews;
   bool get isOwner => _isOwner;
   double get newReviewRating => _newReviewRating;
@@ -70,16 +72,35 @@ class LibraryTripViewModel extends ChangeNotifier {
 
       _trip = LibraryTrip.fromJson(response);
 
-      _dailyPlans = (response["days"] as List<dynamic>)
-          .map((a) => DailyPlan.fromJson(a as Map<String, dynamic>))
-          .toList();
-
       await loadReviews();
+
+      await loadDailyPlans();
 
       _isLoading = false;
       notifyListeners();
     } catch (e) {
       _error = e.toString();
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> loadDailyPlans() async {
+    if (_trip == null) {
+      return ;
+    }
+
+    try {
+      final response = await _tripService.getTripDays(_trip!.originalRouteId!);
+
+      final days = response
+          .map((e) => TripDay.fromJson(e as Map<String, dynamic>))
+          .toList();
+
+      _dailyPlans = days;
+    } catch (e) {
+
+    } finally {
       _isLoading = false;
       notifyListeners();
     }
