@@ -524,7 +524,7 @@ class _TripCreationScreenState extends State<TripCreationScreen> {
             
             // Update trip list
             final tripsViewModel = context.read<TripsViewModel>();
-            await tripsViewModel.loadTrips(forceRefresh: true);
+            await tripsViewModel.loadAllTrips();
             
             if (mounted) {
               // Navigate back to trips list

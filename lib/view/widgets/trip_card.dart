@@ -51,7 +51,8 @@ class TripCard extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        trip.title,
+                        trip.title.length > 25 ?
+                         "${trip.title.substring(0, 25)}..." : trip.title,
                         style: const TextStyle(
                           fontFamily: 'NotoSans',
                           fontSize: 20,

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:putevod/model/app_colors.dart';
 import 'package:putevod/model/library_trip.dart';
 import 'package:putevod/model/trip_event.dart';
 import 'package:putevod/view-model/library_trip_view_model.dart';
+import 'package:putevod/view/screens/trips_screen.dart';
 
 import '../../model/trip_day.dart';
 // We'll need to create this model later
@@ -129,6 +131,10 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
                             _buildDailyPlanSection(viewModel.dailyPlans ?? []),
                             const SizedBox(height: 24),
                             _buildReviewsSection(trip.reviewsCount, viewModel.reviews ?? []),
+                            const SizedBox(height: 24),
+                            // Only show start date picker and copy route button if user is not the owner
+                            if (!viewModel.isOwner) 
+                              _buildStartDateSection(context, viewModel),
                           ],
                         ),
                       ),
@@ -138,9 +144,6 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
               ),
             );
           },
-        ),
-        bottomNavigationBar: Builder(
-          builder: (context) => _buildBottomBar(context),
         ),
       ),
     );
@@ -396,7 +399,7 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
             height: 48,
             decoration: BoxDecoration(
               color: AppColors.secondary,
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(24),
             ),
             child: Center(
               child: Text(
@@ -463,15 +466,21 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
 
   Widget _buildReviewsSection(int reviewsCount, List<TripReview> reviews) {
     if (reviews.isEmpty) {
-      return const Center(
-        child: Text(
-          "Нет отзывов",
-          style: TextStyle(
-            fontFamily: "NotoSans",
-            fontSize: 16,
-            color: Color(0xFF6B7280),
+      return Column(
+        children: [
+          const Center(
+            child: Text(
+              "Нет отзывов",
+              style: TextStyle(
+                fontFamily: "NotoSans",
+                fontSize: 16,
+                color: Color(0xFF6B7280),
+              ),
+            ),
           ),
-        ),
+          const SizedBox(height: 16),
+          Builder(builder: (context) => _buildAddCommentSection(context)),
+        ],
       );
     }
     
@@ -688,67 +697,132 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
     );
   }
 
-  Widget _buildBottomBar(BuildContext context) {
-    final viewModel = Provider.of<LibraryTripViewModel>(context);
-    // Don't show copy route button if user is the owner of the trip
-    if (viewModel.isOwner) {
-      return const SizedBox.shrink();
-    }
-    
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 17),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            spreadRadius: 0,
-            blurRadius: 2,
-            offset: const Offset(0, -1),
+  Widget _buildStartDateSection(BuildContext context, LibraryTripViewModel viewModel) {
+    final DateFormat formatter = DateFormat('dd.MM.yyyy');
+    final String displayDate = viewModel.selectedStartDate != null
+        ? formatter.format(viewModel.selectedStartDate!)
+        : 'Выберите дату';
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            color: AppColors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 2,
+                offset: const Offset(0, 1),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.red,
-                padding: const EdgeInsets.symmetric(vertical: 13),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Выбор дня начала поездки',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Color(0xFF4B555D),
                 ),
               ),
-              onPressed: () {
-                viewModel.copyRoute();
-              },
-              child: Text(
-                "Копировать маршрут",
-                style: TextStyle(
-                  fontFamily: "NotoSans",
-                  fontSize: 16,
-                  color: AppColors.white,
-                  fontWeight: FontWeight.bold,
+              const SizedBox(height: 4),
+              GestureDetector(
+                onTap: () async {
+                  final pickedDate = await showDatePicker(
+                    context: context,
+                    initialDate: viewModel.selectedStartDate ?? DateTime.now(),
+                    firstDate: DateTime.now(),
+                    lastDate: DateTime(2100),
+                    builder: (BuildContext context, Widget? child) {
+                      return Theme(
+                        data: ThemeData.light().copyWith(
+                          colorScheme: ColorScheme.light(
+                            primary: AppColors.secondary,
+                            onPrimary: Colors.black,
+                            surface: Colors.white,
+                          ),
+                        ),
+                        child: child!,
+                      );
+                    },
+                  );
+                  
+                  if (pickedDate != null) {
+                    viewModel.setStartDate(pickedDate);
+                  }
+                },
+                child: Container(
+                  height: 41,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(color: const Color(0xFFE5E7EB)),
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  alignment: Alignment.centerLeft,
+                  child: Row(
+                    children: [
+                      const Icon(Icons.calendar_today, size: 16, color: Colors.black),
+                      const SizedBox(width: 8),
+                      Text(
+                        displayDate,
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: viewModel.selectedStartDate != null
+                              ? Colors.black
+                              : const Color(0xFFADAFBC),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.red,
+              padding: const EdgeInsets.symmetric(vertical: 13),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            onPressed: () async {
+              if (viewModel.selectedStartDate != null) {
+                await viewModel.copyRoute();
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const TripsScreen(),
+                  ),
+                );
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Пожалуйста, выберите дату начала поездки')),
+                );
+              }
+            },
+            child: Text(
+              "Копировать маршрут",
+              style: TextStyle(
+                fontFamily: "NotoSans",
+                fontSize: 16,
+                color: AppColors.white,
+                fontWeight: FontWeight.bold,
               ),
             ),
           ),
-          // const SizedBox(width: 12),
-          // OutlinedButton(
-          //   style: OutlinedButton.styleFrom(
-          //     padding: const EdgeInsets.all(12),
-          //     side: BorderSide(color: AppColors.divider),
-          //     shape: RoundedRectangleBorder(
-          //       borderRadius: BorderRadius.circular(8),
-          //     ),
-          //   ),
-          //   onPressed: () {
-          //     context.read<LibraryTripViewModel>().toggleFavorite();
-          //   },
-          //   child: Icon(Icons.favorite_border, color: AppColors.darkGrey, size: 24),
-          // ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 } 

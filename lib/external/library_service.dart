@@ -1,9 +1,29 @@
 import 'package:dio/dio.dart';
+import 'package:intl/intl.dart';
 import 'package:putevod/external/api_client.dart';
 
 class LibraryService {
   final ApiClient _libraryClient = ApiClients.library;
-  
+
+  Future<dynamic> copyTripFromLibrary(int libraryRouteId, DateTime startDate) async {
+    try {
+      final response = await _libraryClient.post(
+        '/routes/$libraryRouteId/copy',
+        data: {
+          'startDate': DateFormat('yyyy-MM-dd').format(startDate),
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return response.data;
+      } else {
+        throw Exception('Failed to copy route from library: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      throw Exception(_handleDioError(e));
+    }
+  }
+
   /// Получить список опубликованных маршрутов
   Future<Map<String, dynamic>> getPublishedRoutes({
     int page = 0,

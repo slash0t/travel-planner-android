@@ -5,7 +5,7 @@ class Place {
   
   final String name;
   
-  final String placeType;
+  final String? placeType;
   
   final double? latitude;
   
@@ -16,7 +16,7 @@ class Place {
   const Place({
     required this.id,
     required this.name,
-    required this.placeType,
+    this.placeType,
     this.latitude,
     this.longitude,
     this.address,
@@ -62,7 +62,7 @@ class Place {
   factory Place.fromJson(Map<String, dynamic> json) => Place(
     id: json['id'] as int,
     name: json['name'] as String,
-    placeType: json['placeType'] as String,
+    placeType: json['placeType'] as String?,
     latitude: json['latitude'] as double?,
     longitude: json['longitude'] as double?,
     address: json['address'] as String?,

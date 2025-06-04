@@ -18,6 +18,7 @@ class LibraryTripViewModel extends ChangeNotifier {
   bool _isOwner = false;
   double _newReviewRating = 5.0;
   final TextEditingController commentController = TextEditingController();
+  DateTime? _selectedStartDate;
 
   LibraryTrip? get trip => _trip;
   bool get isLoading => _isLoading;
@@ -26,6 +27,7 @@ class LibraryTripViewModel extends ChangeNotifier {
   List<TripReview>? get reviews => _reviews;
   bool get isOwner => _isOwner;
   double get newReviewRating => _newReviewRating;
+  DateTime? get selectedStartDate => _selectedStartDate;
 
   void setTrip(LibraryTrip trip) {
     _trip = trip;
@@ -36,6 +38,11 @@ class LibraryTripViewModel extends ChangeNotifier {
 
   void updateRating(double rating) {
     _newReviewRating = rating;
+    notifyListeners();
+  }
+  
+  void setStartDate(DateTime date) {
+    _selectedStartDate = date;
     notifyListeners();
   }
 
@@ -106,11 +113,11 @@ class LibraryTripViewModel extends ChangeNotifier {
     }
   }
 
-  Future<void> loadReviews() async  {
+  Future<void> loadReviews({bool loading = true}) async  {
     if (_trip == null) return;
 
     try {
-      _isLoading = true;
+      if (loading) _isLoading = true;
       _error = null;
       notifyListeners();
 
@@ -119,11 +126,11 @@ class LibraryTripViewModel extends ChangeNotifier {
           .map((a) => TripReview.fromJson(a as Map<String, dynamic>))
           .toList();
 
-      _isLoading = false;
+      if (loading) _isLoading = false;
       notifyListeners();
     } catch (e) {
       _error = e.toString();
-      _isLoading = false;
+      if (loading) _isLoading = false;
       notifyListeners();
     }
   }
@@ -132,7 +139,6 @@ class LibraryTripViewModel extends ChangeNotifier {
     if (_trip == null || commentController.text.isEmpty) return;
 
     try {
-      _isLoading = true;
       _error = null;
       notifyListeners();
 
@@ -146,19 +152,42 @@ class LibraryTripViewModel extends ChangeNotifier {
       commentController.clear();
       
       // Reload reviews to show the new comment
-      await loadReviews();
+      await loadReviews(loading: false);
 
-      _isLoading = false;
       notifyListeners();
     } catch (e) {
       _error = e.toString();
-      _isLoading = false;
       notifyListeners();
     }
   }
 
   Future<void> copyRoute() async {
+    if (_trip == null) return;
+    if (_selectedStartDate == null) {
+      _error = "Необходимо выбрать дату начала поездки";
+      notifyListeners();
+      return;
+    }
 
+    try {
+      _isLoading = true;
+      _error = null;
+      notifyListeners();
+
+      final response = await _libraryService.copyTripFromLibrary(
+        _trip!.id,
+        _selectedStartDate!,
+      );
+
+      _isLoading = false;
+      notifyListeners();
+      
+      return response;
+    } catch (e) {
+      _error = e.toString();
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
   @override
