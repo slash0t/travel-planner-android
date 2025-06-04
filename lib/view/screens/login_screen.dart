@@ -134,9 +134,10 @@ class LoginScreen extends StatelessWidget {
                       : () async {
                           final success = await viewModel.login();
                           if (success && context.mounted) {
-                            Navigator.pushReplacement(
+                            Navigator.pushAndRemoveUntil(
                               context,
                               MaterialPageRoute(builder: (context) => const MainMenuScreen()),
+                              (Route<dynamic> route) => false,
                             );
                           }
                         },

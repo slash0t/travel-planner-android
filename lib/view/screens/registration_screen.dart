@@ -137,9 +137,10 @@ class RegistrationScreen extends StatelessWidget {
                       : () async {
                           final success = await viewModel.register();
                           if (success && context.mounted) {
-                            Navigator.pushReplacement(
+                            Navigator.pushAndRemoveUntil(
                               context,
                               MaterialPageRoute(builder: (context) => const MainMenuScreen()),
+                              (Route<dynamic> route) => false,
                             );
                           }
                         },
@@ -162,7 +163,7 @@ class RegistrationScreen extends StatelessWidget {
                 const SizedBox(height: 20),
                 GestureDetector(
                   onTap: () {
-                    Navigator.push(
+                    Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(builder: (context) => const LoginScreen()),
                     );

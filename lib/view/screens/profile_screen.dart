@@ -61,6 +61,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       _buildEditableFields(profileViewModel),
                       const SizedBox(height: 20),
                       _buildSaveButton(profileViewModel),
+                      const SizedBox(height: 16),
+                      _buildLogoutButton(profileViewModel),
                     ],
                   ),
                 ),
@@ -271,6 +273,33 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   fontFamily: 'NotoSans',
                 ),
               ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLogoutButton(ProfileViewModel viewModel) {
+    return GestureDetector(
+      onTap: () {
+        // TODO: Implement logout functionality
+      },
+      child: Container(
+        width: double.infinity,
+        height: 50,
+        decoration: BoxDecoration(
+          color: Colors.red,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: const Center(
+          child: Text(
+            'Выйти из аккаунта',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.w500,
+              fontFamily: 'NotoSans',
+            ),
+          ),
         ),
       ),
     );

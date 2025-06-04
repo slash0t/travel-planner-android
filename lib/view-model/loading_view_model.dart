@@ -16,11 +16,11 @@ class LoadingViewModel extends ChangeNotifier {
   /// and determines if this is the first app launch
   Future<void> initializeApp() async {
     // Simulate loading time
-    await Future.delayed(const Duration(seconds: 2));
+    // await Future.delayed(const Duration(seconds: 2));
     
     // Check if this is the first launch
-    _isFirstLaunch = true;
-    // _isFirstLaunch = await SharedPrefsManager.isFirstLaunch();
+    // _isFirstLaunch = true;
+    _isFirstLaunch = await SharedPrefsManager.isFirstLaunch();
 
     _isLoading = false;
     notifyListeners();
