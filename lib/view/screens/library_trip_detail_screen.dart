@@ -33,6 +33,7 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
   Future<void> _initializeTrip() async {
     _viewModel.setTrip(widget.trip);
     await _viewModel.loadTripDetails();
+    await _viewModel.checkOwnerShip();
   }
 
   @override
@@ -135,7 +136,9 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
             );
           },
         ),
-        bottomNavigationBar: _buildBottomBar(),
+        bottomNavigationBar: Builder(
+          builder: (context) => _buildBottomBar(context),
+        ),
       ),
     );
   }
@@ -435,6 +438,8 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
         ),
         const SizedBox(height: 16),
         ...reviews.map((review) => _buildReviewItem(review)),
+        const SizedBox(height: 8),
+        Builder(builder: (context) => _buildAddCommentSection(context)),
       ],
     );
   }
@@ -505,7 +510,126 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
     );
   }
 
-  Widget _buildBottomBar() {
+  Widget _buildAddCommentSection(BuildContext context) {
+    final viewModel = Provider.of<LibraryTripViewModel>(context);
+    
+    // Don't show comment section if user is the owner of the trip
+    if (viewModel.isOwner) {
+      return const SizedBox.shrink();
+    }
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          "Добавить отзыв",
+          style: TextStyle(
+            fontFamily: "NotoSans",
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF000000),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            const Text(
+              "Рейтинг: ",
+              style: TextStyle(
+                fontFamily: "NotoSans",
+                fontSize: 14,
+                color: Color(0xFF4B5563),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Row(
+              children: List.generate(5, (index) {
+                return IconButton(
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  icon: Icon(
+                    index < viewModel.newReviewRating ? Icons.star : Icons.star_border,
+                    color: AppColors.yellow,
+                    size: 24,
+                  ),
+                  onPressed: () => viewModel.updateRating(index + 1.0),
+                );
+              }),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Container(
+          decoration: BoxDecoration(
+            color: AppColors.grey,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: TextField(
+            controller: viewModel.commentController,
+            maxLines: 3,
+            decoration: InputDecoration(
+              hintText: "Напишите свой отзыв...",
+              hintStyle: TextStyle(
+                fontFamily: "NotoSans",
+                fontSize: 14,
+                color: Colors.grey[600],
+              ),
+              contentPadding: const EdgeInsets.all(16),
+              border: InputBorder.none,
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide.none,
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: AppColors.red),
+              ),
+            ),
+            style: const TextStyle(
+              fontFamily: "NotoSans",
+              fontSize: 14,
+              color: Color(0xFF000000),
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.red,
+              padding: const EdgeInsets.symmetric(vertical: 13),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            onPressed: () {
+              if (viewModel.commentController.text.isNotEmpty) {
+                viewModel.addComment();
+              }
+            },
+            child: Text(
+              "Отправить отзыв",
+              style: TextStyle(
+                fontFamily: "NotoSans",
+                fontSize: 16,
+                color: AppColors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBottomBar(BuildContext context) {
+    final viewModel = Provider.of<LibraryTripViewModel>(context);
+    // Don't show copy route button if user is the owner of the trip
+    if (viewModel.isOwner) {
+      return const SizedBox.shrink();
+    }
+    
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 17),
       decoration: BoxDecoration(
@@ -531,7 +655,7 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
                 ),
               ),
               onPressed: () {
-                context.read<LibraryTripViewModel>().copyRoute();
+                Provider.of<LibraryTripViewModel>(context, listen: false).copyRoute();
               },
               child: Text(
                 "Копировать маршрут",
