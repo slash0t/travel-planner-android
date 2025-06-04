@@ -186,54 +186,61 @@ class DailyPlan {
 }
 
 class TripReview {
-  final String reviewerName;
-  final int rating;
-  final String reviewText;
-  final String? avatarUrl;
+  final int id;
+  final int routeId;
+  final Author author;
+  final double rating;
+  final String comment;
 
   const TripReview({
-    required this.reviewerName,
+    required this.id,
+    required this.routeId,
+    required this.author,
     required this.rating,
-    required this.reviewText,
-    this.avatarUrl,
+    required this.comment,
   });
 
   TripReview copyWith({
-    String? reviewerName,
-    int? rating,
-    String? reviewText,
-    String? avatarUrl,
+    int? id,
+    int? routeId,
+    Author? author,
+    double? rating,
+    String? comment,
   }) {
     return TripReview(
-      reviewerName: reviewerName ?? this.reviewerName,
+      id: id ?? this.id,
+      routeId: routeId ?? this.routeId,
+      author: author ?? this.author,
       rating: rating ?? this.rating,
-      reviewText: reviewText ?? this.reviewText,
-      avatarUrl: avatarUrl ?? this.avatarUrl,
+      comment: comment ?? this.comment,
     );
   }
 
   Map<String, dynamic> toJson() => {
-    'reviewerName': reviewerName,
+    'id': id,
+    'routeId': routeId,
+    'author': author.toJson(),
     'rating': rating,
-    'reviewText': reviewText,
-    'avatarUrl': avatarUrl,
+    'comment': comment,
   };
 
   factory TripReview.fromJson(Map<String, dynamic> json) {
     return TripReview(
-      reviewerName: json['reviewerName'] as String,
-      rating: json['rating'] as int,
-      reviewText: json['reviewText'] as String,
-      avatarUrl: json['avatarUrl'] as String?,
+      id: json['id'] as int,
+      routeId: json['routeId'] as int,
+      author: Author.fromJson(json['author'] as Map<String, dynamic>),
+      rating: (json['rating'] as num).toDouble(),
+      comment: json['comment'] as String,
     );
   }
 
   factory TripReview.empty() {
-    return const TripReview(
-      reviewerName: '',
-      rating: 0,
-      reviewText: '',
-      avatarUrl: null,
+    return TripReview(
+      id: 0,
+      routeId: 0,
+      author: Author.empty(),
+      rating: 0.0,
+      comment: '',
     );
   }
 }

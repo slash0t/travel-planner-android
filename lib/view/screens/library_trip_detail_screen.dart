@@ -25,10 +25,13 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
   void initState() {
     super.initState();
     _viewModel = LibraryTripViewModel();
-    _initializeTrip();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initializeTrip();
+    });
   }
 
   Future<void> _initializeTrip() async {
+    _viewModel.setTrip(widget.trip);
     await _viewModel.loadTripDetails();
   }
 
@@ -451,28 +454,23 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
             children: [
               CircleAvatar(
                 radius: 16,
-                backgroundImage: review.avatarUrl != null 
-                  ? NetworkImage(review.avatarUrl!) 
-                  : null,
-                backgroundColor: review.avatarUrl == null ? AppColors.yellow.withOpacity(0.2) : null,
-                child: review.avatarUrl == null 
-                  ? Text(
-                      review.reviewerName.isNotEmpty ? review.reviewerName[0].toUpperCase() : '?',
-                      style: TextStyle(
-                        fontFamily: "NotoSans",
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.yellow,
-                      ),
-                    ) 
-                  : null,
+                backgroundColor: AppColors.yellow.withOpacity(0.2),
+                child: Text(
+                  review.author.username.isNotEmpty ? review.author.username[0].toUpperCase() : '?',
+                  style: TextStyle(
+                    fontFamily: "NotoSans",
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.yellow,
+                  ),
+                ),
               ),
               const SizedBox(width: 8),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    review.reviewerName,
+                    review.author.username,
                     style: const TextStyle(
                       fontFamily: "NotoSans",
                       fontSize: 14,
@@ -495,7 +493,7 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            review.reviewText,
+            review.comment,
             style: const TextStyle(
               fontFamily: "NotoSans",
               fontSize: 14,
