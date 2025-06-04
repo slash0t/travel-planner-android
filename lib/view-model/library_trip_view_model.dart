@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:putevod/external/library_service.dart';
 import 'package:putevod/model/library_trip.dart';
 
 class LibraryTripViewModel extends ChangeNotifier {
+  final LibraryService _libraryService = LibraryService();
   LibraryTrip? _trip;
   bool _isLoading = false;
   String? _error;
@@ -16,68 +18,20 @@ class LibraryTripViewModel extends ChangeNotifier {
 
   // Mock data for demonstration
   Future<void> loadTripDetails() async {
+    if (_trip == null) return;
+
     try {
       _isLoading = true;
       _error = null;
       notifyListeners();
 
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 1));
+      final response = await _libraryService.getRouteDetails(_trip!.id);
 
-      // Create author
-      final author = Author(
-        id: 1,
-        username: "Александр Петров",
-        // avatarUrl: "https://via.placeholder.com/100",
-      );
+      _trip = LibraryTrip.fromJson(response);
 
-      // Create trip
-      _trip = LibraryTrip(
-        id: 1,
-        title: "Путешествие по Европе",
-        description: "Незабываемое путешествие по историческим городам Европы с посещением главных достопримечательностей",
-        author: author,
-        countries: ["Франция", "Италия", "Испания"],
-        cities: ["Париж", "Рим", "Барселона", "Венеция", "Мадрид", "Флоренция"],
-        duration: 14,
-        rating: 4.8,
-        reviewsCount: 42,
-        previewImageUrl: "https://via.placeholder.com/390x200",
-        tags: ["Европа", "Культура", "История", "Архитектура"],
-      );
+      await loadDailyPlans();
 
-      // Create daily plans
-      _dailyPlans = [
-        DailyPlan(
-          day: 1,
-          city: "Париж",
-          details: "5 мест • 8 часов",
-        ),
-        DailyPlan(
-          day: 2,
-          city: "Париж",
-          details: "3 места • 6 часов",
-        ),
-        DailyPlan(
-          day: 3,
-          city: "Рим",
-          details: "4 места • 7 часов",
-        ),
-      ];
-
-      // Create reviews
-      _reviews = [
-        TripReview(
-          reviewerName: "Мария К.",
-          rating: 5,
-          reviewText: "Отличный маршрут! Все достопримечательности подобраны идеально.",
-        ),
-        TripReview(
-          reviewerName: "Иван С.",
-          rating: 4,
-          reviewText: "Хороший маршрут, но немного утомительный. Рекомендую добавить больше времени на отдых.",
-        ),
-      ];
+      await loadReviews();
 
       _isLoading = false;
       notifyListeners();
@@ -86,6 +40,14 @@ class LibraryTripViewModel extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     }
+  }
+
+  Future<void> loadDailyPlans() async  {
+
+  }
+
+  Future<void> loadReviews() async  {
+
   }
 
   Future<void> copyRoute() async {

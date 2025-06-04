@@ -78,7 +78,6 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
             if (viewModel.error != null) {
               return Center(child: Text(viewModel.error!));
             }
-
             // Use either the viewModel trip or widget.trip as fallback
             final trip = viewModel.trip ?? widget.trip;
 
@@ -91,6 +90,14 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
                     width: double.infinity,
                     height: 200,
                     fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        height: 200,
+                        width: double.infinity,
+                        color: Colors.grey[300],
+                        child: const Icon(Icons.image_not_supported, size: 48),
+                      );
+                    },
                   ),
                   Padding(
                     padding: const EdgeInsets.all(16.0),
@@ -159,10 +166,19 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
   Widget _buildAuthorSection(Author author) {
     return Row(
       children: [
-        // CircleAvatar(
-        //   radius: 24,
-        //   backgroundImage: NetworkImage(author.avatarUrl),
-        // ),
+        CircleAvatar(
+          radius: 24,
+          backgroundColor: AppColors.red.withOpacity(0.2),
+          child: Text(
+            author.username.isNotEmpty ? author.username[0].toUpperCase() : '?',
+            style: TextStyle(
+              fontFamily: "NotoSans",
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: AppColors.red,
+            ),
+          ),
+        ),
         const SizedBox(width: 12),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -255,6 +271,19 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
   }
 
   Widget _buildDailyPlanSection(List<DailyPlan> dailyPlans) {
+    if (dailyPlans.isEmpty) {
+      return const Center(
+        child: Text(
+          "Нет плана по дням",
+          style: TextStyle(
+            fontFamily: "NotoSans",
+            fontSize: 16,
+            color: Color(0xFF6B7280),
+          ),
+        ),
+      );
+    }
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -362,6 +391,19 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
   }
 
   Widget _buildReviewsSection(int reviewsCount, List<TripReview> reviews) {
+    if (reviews.isEmpty) {
+      return const Center(
+        child: Text(
+          "Нет отзывов",
+          style: TextStyle(
+            fontFamily: "NotoSans",
+            fontSize: 16,
+            color: Color(0xFF6B7280),
+          ),
+        ),
+      );
+    }
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -411,7 +453,19 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
                 radius: 16,
                 backgroundImage: review.avatarUrl != null 
                   ? NetworkImage(review.avatarUrl!) 
-                  : const AssetImage('assets/images/profile_avatar.png') as ImageProvider,
+                  : null,
+                backgroundColor: review.avatarUrl == null ? AppColors.yellow.withOpacity(0.2) : null,
+                child: review.avatarUrl == null 
+                  ? Text(
+                      review.reviewerName.isNotEmpty ? review.reviewerName[0].toUpperCase() : '?',
+                      style: TextStyle(
+                        fontFamily: "NotoSans",
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.yellow,
+                      ),
+                    ) 
+                  : null,
               ),
               const SizedBox(width: 8),
               Column(
