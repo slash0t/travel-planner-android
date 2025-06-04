@@ -49,6 +49,7 @@ class _TodoItemDetailScreenState extends State<TodoItemDetailScreen> {
   
   Future<void> _loadTodoItem() async {
     await _viewModel.loadTodoItem(widget.todoItemId);
+    await _viewModel.loadTasks();
   }
   
   @override

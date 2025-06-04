@@ -140,6 +140,8 @@ class TripDetailViewModel with ChangeNotifier {
 
     _selectedEvents = newDayEvents;
 
+    notifyListeners();
+
     try {
       await _tripService.reorderEvent(
           _trip!.id,

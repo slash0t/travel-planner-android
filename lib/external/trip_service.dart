@@ -109,6 +109,23 @@ class TripService {
     }
   }
 
+  Future<dynamic> reorderTodoTask(int listId, int itemId, Map<String, dynamic> data) async {
+    try {
+      final response = await _plannerClient.patch(
+        '/todo-lists/${listId}/items/${itemId}/reorder',
+        data: data,
+      );
+
+      if (response.statusCode == 200) {
+        return response.data;
+      } else {
+        throw Exception('Failed to get trip details: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      throw Exception(_handleDioError(e));
+    }
+  }
+
   /// Создать новую поездку
   Future<dynamic> createTrip(Map<String, dynamic> tripData) async {
     try {
