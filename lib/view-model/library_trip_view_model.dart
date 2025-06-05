@@ -1,0 +1,198 @@
+import 'package:flutter/material.dart';
+import 'package:putevod/external/library_service.dart';
+import 'package:putevod/model/library_trip.dart';
+
+import '../external/api_client.dart';
+import '../external/trip_service.dart';
+import '../model/trip_day.dart';
+
+class LibraryTripViewModel extends ChangeNotifier {
+  final TripService _tripService = TripService();
+  final ApiClient _plannerClient = ApiClients.planner;
+  final LibraryService _libraryService = LibraryService();
+  LibraryTrip? _trip;
+  bool _isLoading = false;
+  String? _error;
+  List<TripDay>? _dailyPlans;
+  List<TripReview>? _reviews;
+  bool _isOwner = false;
+  double _newReviewRating = 5.0;
+  final TextEditingController commentController = TextEditingController();
+  DateTime? _selectedStartDate;
+
+  LibraryTrip? get trip => _trip;
+  bool get isLoading => _isLoading;
+  String? get error => _error;
+  List<TripDay>? get dailyPlans => _dailyPlans;
+  List<TripReview>? get reviews => _reviews;
+  bool get isOwner => _isOwner;
+  double get newReviewRating => _newReviewRating;
+  DateTime? get selectedStartDate => _selectedStartDate;
+
+  void setTrip(LibraryTrip trip) {
+    _trip = trip;
+    // Here you would check if the current user is the owner of the trip
+    // For now, we'll simulate that the user is not the owner
+    _isOwner = false;
+  }
+
+  void updateRating(double rating) {
+    _newReviewRating = rating;
+    notifyListeners();
+  }
+  
+  void setStartDate(DateTime date) {
+    _selectedStartDate = date;
+    notifyListeners();
+  }
+
+  Future<void> checkOwnerShip() async {
+    if (_trip == null) return;
+
+    try {
+      final userResponse = await _plannerClient.get(
+          '/users/me'
+      );
+
+      if (userResponse.statusCode == 200) {
+        _isOwner = trip!.author.id == (userResponse.data["id"] as int);
+      }
+
+      notifyListeners();
+    } catch (e) {
+      _error = e.toString();
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // Mock data for demonstration
+  Future<void> loadTripDetails() async {
+    if (_trip == null) return;
+
+    try {
+      _isLoading = true;
+      _error = null;
+      notifyListeners();
+
+      final response = await _libraryService.getRouteDetails(_trip!.id);
+
+      _trip = LibraryTrip.fromJson(response);
+
+      await loadReviews();
+
+      await loadDailyPlans();
+
+      _isLoading = false;
+      notifyListeners();
+    } catch (e) {
+      _error = e.toString();
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> loadDailyPlans() async {
+    if (_trip == null) {
+      return ;
+    }
+
+    try {
+      final response = await _tripService.getTripDays(_trip!.originalRouteId!);
+
+      final days = response
+          .map((e) => TripDay.fromJson(e as Map<String, dynamic>))
+          .toList();
+
+      _dailyPlans = days;
+    } catch (e) {
+
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> loadReviews({bool loading = true}) async  {
+    if (_trip == null) return;
+
+    try {
+      if (loading) _isLoading = true;
+      _error = null;
+      notifyListeners();
+
+      final response = await _libraryService.getRouteReviews(_trip!.id);
+      _reviews = (response["content"] as List<dynamic>)
+          .map((a) => TripReview.fromJson(a as Map<String, dynamic>))
+          .toList();
+
+      if (loading) _isLoading = false;
+      notifyListeners();
+    } catch (e) {
+      _error = e.toString();
+      if (loading) _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> addComment() async {
+    if (_trip == null || commentController.text.isEmpty) return;
+
+    try {
+      _error = null;
+      notifyListeners();
+
+      await _libraryService.addReview(
+        _trip!.id,
+        _newReviewRating.round(),
+        comment: commentController.text,
+      );
+
+      // Clear the comment field after successful submission
+      commentController.clear();
+      
+      // Reload reviews to show the new comment
+      await loadReviews(loading: false);
+
+      notifyListeners();
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+    }
+  }
+
+  Future<void> copyRoute() async {
+    if (_trip == null) return;
+    if (_selectedStartDate == null) {
+      _error = "Необходимо выбрать дату начала поездки";
+      notifyListeners();
+      return;
+    }
+
+    try {
+      _isLoading = true;
+      _error = null;
+      notifyListeners();
+
+      final response = await _libraryService.copyTripFromLibrary(
+        _trip!.id,
+        _selectedStartDate!,
+      );
+
+      _isLoading = false;
+      notifyListeners();
+      
+      return response;
+    } catch (e) {
+      _error = e.toString();
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  @override
+  void dispose() {
+    commentController.dispose();
+    super.dispose();
+  }
+} 

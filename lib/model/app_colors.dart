@@ -1,0 +1,26 @@
+import 'package:flutter/material.dart';
+
+/// App colors enum containing the main colors used in the app
+class AppColors {
+  /// Main white color for background #e7e4dc
+  static const Color background = Color(0xFFE7E4DC);
+  
+  /// Red color for highlighting #ea2517
+  static const Color accent = Color(0xFFEA2517);
+  static const Color red = Color(0xFFEA2517);
+  
+  /// Black color #181507
+  static const Color text = Color(0xFF181507);
+  static const Color black = Color(0xFF181507);
+
+  /// Yellow color for highlighting #f1c021
+  static const Color secondary = Color(0xFFF1C021);
+  static const Color yellow = Color(0xFFF1C021);
+
+  static const Color link = Color(0xFF367AFF);
+
+  static const Color white = Color(0xFFFFFFFF);
+  static const Color grey = Color(0xFFF8F8F8);
+  static const Color darkGrey = Color(0xFF4B5563);
+  static const Color divider = Color(0xFFE5E7EB);
+}
