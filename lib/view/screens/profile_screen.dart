@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:putevod/model/analytics_service.dart';
 import 'package:putevod/model/app_colors.dart';
 import 'package:putevod/view-model/navigation_view_model.dart';
 import 'package:putevod/view-model/profile_view_model.dart';
@@ -35,6 +36,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    AnalyticsService.trackProfileView();
+
     final navigationViewModel = Provider.of<NavigationViewModel>(context);
     final profileViewModel = Provider.of<ProfileViewModel>(context);
     

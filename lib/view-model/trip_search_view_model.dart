@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:putevod/model/analytics_service.dart';
 import 'package:putevod/model/trip_category.dart';
 import 'package:putevod/model/library_trip.dart';
 import 'package:putevod/external/library_service.dart';
@@ -55,6 +56,7 @@ class TripSearchViewModel extends ChangeNotifier {
     _searchQuery = query;
     if (query.isNotEmpty) {
       _performSearch(query);
+      AnalyticsService.trackTripSearch(query);
     } else {
       _loadPopularTrips();
     }

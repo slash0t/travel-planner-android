@@ -50,8 +50,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
 
   void _handleNewTripPressed() {
     // Трекинг начала создания поездки
-    AnalyticsService.trackTripCreationStarted();
-    
+
     // Handle create new trip button pressed
     Navigator.push(
       context,

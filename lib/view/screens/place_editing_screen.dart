@@ -943,6 +943,7 @@ class _PlaceEditingScreenState extends State<PlaceEditingScreen> {
                 final success = await viewModel.savePlaceChanges();
                 if (success) {
                   if (mounted) {
+                    Navigator.pop(context);
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(

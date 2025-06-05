@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:putevod/model/analytics_service.dart';
 import 'package:putevod/model/app_colors.dart';
 import 'package:putevod/model/library_trip.dart';
 import 'package:putevod/view-model/navigation_view_model.dart';
@@ -18,6 +19,8 @@ class TripSearchScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AnalyticsService.trackLibraryView();
+
     return ChangeNotifierProvider(
       create: (_) => TripSearchViewModel(),
       child: Scaffold(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:putevod/model/analytics_service.dart';
 import 'package:putevod/model/app_colors.dart';
 import 'package:putevod/model/notification.dart';
 import 'package:putevod/view/widgets/app_header.dart';
@@ -40,6 +41,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    AnalyticsService.trackNotificationsView();
+
     final viewModel = Provider.of<NotificationsViewModel>(context);
     
     return Scaffold(

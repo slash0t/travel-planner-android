@@ -157,7 +157,7 @@ class TodoAICreationViewModel extends ChangeNotifier {
       );
       
       // Также отправляем общий трекинг создания туду листа
-      AnalyticsService.trackTodoListCreated('ai');
+      AnalyticsService.trackAITodoCreated();
       
     } catch (e) {
       // Трекинг ошибки создания туду листа через ИИ

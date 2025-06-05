@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:putevod/model/analytics_service.dart';
 import 'package:putevod/model/app_colors.dart';
 import 'package:putevod/model/trip.dart';
 import 'package:putevod/view-model/trip_detail_view_model.dart';
@@ -33,6 +34,8 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   @override
   void initState() {
     super.initState();
+    AnalyticsService.trackTripDetailView(widget.tripId.toString());
+
     _viewModel = Provider.of<TripDetailViewModel>(context, listen: false);
     
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -229,6 +232,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
             onPressed: () async {
               await _viewModel.publishToLibrary();
               Navigator.pop(context);
+              AnalyticsService.trackTripPublished(_viewModel.trip!.id.toString());
             },
             child: const Text('Опубликовать'),
           ),

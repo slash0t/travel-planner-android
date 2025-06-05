@@ -36,6 +36,12 @@ class _TripCreationScreenState extends State<TripCreationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.tripToEdit == null) {
+
+    } else {
+      AnalyticsService.trackTripCreationStarted();
+    }
+
     return Consumer<TripCreationViewModel>(
       builder: (context, viewModel, child) {
         return Scaffold(

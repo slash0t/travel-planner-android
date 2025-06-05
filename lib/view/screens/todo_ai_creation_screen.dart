@@ -27,6 +27,7 @@ class _TodoAICreationScreenState extends State<TodoAICreationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    AnalyticsService.trackAITodoCreationStarted();
     final todoListViewModel = Provider.of<TodoListViewModel>(context, listen: false);
     return ChangeNotifierProvider(
       create: (_) => TodoAICreationViewModel(todoListViewModel),

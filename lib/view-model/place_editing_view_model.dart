@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:putevod/model/analytics_service.dart';
 import 'dart:io';
 
 import '../external/trip_service.dart';
@@ -190,6 +191,12 @@ class PlaceEditingViewModel extends ChangeNotifier {
       debugPrint(_errorMessage);
       return false;
     } finally {
+      if (_isCreateMode) {
+
+      } else {
+        final eventId = _tripEvent!.id;
+        AnalyticsService.trackPlaceAdded("blankType");
+      }
       _isSaving = false;
       notifyListeners();
     }
