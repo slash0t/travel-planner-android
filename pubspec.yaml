@@ -32,7 +32,7 @@ dependencies:
     sdk: flutter
   provider: ^6.0.5
   shared_preferences: ^2.2.2
-  intl: ^0.18.1
+  intl: ^0.20.0
   cupertino_icons: ^1.0.2
   http: ^1.4.0
   device_info_plus: ^9.0.3
@@ -52,7 +52,7 @@ dependencies:
   latlong2: ^0.9.1
   flutter_map: ^8.1.1
   # AppMetrica для аналитики
-  appmetrica_plugin: ^3.0.0
+  appmetrica_plugin: 3.0.0
 
 dev_dependencies:
   flutter_test:

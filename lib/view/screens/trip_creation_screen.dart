@@ -530,8 +530,8 @@ class _TripCreationScreenState extends State<TripCreationScreen> {
               AnalyticsService.trackCustomEvent('trip_updated');
             } else {
               // Получаем ID созданной поездки (если есть)
-              final tripId = viewModel.tripId ?? 'unknown';
-              AnalyticsService.trackTripCreated(tripId);
+              final tripId = widget.tripToEdit ?? 'unknown';
+              AnalyticsService.trackTripCreated(widget.tripToEdit.toString());
             }
             
             final tripsViewModel = context.read<TripsViewModel>();
@@ -551,9 +551,6 @@ class _TripCreationScreenState extends State<TripCreationScreen> {
             }
           } catch (e) {
             // Трекинг ошибки создания поездки
-            AnalyticsService.trackError('trip_creation_error', e.toString());
-            
-            // Show error message
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text('Ошибка: ${e.toString()}')),
             );
