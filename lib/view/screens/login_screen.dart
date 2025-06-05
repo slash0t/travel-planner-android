@@ -4,6 +4,7 @@ import 'package:putevod/view/screens/main_menu_screen.dart';
 import 'package:putevod/view/screens/password_recovery_screen.dart';
 import 'package:putevod/view/screens/registration_screen.dart';
 import 'package:putevod/model/app_colors.dart';
+import 'package:putevod/model/analytics_service.dart';
 import 'package:putevod/view-model/login_view_model.dart';
 
 import '../widgets/password_field.dart';
@@ -14,6 +15,9 @@ class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final viewModel = Provider.of<LoginViewModel>(context);
+    
+    // Трекинг просмотра экрана входа
+    AnalyticsService.trackLoginStarted();
     
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -86,6 +90,9 @@ class LoginScreen extends StatelessWidget {
                   alignment: Alignment.centerRight,
                   child: TextButton(
                     onPressed: () {
+                      // Трекинг нажатия на восстановление пароля
+                      AnalyticsService.trackCustomEvent('password_recovery_requested');
+                      
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => const PasswordRecoveryScreen()),
@@ -134,11 +141,19 @@ class LoginScreen extends StatelessWidget {
                       : () async {
                           final success = await viewModel.login();
                           if (success && context.mounted) {
+                            // Трекинг успешного входа
+                            AnalyticsService.trackLoginCompleted();
+                            
                             Navigator.pushAndRemoveUntil(
                               context,
                               MaterialPageRoute(builder: (context) => const MainMenuScreen()),
                               (Route<dynamic> route) => false,
                             );
+                          } else {
+                            // Трекинг ошибки входа
+                            AnalyticsService.trackCustomEvent('login_failed', {
+                              'error': viewModel.errorMessage ?? 'unknown_error'
+                            });
                           }
                         },
                   style: ElevatedButton.styleFrom(
@@ -179,6 +194,9 @@ class LoginScreen extends StatelessWidget {
                 const SizedBox(height: 20),
                 GestureDetector(
                   onTap: () {
+                    // Трекинг перехода к регистрации
+                    AnalyticsService.trackCustomEvent('registration_from_login');
+                    
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => const RegistrationScreen()),

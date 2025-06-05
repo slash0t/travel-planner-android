@@ -3,6 +3,7 @@ import 'package:putevod/model/todo_item_detail.dart';
 import 'package:putevod/view-model/todo_list_view_model.dart';
 import 'package:putevod/external/trip_service.dart';
 import 'package:uuid/uuid.dart';
+import 'package:putevod/model/analytics_service.dart';
 
 class TodoItemDetailViewModel extends ChangeNotifier {
   final TripService _tripService = TripService();
@@ -111,6 +112,20 @@ class TodoItemDetailViewModel extends ChangeNotifier {
   Future<void> toggleTaskCompletion(int taskId) async {
     if (_todoItemDetail == null) return;
     
+    // Находим задачу чтобы понять её текущий статус
+    Task? task;
+    task = _incompleteTasks.where((t) => t.id == taskId).firstOrNull;
+    task ??= _completedTasks.where((t) => t.id == taskId).firstOrNull;
+    
+    if (task != null) {
+      // Трекинг переключения статуса задачи
+      if (task.completed) {
+        AnalyticsService.trackTodoTaskUncompleted(_todoItemDetail!.id.toString(), taskId.toString());
+      } else {
+        AnalyticsService.trackTodoTaskCompleted(_todoItemDetail!.id.toString(), taskId.toString());
+      }
+    }
+    
     try {
       final response = await _tripService.toggleTodoItemComplete(
         _todoItemDetail!.id,
@@ -118,6 +133,15 @@ class TodoItemDetailViewModel extends ChangeNotifier {
       );
 
       await loadTasks();
+      
+      // Проверяем если все задачи выполнены
+      if (_incompleteTasks.isEmpty && _completedTasks.isNotEmpty) {
+        AnalyticsService.trackTodoListCompleted(
+          _todoItemDetail!.id.toString(), 
+          _completedTasks.length
+        );
+      }
+      
       notifyListeners();
     } catch (e) {
       debugPrint('Ошибка переключения статуса задачи: $e');

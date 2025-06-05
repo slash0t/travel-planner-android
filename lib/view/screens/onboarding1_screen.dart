@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:putevod/model/app_colors.dart';
 import 'package:putevod/model/shared_prefs_manager.dart';
+import 'package:putevod/model/analytics_service.dart';
 import 'package:putevod/view/screens/main_screen.dart';
 import 'package:putevod/view/screens/onboarding2_screen.dart';
 
@@ -11,6 +12,9 @@ class Onboarding1Screen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Трекинг просмотра экрана онбординга
+    AnalyticsService.trackOnboardingView('onboarding1');
+    
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -98,6 +102,9 @@ class Onboarding1Screen extends StatelessWidget {
                         // Skip button
                         TextButton(
                           onPressed: () async {
+                            // Трекинг пропуска онбординга
+                            AnalyticsService.trackCustomEvent('onboarding_skipped', {'from_screen': 'onboarding1'});
+                            
                             // Mark onboarding as completed
                             await SharedPrefsManager.setFirstLaunchComplete();
                             
@@ -124,6 +131,9 @@ class Onboarding1Screen extends StatelessWidget {
                         // Next button
                         ElevatedButton(
                           onPressed: () {
+                            // Трекинг перехода к следующему экрану
+                            AnalyticsService.trackCustomEvent('onboarding_next', {'from_screen': 'onboarding1'});
+                            
                             Navigator.of(context).push(
                               MaterialPageRoute(
                                 builder: (context) => const Onboarding2Screen(),

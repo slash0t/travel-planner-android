@@ -3,9 +3,11 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:putevod/model/app_colors.dart';
 import 'package:putevod/model/trip.dart';
+import 'package:putevod/model/analytics_service.dart';
 import 'package:putevod/view-model/trip_creation_view_model.dart';
 import 'package:putevod/view-model/trips_view_model.dart';
 import 'package:putevod/view/screens/trips_screen.dart';
+import 'package:putevod/view/screens/main_menu_screen.dart';
 
 /// Screen for creating or editing a trip
 class TripCreationScreen extends StatefulWidget {
@@ -523,6 +525,15 @@ class _TripCreationScreenState extends State<TripCreationScreen> {
           try {
             await viewModel.saveTrip();
             
+            // Трекинг успешного создания/обновления поездки
+            if (viewModel.isEditingMode) {
+              AnalyticsService.trackCustomEvent('trip_updated');
+            } else {
+              // Получаем ID созданной поездки (если есть)
+              final tripId = viewModel.tripId ?? 'unknown';
+              AnalyticsService.trackTripCreated(tripId);
+            }
+            
             final tripsViewModel = context.read<TripsViewModel>();
             await tripsViewModel.loadAllTrips();
             
@@ -539,12 +550,18 @@ class _TripCreationScreenState extends State<TripCreationScreen> {
               }
             }
           } catch (e) {
+            // Трекинг ошибки создания поездки
+            AnalyticsService.trackError('trip_creation_error', e.toString());
+            
             // Show error message
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text('Ошибка: ${e.toString()}')),
             );
           }
         } else {
+          // Трекинг ошибки валидации
+          AnalyticsService.trackCustomEvent('trip_creation_validation_failed');
+          
           // Show validation error
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Пожалуйста, заполните все обязательные поля')),

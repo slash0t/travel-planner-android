@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:putevod/view/screens/login_screen.dart';
 import 'package:putevod/view/screens/main_menu_screen.dart';
 import 'package:putevod/model/app_colors.dart';
+import 'package:putevod/model/analytics_service.dart';
 import 'package:putevod/view-model/registration_view_model.dart';
 
 import '../widgets/password_field.dart';
@@ -13,6 +14,9 @@ class RegistrationScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final viewModel = Provider.of<RegistrationViewModel>(context);
+    
+    // Трекинг просмотра экрана регистрации
+    AnalyticsService.trackRegistrationStarted();
     
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -137,11 +141,19 @@ class RegistrationScreen extends StatelessWidget {
                       : () async {
                           final success = await viewModel.register();
                           if (success && context.mounted) {
+                            // Трекинг успешной регистрации
+                            AnalyticsService.trackRegistrationCompleted();
+                            
                             Navigator.pushAndRemoveUntil(
                               context,
                               MaterialPageRoute(builder: (context) => const MainMenuScreen()),
                               (Route<dynamic> route) => false,
                             );
+                          } else {
+                            // Трекинг ошибки регистрации
+                            AnalyticsService.trackCustomEvent('registration_failed', {
+                              'error': viewModel.errorMessage.isEmpty ? 'unknown_error' : viewModel.errorMessage
+                            });
                           }
                         },
                   style: ElevatedButton.styleFrom(
@@ -163,6 +175,9 @@ class RegistrationScreen extends StatelessWidget {
                 const SizedBox(height: 20),
                 GestureDetector(
                   onTap: () {
+                    // Трекинг перехода к входу
+                    AnalyticsService.trackCustomEvent('login_from_registration');
+                    
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(builder: (context) => const LoginScreen()),

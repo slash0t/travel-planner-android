@@ -4,6 +4,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
 import 'package:putevod/model/app_colors.dart';
 import 'package:putevod/model/notification_service.dart';
+import 'package:putevod/model/analytics_service.dart';
 import 'package:putevod/view-model/loading_view_model.dart';
 import 'package:putevod/view-model/navigation_view_model.dart';
 import 'package:putevod/view-model/notifications_view_model.dart';
@@ -38,6 +39,12 @@ Future<void> main() async {
     // Если .env файл не найден, используем значения по умолчанию
     print('Warning: .env file not found, using default values');
   }
+
+  // Инициализируем AppMetrica
+  await AnalyticsService.initialize();
+  
+  // Отслеживаем запуск приложения
+  AnalyticsService.trackAppLaunch();
 
   initializeDateFormatting('ru_ru', null);
   

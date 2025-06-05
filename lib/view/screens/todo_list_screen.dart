@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:putevod/model/app_colors.dart';
+import 'package:putevod/model/analytics_service.dart';
 import 'package:putevod/view-model/navigation_view_model.dart';
 import 'package:putevod/view-model/todo_list_view_model.dart';
 import 'package:putevod/view/widgets/app_header.dart';
@@ -23,6 +24,9 @@ class _TodoListScreenState extends State<TodoListScreen> {
   void initState() {
     super.initState();
     _viewModel = Provider.of<TodoListViewModel>(context, listen: false);
+
+    // Трекинг просмотра экрана туду листов
+    AnalyticsService.trackTodoListView();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadTodoItems();
@@ -157,8 +161,16 @@ class _TodoListScreenState extends State<TodoListScreen> {
                   style: TextStyle(fontFamily: 'NotoSans'),
                   ),
                 onTap: () async {
+                  // Трекинг выбора создания пустого списка
+                  AnalyticsService.trackTodoListCreationMethodSelected('empty');
+                  
                   Navigator.of(context).pop(); // Close the dialog
-                  await viewModel.createNewTodoList();
+                  final result = await viewModel.createNewTodoList();
+                  
+                  // Трекинг успешного создания туду листа
+                  if (result != null) {
+                    AnalyticsService.trackTodoListCreated('manual');
+                  }
                   },
               ),
               ListTile(
@@ -167,6 +179,9 @@ class _TodoListScreenState extends State<TodoListScreen> {
                   style: TextStyle(fontFamily: 'NotoSans'),
                   ),
                 onTap: () {
+                  // Трекинг выбора создания через ИИ
+                  AnalyticsService.trackTodoListCreationMethodSelected('ai');
+                  
                   Navigator.of(context).pop(); // Close the dialog
                   // Navigate to the AI creation screen
                   Navigator.push(

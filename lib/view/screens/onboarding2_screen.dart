@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:putevod/model/app_colors.dart';
+import 'package:putevod/model/shared_prefs_manager.dart';
+import 'package:putevod/model/analytics_service.dart';
+import 'package:putevod/view/screens/main_screen.dart';
 import 'package:putevod/view/screens/onboarding3_screen.dart';
 
 /// Second onboarding screen displayed after the first one
@@ -9,6 +12,9 @@ class Onboarding2Screen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Трекинг просмотра экрана онбординга
+    AnalyticsService.trackOnboardingView('onboarding2');
+    
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -95,6 +101,8 @@ class Onboarding2Screen extends StatelessWidget {
                       children: [
                         TextButton(
                           onPressed: () {
+                            // Трекинг возврата назад
+                            AnalyticsService.trackCustomEvent('onboarding_back', {'from_screen': 'onboarding2'});
                             Navigator.of(context).pop();
                           },
                           child: const Text(
@@ -109,6 +117,9 @@ class Onboarding2Screen extends StatelessWidget {
                         ),
                         ElevatedButton(
                           onPressed: () {
+                            // Трекинг перехода к следующему экрану
+                            AnalyticsService.trackCustomEvent('onboarding_next', {'from_screen': 'onboarding2'});
+                            
                             Navigator.of(context).push(
                               MaterialPageRoute(
                                 builder: (context) => const Onboarding3Screen(),

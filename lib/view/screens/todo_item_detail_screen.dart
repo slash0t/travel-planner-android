@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:putevod/model/app_colors.dart';
+import 'package:putevod/model/analytics_service.dart';
 import 'package:putevod/model/todo_item_detail.dart';
 import 'package:putevod/view-model/todo_item_detail_view_model.dart';
 import 'package:putevod/view/screens/todo_list_screen.dart';
@@ -50,6 +51,17 @@ class _TodoItemDetailScreenState extends State<TodoItemDetailScreen> {
   Future<void> _loadTodoItem() async {
     await _viewModel.loadTodoItem(widget.todoItemId);
     await _viewModel.loadTasks();
+    
+    // Трекинг просмотра деталей туду листа
+    AnalyticsService.trackTodoListDetailView(widget.todoItemId.toString());
+    
+    // Трекинг прогресса туду листа
+    if (_viewModel.todoItemDetail != null) {
+      AnalyticsService.trackTodoListProgressView(
+        widget.todoItemId.toString(), 
+        _viewModel.progress
+      );
+    }
   }
   
   @override
@@ -166,7 +178,10 @@ class _TodoItemDetailScreenState extends State<TodoItemDetailScreen> {
           TextButton(
             onPressed: () {
               final newTitle = titleController.text.trim();
-              if (newTitle.isNotEmpty) {
+              if (newTitle.isNotEmpty && newTitle != currentTitle) {
+                // Трекинг переименования туду листа
+                AnalyticsService.trackTodoListRenamed(widget.todoItemId.toString());
+                
                 _viewModel.updateTitle(newTitle);
               }
               Navigator.pop(context);
@@ -263,6 +278,9 @@ class _TodoItemDetailScreenState extends State<TodoItemDetailScreen> {
               ),
               onSubmitted: (value) {
                 if (value.isNotEmpty) {
+                  // Трекинг добавления новой задачи
+                  AnalyticsService.trackTodoTaskAdded(widget.todoItemId.toString(), 'manual');
+                  
                   _viewModel.addTask(value);
                   _newTaskController.clear();
                 }
@@ -307,6 +325,9 @@ class _TodoItemDetailScreenState extends State<TodoItemDetailScreen> {
           ),
           direction: DismissDirection.endToStart,
           onDismissed: (_) {
+            // Трекинг удаления задачи
+            AnalyticsService.trackTodoTaskDeleted(widget.todoItemId.toString(), task.id.toString());
+            
             viewModel.deleteTask(task.id);
           },
           child: TodoTaskItem(
@@ -369,6 +390,9 @@ class _TodoItemDetailScreenState extends State<TodoItemDetailScreen> {
                 ),
                 direction: DismissDirection.endToStart,
                 onDismissed: (_) {
+                  // Трекинг удаления задачи
+                  AnalyticsService.trackTodoTaskDeleted(widget.todoItemId.toString(), task.id.toString());
+                  
                   viewModel.deleteTask(task.id);
                 },
                 child: Opacity(
@@ -401,6 +425,9 @@ class _TodoItemDetailScreenState extends State<TodoItemDetailScreen> {
   }
   
   Future<void> _handleDeleteTodoList() async {
+    // Трекинг удаления туду листа
+    AnalyticsService.trackTodoListDeleted(widget.todoItemId.toString());
+    
     await _viewModel.deleteTodoList();
     if (!mounted) return;
     

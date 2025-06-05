@@ -51,6 +51,8 @@ dependencies:
   connectivity_plus: ^5.0.1
   latlong2: ^0.9.1
   flutter_map: ^8.1.1
+  # AppMetrica для аналитики
+  appmetrica_plugin: ^3.0.0
 
 dev_dependencies:
   flutter_test:

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:putevod/model/app_colors.dart';
+import 'package:putevod/model/analytics_service.dart';
 import 'package:putevod/model/trip.dart';
 import 'package:putevod/view-model/todo_ai_creation_view_model.dart';
 import 'package:putevod/view/screens/todo_item_detail_screen.dart';
@@ -16,6 +17,13 @@ class TodoAICreationScreen extends StatefulWidget {
 
 class _TodoAICreationScreenState extends State<TodoAICreationScreen> {
   final _formKey = GlobalKey<FormState>();
+
+  @override
+  void initState() {
+    super.initState();
+    // Трекинг начала создания туду листа через ИИ
+    AnalyticsService.trackAITodoListCreationStarted();
+  }
 
   @override
   Widget build(BuildContext context) {

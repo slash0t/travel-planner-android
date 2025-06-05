@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:putevod/model/analytics_service.dart';
 import 'package:putevod/model/trip.dart';
 import 'package:putevod/view-model/todo_list_view_model.dart';
 
@@ -137,18 +138,35 @@ class TodoAICreationViewModel extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
-    final request = {
-      "prompt": "Сделай список для сбора человеку в обычную поездку, который бы подошел на любой случай, учитывая другие факторы",
-      "duration": _duration,
-      "destination": _direction,
-      "season": _season,
-      "additionalPrompt": _additionalInfo,
-    };
+    try {
+      final request = {
+        "prompt": "Сделай список для сбора человеку в обычную поездку, который бы подошел на любой случай, учитывая другие факторы",
+        "duration": _duration,
+        "destination": _direction,
+        "season": _season,
+        "additionalPrompt": _additionalInfo,
+      };
 
-    await _externalService.generatePackingList(request);
+      await _externalService.generatePackingList(request);
 
-    _isLoading = false;
-    notifyListeners();
+      // Трекинг успешного создания туду листа через ИИ
+      AnalyticsService.trackAITodoListCreated(
+        _direction,
+        _season ?? 'unknown',
+        _duration,
+      );
+      
+      // Также отправляем общий трекинг создания туду листа
+      AnalyticsService.trackTodoListCreated('ai');
+      
+    } catch (e) {
+      // Трекинг ошибки создания туду листа через ИИ
+      AnalyticsService.trackAITodoListCreationFailed(e.toString());
+      rethrow;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
   String _generateTitle() {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:putevod/model/app_colors.dart';
 import 'package:putevod/model/shared_prefs_manager.dart';
+import 'package:putevod/model/analytics_service.dart';
 import 'package:putevod/view/screens/main_screen.dart';
 
 /// Third and final onboarding screen
@@ -10,6 +11,9 @@ class Onboarding3Screen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Трекинг просмотра экрана онбординга
+    AnalyticsService.trackOnboardingView('onboarding3');
+    
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -96,6 +100,8 @@ class Onboarding3Screen extends StatelessWidget {
                       children: [
                         TextButton(
                           onPressed: () {
+                            // Трекинг возврата назад
+                            AnalyticsService.trackCustomEvent('onboarding_back', {'from_screen': 'onboarding3'});
                             Navigator.of(context).pop();
                           },
                           child: const Text(
@@ -110,6 +116,9 @@ class Onboarding3Screen extends StatelessWidget {
                         ),
                         ElevatedButton(
                           onPressed: () async {
+                            // Трекинг завершения онбординга
+                            AnalyticsService.trackOnboardingCompleted();
+                            
                             // Mark onboarding as completed
                             await SharedPrefsManager.setFirstLaunchComplete();
                             

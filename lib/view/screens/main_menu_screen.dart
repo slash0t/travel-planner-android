@@ -2,9 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:putevod/model/app_colors.dart';
 import 'package:putevod/model/trip.dart';
+import 'package:putevod/model/analytics_service.dart';
 import 'package:putevod/view-model/navigation_view_model.dart';
 import 'package:putevod/view-model/trips_view_model.dart';
 import 'package:putevod/view/screens/trip_search_screen.dart';
+import 'package:putevod/view/screens/library_screen.dart';
+import 'package:putevod/view/screens/notifications_screen.dart';
+import 'package:putevod/view/screens/profile_screen.dart';
+import 'package:putevod/view/screens/trips_screen.dart';
 import 'package:putevod/view/widgets/app_bottom_navigation.dart';
 import 'package:putevod/view/widgets/app_header.dart';
 import 'package:putevod/view/screens/trip_creation_screen.dart';
@@ -23,6 +28,9 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
   @override
   void initState() {
     super.initState();
+    // Трекинг просмотра главного экрана
+    AnalyticsService.trackMainScreenView();
+    
     // Загружаем поездки при инициализации экрана
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<TripsViewModel>(context, listen: false).loadTrips();
@@ -31,6 +39,9 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
 
 
   void _handleCreatePressed() {
+    // Трекинг нажатия на создание путешествия
+    AnalyticsService.trackCustomEvent('main_create_button_pressed');
+    
     // Handle create new journey button pressed
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Create new journey')),
@@ -38,6 +49,9 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
   }
 
   void _handleNewTripPressed() {
+    // Трекинг начала создания поездки
+    AnalyticsService.trackTripCreationStarted();
+    
     // Handle create new trip button pressed
     Navigator.push(
       context,
@@ -46,6 +60,9 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
   }
 
   void _handleLibraryPressed() {
+    // Трекинг перехода в библиотеку
+    AnalyticsService.trackLibraryView();
+    
     // Handle library button pressed
     Navigator.pushReplacement(
       context,
