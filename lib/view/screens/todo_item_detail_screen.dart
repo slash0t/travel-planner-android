@@ -92,7 +92,15 @@ class _TodoItemDetailScreenState extends State<TodoItemDetailScreen> {
       ),
     );
   }
-  
+
+  void exit() {
+    Navigator.pop(context);
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const TodoListScreen()),
+    );
+  }
+
   Widget _buildHeader(TodoItemDetailViewModel viewModel) {
     final todoItem = viewModel.todoItemDetail!;
     
@@ -105,7 +113,7 @@ class _TodoItemDetailScreenState extends State<TodoItemDetailScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               GestureDetector(
-                onTap: () => Navigator.pop(context),
+                onTap: exit,
                 child: const Icon(Icons.arrow_back, size: 20),
               ),
               Row(
@@ -172,7 +180,7 @@ class _TodoItemDetailScreenState extends State<TodoItemDetailScreen> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: exit,
             child: const Text('Отмена'),
           ),
           TextButton(
@@ -184,7 +192,7 @@ class _TodoItemDetailScreenState extends State<TodoItemDetailScreen> {
                 
                 _viewModel.updateTitle(newTitle);
               }
-              Navigator.pop(context);
+              exit();
             },
             child: const Text('Сохранить'),
           ),
